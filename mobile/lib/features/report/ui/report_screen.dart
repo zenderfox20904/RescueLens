@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -30,9 +31,13 @@ class _ReportState extends State<ReportScreen> {
       final a = (await Api.post('/analyses', {'media_id': mediaId, 'ai_consent': true, 'language': curLang}))['analysis'];
       setState(() {
         analysis = a;
-        final r = a['result'];
-        if (r != null) { title.text = r['suggested_title']; desc.text = r['summary']; }
-        category = a['primary_hazard'] ?? category; severity = a['severity'] ?? severity;
+        final x = a['assessment'] as Map?;
+        if (x != null) {
+          if (title.text.isEmpty) title.text = x['suggested_title'] ?? '';
+          if (desc.text.isEmpty) desc.text = x['summary'] ?? '';
+          if (RL.catIcon.containsKey(x['category'])) category = x['category'];
+          if (RL.sev.containsKey(x['severity'])) severity = x['severity'];
+        }
       });
     } catch (_) { setState(() => err = tr('action_failed')); } finally { setState(() => busy = false); }
   }
@@ -54,16 +59,64 @@ class _ReportState extends State<ReportScreen> {
       const SizedBox(width: 8),
       Expanded(child: OutlinedButton.icon(onPressed: busy ? null : () => pick(ImageSource.gallery), icon: const Icon(Icons.photo), label: Text(tr('gallery')))),
     ]),
-    if (busy) const Padding(padding: EdgeInsets.all(8), child: Shim(child: Column(children: [Sk(h: 14), SizedBox(height: 8), Sk(w: 200, h: 14)]))),
-    if (analysis != null) Card(color: RL.primary.withValues(alpha: .08), child: Padding(padding: const EdgeInsets.all(12), child: Text('✨ ${tr('ai_suggestion')}${analysis!['mode'] == 'demo' ? ' (DEMO)' : ''}'))),
+    if (file != null) Padding(padding: const EdgeInsets.only(top: 12), child: ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.file(File(file!.path), height: 200, width: double.infinity, fit: BoxFit.cover))),
+    if (busy) Padding(padding: const EdgeInsets.only(top: 12), child: Card(child: Padding(padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Row(children: [const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)), const SizedBox(width: 12), Expanded(child: Text(tr('ai_analyzing')))]),
+      const SizedBox(height: 12), const Shim(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Sk(h: 14), SizedBox(height: 8), Sk(w: 200, h: 14)])),
+    ])))),
+    if (analysis?['assessment'] != null) Padding(padding: const EdgeInsets.only(top: 12), child: AiCard(analysis!)),
     if (file != null) ...[
       TextField(controller: title, maxLength: 160, decoration: InputDecoration(labelText: tr('title'))),
       TextField(controller: desc, maxLines: 3, decoration: InputDecoration(labelText: tr('description'))),
-      Wrap(spacing: 6, children: [for (final c in RL.catIcon.keys) ChoiceChip(label: Text(RL.catIcon[c]!), selected: category == c, onSelected: (_) => setState(() => category = c))]),
-      Wrap(spacing: 6, children: [for (final s in RL.sev.keys) ChoiceChip(label: Text(tr(s)), selected: severity == s, onSelected: (_) => setState(() => severity = s))]),
+      const SizedBox(height: 8),
+      Text(tr('category'), style: const TextStyle(fontWeight: FontWeight.w600)), const SizedBox(height: 8),
+      Wrap(spacing: 8, runSpacing: 8, children: [for (final c in RL.catIcon.keys) ChoiceChip(showCheckmark: false, avatar: Text(RL.catIcon[c]!), label: Text(tr('c_$c')), selected: category == c, onSelected: (_) => setState(() => category = c))]),
+      const SizedBox(height: 16),
+      Text(tr('severity'), style: const TextStyle(fontWeight: FontWeight.w600)), const SizedBox(height: 8),
+      Wrap(spacing: 8, runSpacing: 8, children: [for (final s in RL.sev.keys) ChoiceChip(showCheckmark: false, label: Text(tr(s)), selected: severity == s, selectedColor: RL.sev[s]!.withValues(alpha: .25), onSelected: (_) => setState(() => severity = s))]),
       CheckboxListTile(value: confirm, onChanged: (v) => setState(() => confirm = v ?? false), title: Text(tr('confirm_publish'))),
       FilledButton(onPressed: confirm && !busy && title.text.isNotEmpty ? post : null, child: Text(tr('post'))),
     ],
     if (err != null) Text(err!, style: const TextStyle(color: Color(0xFFE41E3F))),
   ]);
+}
+
+/// Meta AI result card: category, severity, confidence, reasons and recommended responders.
+class AiCard extends StatelessWidget {
+  final Map a;
+  const AiCard(this.a, {super.key});
+  @override
+  Widget build(BuildContext context) {
+    final x = a['assessment'] as Map; final ok = x['is_incident'] == true;
+    final conf = ((x['confidence'] ?? 0) as num).toDouble(); final sev = '${x['severity']}';
+    final color = RL.sev[sev] ?? RL.primary;
+    return Card(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: (ok ? color : RL.text2).withValues(alpha: .5))), child: Padding(padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Row(children: [
+        const Icon(Icons.auto_awesome, color: RL.primary, size: 20), const SizedBox(width: 8),
+        Expanded(child: Text(tr('ai_suggestion'), style: const TextStyle(fontWeight: FontWeight.w700))),
+        if (a['mode'] == 'demo') Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2), decoration: BoxDecoration(color: Colors.amber.withValues(alpha: .2), borderRadius: BorderRadius.circular(8)), child: Text(tr('demo'), style: const TextStyle(color: Colors.amber, fontSize: 12, fontWeight: FontWeight.w700))),
+      ]),
+      const SizedBox(height: 12),
+      if (!ok) Text(tr('ai_not_incident'), style: const TextStyle(color: RL.text2))
+      else Wrap(spacing: 8, runSpacing: 8, children: [
+        Chip(avatar: Text(RL.catIcon[x['category']] ?? '⚠️'), label: Text(tr('c_${x['category']}'))),
+        Chip(backgroundColor: color.withValues(alpha: .2), side: BorderSide.none, label: Text(tr(sev), style: TextStyle(color: color, fontWeight: FontWeight.w700))),
+      ]),
+      const SizedBox(height: 12),
+      Row(children: [Text(tr('ai_confidence'), style: const TextStyle(color: RL.text2, fontSize: 13)), const Spacer(), Text('${(conf * 100).round()}%', style: const TextStyle(fontWeight: FontWeight.w600))]),
+      const SizedBox(height: 4),
+      ClipRRect(borderRadius: BorderRadius.circular(4), child: TweenAnimationBuilder<double>(tween: Tween(begin: 0, end: conf), duration: const Duration(milliseconds: 600),
+        builder: (_, v, _) => LinearProgressIndicator(value: v, minHeight: 6, color: ok ? color : RL.text2, backgroundColor: RL.text2.withValues(alpha: .15)))),
+      if ((x['reasons'] as List?)?.isNotEmpty == true) ...[
+        const SizedBox(height: 12), Text(tr('ai_why'), style: const TextStyle(fontWeight: FontWeight.w600)), const SizedBox(height: 4),
+        for (final r in x['reasons']) Padding(padding: const EdgeInsets.only(top: 4), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('•  ', style: TextStyle(color: RL.text2)), Expanded(child: Text('$r', style: const TextStyle(fontSize: 13)))])),
+      ],
+      if ((x['responders'] as List?)?.isNotEmpty == true) ...[
+        const SizedBox(height: 12), Text(tr('ai_responders'), style: const TextStyle(fontWeight: FontWeight.w600)), const SizedBox(height: 8),
+        Wrap(spacing: 8, runSpacing: 8, children: [for (final r in x['responders']) Chip(visualDensity: VisualDensity.compact, label: Text(tr('r_$r')))]),
+      ],
+      const SizedBox(height: 12),
+      Text(tr('ai_applied'), style: const TextStyle(color: RL.text2, fontSize: 12)),
+    ])));
+  }
 }

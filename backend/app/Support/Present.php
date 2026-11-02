@@ -27,12 +27,33 @@ class Present
             'segmentation_model' => $dev ? config('rescuelens.meta.segmentation_model') : $a->segmentation_model,
             'language' => $a->language, 'primary_hazard' => $a->primary_hazard, 'severity' => $a->severity,
             'requires_human_review' => $a->requires_human_review, 'error_code' => $a->error_code,
+            'assessment' => self::assessment($a),
             'result' => $a->result, 'latency_ms' => $a->latency_ms, 'created_at' => $a->created_at?->toIso8601String(),
             'evidence_regions' => $a->regions->map(fn ($r) => ['label' => $r->label, 'source' => $r->source,
                 'box' => [$r->x1, $r->y1, $r->x2, $r->y2], 'image_width' => $r->image_width, 'image_height' => $r->image_height,
                 'confidence' => $r->confidence])->values(),
             'media' => $withMedia && $a->media ? ['id' => $a->media->public_id, 'url' => $a->media->signedUrl(), 'width' => $a->media->width, 'height' => $a->media->height] : null,
         ];
+    }
+
+    /** Compact, UI ready view of an analysis: category, severity, confidence, reasons and who should respond. */
+    public static function assessment(AiAnalysis $a): ?array
+    {
+        $r = $a->result ?? [];
+        if (! $r) return null;
+        $haz = collect($r['possible_hazards'] ?? []);
+        $weight = ['clearly_visible' => 0.9, 'likely' => 0.7, 'possible' => 0.45];
+        $type = $a->primary_hazard ?? ($haz->first()['type'] ?? 'other');
+        $type = $type === 'smoke' ? 'fire' : $type;
+        $cat = in_array($type, Incident::CATEGORIES, true) ? $type : 'other';
+        $isIncident = (bool) ($r['is_incident_scene'] ?? true);
+        $conf = $haz->isEmpty() ? 0.4 : round($haz->map(fn ($h) => $weight[$h['likelihood'] ?? 'possible'] ?? 0.45)->max(), 2);
+        $reasons = array_values(array_filter(array_merge([$r['severity_reason'] ?? null],
+            $haz->take(3)->map(fn ($h) => $h['evidence'] ?? null)->all())));
+        return ['is_incident' => $isIncident, 'category' => $cat, 'severity' => $a->severity ?? 'moderate', 'confidence' => $isIncident ? $conf : round(1 - $conf / 2, 2),
+            'summary' => $r['summary'] ?? null, 'suggested_title' => $r['suggested_title'] ?? null, 'reasons' => array_slice($reasons, 0, 4),
+            'responders' => $isIncident ? \App\Services\DispatchService::responderTypes($cat, $a->severity ?? 'moderate') : [],
+            'precautions' => array_slice($r['recommended_precautions'] ?? [], 0, 3)];
     }
 
     public static function incident(Incident $i, ?User $viewer = null, bool $detail = false): array
