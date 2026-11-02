@@ -56,7 +56,7 @@ class IncidentController extends Controller
         // Anonymous public feed is cached briefly; any incident write bumps the version key.
         if (! $user && empty($d['mine'])) {
             $key = 'feed:'.Incident::cacheVersion().':'.md5(json_encode($d));
-            $out = \Illuminate\Support\Facades\Cache::remember($key, 15, $build);
+            $out = \Illuminate\Support\Facades\Cache::remember($key, 15, fn () => json_decode(json_encode($build()), true));
             $out['data'] = \App\Services\I18n\ContentTranslation::applyAll(collect($out['data'])->all(), $r->input('lang'));
             return response()->json($out)->header('Cache-Control', 'private, max-age=10');
         }
@@ -71,14 +71,14 @@ class IncidentController extends Controller
         $d = $r->validate(['hours' => 'nullable|integer|between:1,720', 'category' => ['nullable', Rule::in(Incident::CATEGORIES)]]);
         $key = 'map:'.Incident::cacheVersion().':'.md5(json_encode($d));
         $tr = fn ($o) => ['data' => \App\Services\I18n\ContentTranslation::applyAll(collect($o['data'])->all(), $r->input('lang'))];
-        return response()->json($tr(\Illuminate\Support\Facades\Cache::remember($key, 15, fn () => ['data' => Incident::public()->with('media')
+        return response()->json($tr(\Illuminate\Support\Facades\Cache::remember($key, 15, fn () => json_decode(json_encode(['data' => Incident::public()->with('media')
             ->where('created_at', '>=', now()->subHours($d['hours'] ?? 168))
             ->when($d['category'] ?? null, fn ($q, $v) => $q->where('category', $v))
             ->latest()->limit(500)->get()
             ->map(fn ($i) => ['id' => $i->public_id, 'title' => $i->title, 'category' => $i->category, 'severity' => $i->severity,
                 'status' => $i->status, 'is_stale' => $i->isStale(), 'is_demo' => $i->is_demo, 'lat' => $i->public_lat, 'lng' => $i->public_lng,
                 'area_name' => $i->area_name, 'confirm' => $i->confirmations_count, 'created_at' => $i->created_at->toIso8601String(),
-                'thumb' => $i->media->first()?->signedUrl()])->values()])))->header('Cache-Control', 'private, max-age=10');
+                'thumb' => $i->media->first()?->signedUrl()])->values()]), true))))->header('Cache-Control', 'private, max-age=10');
     }
 
     public function show(Request $r, Incident $incident)
