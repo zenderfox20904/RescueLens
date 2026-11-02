@@ -18,6 +18,12 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        // DEV ONLY, TEMPORARY: AI_PROVIDER=ollama selects the local Ollama provider. Never in production. Remove before launch.
+        if (config('rescuelens.ai_provider') === 'ollama' && ! $this->app->environment('production')) {
+            $this->app->bind(VisionAnalysisProvider::class, fn () => new \App\Services\AI\DevOllama\OllamaVisionProvider);
+            $this->app->bind(ImageSegmentationProvider::class, fn () => new \App\Services\AI\DevOllama\NoSegmentationProvider);
+            return;
+        }
         $live = fn () => filled(config('rescuelens.meta.api_key'));
         $this->app->bind(VisionAnalysisProvider::class, fn ($app) => $live() ? new MetaVisionProvider($app->make(MetaModelClient::class)) : new DemoVisionProvider);
         $this->app->bind(ImageSegmentationProvider::class, fn ($app) => $live() ? new MetaSamProvider($app->make(MetaModelClient::class)) : new DemoSegmentationProvider);

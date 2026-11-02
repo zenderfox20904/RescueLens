@@ -13,9 +13,6 @@ export function PostSkeleton() {
     </div>
   )
 }
-export function StoriesSkeleton() {
-  return <div className="stories">{Array.from({ length: 5 }).map((_, i) => <Sk key={i} w={112} h={190} r={12} style={{ flex: 'none' }} />)}</div>
-}
 export function ListSkeleton({ rows = 5, avatar = true }: { rows?: number; avatar?: boolean }) {
   return <div>{Array.from({ length: rows }).map((_, i) => (
     <div key={i} className="row" style={{ padding: 8 }}>{avatar && <Sk w={36} h={36} r={18} />}<div className="grow"><Sk w="80%" h={11} /><Sk w="45%" h={9} style={{ marginTop: 6 }} /></div></div>

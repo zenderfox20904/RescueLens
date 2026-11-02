@@ -22,7 +22,7 @@ class AuthController extends Controller
             'locale' => ['nullable', 'regex:/^[a-z]{2}$/'],
             'device_name' => 'nullable|string|max:60',
         ]);
-        $u = User::create(['name' => $d['name'], 'email' => strtolower($d['email']), 'password' => $d['password'], 'locale' => $d['locale'] ?? 'bn']);
+        $u = User::create(['name' => $d['name'], 'email' => strtolower($d['email']), 'password' => $d['password'], 'locale' => $d['locale'] ?? 'en']);
         AuditLog::record('auth.register', $u);
         return response()->json(['user' => Present::user($u), 'token' => $u->createToken($d['device_name'] ?? 'web')->plainTextToken], 201);
     }
@@ -53,12 +53,18 @@ class AuthController extends Controller
     public function updateMe(Request $r)
     {
         $d = $r->validate([
-            'name' => 'sometimes|string|max:80', 'locale' => ['sometimes', 'regex:/^[a-z]{2}$/'], 'country_code' => 'sometimes|string|size:2|alpha', 'distance_unit' => 'sometimes|in:km,mi', 'timezone' => 'sometimes|nullable|timezone', 'ai_consent' => 'sometimes|boolean',
+            'name' => 'sometimes|string|max:80', 'locale' => ['sometimes', 'regex:/^[a-z]{2}$/'], 'country_code' => 'sometimes|string|size:2|alpha', 'distance_unit' => 'sometimes|in:km,mi', 'timezone' => 'sometimes|nullable|timezone', 'ai_consent' => 'sometimes|boolean', 'auto_post_enabled' => 'sometimes|boolean', 'auto_post_consent' => 'accepted_if:auto_post_enabled,true,1',
             'alert_lat' => 'nullable|numeric|between:-90,90', 'alert_lng' => 'nullable|numeric|between:-180,180',
             'alert_radius_km' => 'sometimes|integer|between:1,50',
         ]);
         if (isset($d["country_code"])) $d["country_code"] = strtoupper($d["country_code"]);
-        $r->user()->update($d);
+        // Auto post is opt in: enabling it requires explicit consent, which is timestamped and audited.
+        unset($d['auto_post_consent']);
+        if (array_key_exists('auto_post_enabled', $d)) {
+            $d['auto_post_consent_at'] = $d['auto_post_enabled'] ? now() : null;
+            \App\Models\AuditLog::record($d['auto_post_enabled'] ? 'consent.auto_post.granted' : 'consent.auto_post.revoked', $r->user());
+        }
+        $r->user()->forceFill($d)->save();
         return ['user' => Present::user($r->user()->fresh())];
     }
 

@@ -37,5 +37,22 @@ return [
         'graph_version' => env('FB_GRAPH_VERSION', 'v24.0'),
     ],
 
+    // meta (default) | ollama (DEV ONLY, temporary, ignored when APP_ENV=production)
+    'ai_provider' => env('AI_PROVIDER', 'meta'),
+    'dev_ollama' => [
+        'url' => env('OLLAMA_URL', 'http://localhost:11434'),
+        'model' => env('OLLAMA_MODEL', 'gemma4:31b-cloud'),
+        'timeout' => (int) env('OLLAMA_TIMEOUT', 180),
+    ],
+
+    'camera' => [
+        // Only https snapshot URLs on these hosts may be registered (comma separated). Empty means URL feeds are disabled.
+        'allowed_hosts' => array_filter(array_map('trim', explode(',', (string) env('CAMERA_ALLOWED_HOSTS', '')))),
+        'min_confidence' => (float) env('CAMERA_MIN_CONFIDENCE', 0.7),
+        'feed_severities' => ['high', 'critical'],
+        'max_bytes' => 8 * 1024 * 1024,
+    ],
+    'auto_post_undo_seconds' => 10,
+
     'facebook_app_id' => env('FACEBOOK_CLIENT_ID'),
 ];

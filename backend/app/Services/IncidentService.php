@@ -20,7 +20,8 @@ class IncidentService
     public function duplicates(string $category, float $lat, float $lng, ?int $excludeId = null)
     {
         $km = config('rescuelens.duplicate_radius_m') / 1000;
-        return Incident::public()->where('category', $category)
+        // Includes AI detections hidden from the feed so repeated camera frames do not pile up.
+        return Incident::whereIn('status', Incident::PUBLIC_STATUSES)->whereNull('merged_into_id')->where('category', $category)
             ->whereNotIn('status', ['resolved', 'expired'])
             ->where('created_at', '>=', now()->subHours(config('rescuelens.duplicate_window_hours')))
             ->when($excludeId, fn ($q) => $q->where('id', '!=', $excludeId))
@@ -33,7 +34,12 @@ class IncidentService
         if ($i->status === $to) return;
         IncidentStatusHistory::create(['incident_id' => $i->id, 'actor_id' => $actor?->id, 'from_status' => $i->status, 'to_status' => $to, 'note' => $note]);
         $i->status = $to;
-        if ($to === 'verified') $i->verified_at = now();
+        if ($to === 'verified') {
+            // Only a human moderator can verify; that review also clears the AI unverified label and allows feed display.
+            $i->verified_at = now();
+            $i->ai_unverified = false;
+            $i->feed_eligible = true;
+        }
         $i->save();
 
         $label = ['verified' => 'verified by a moderator', 'resolved' => 'marked resolved', 'corroborated' => 'corroborated by the community',

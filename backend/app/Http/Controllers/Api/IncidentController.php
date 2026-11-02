@@ -80,7 +80,7 @@ class IncidentController extends Controller
     public function show(Request $r, Incident $incident)
     {
         $user = $r->user('sanctum');
-        $visible = in_array($incident->status, Incident::PUBLIC_STATUSES) || ($user && ($user->id === $incident->user_id || $user->isModerator()));
+        $visible = (in_array($incident->status, Incident::PUBLIC_STATUSES) && $incident->feed_eligible) || ($user && ($user->id === $incident->user_id || $user->isModerator()));
         abort_unless($visible, 404);
         $incident->load(['user', 'media', 'analyses.regions', 'confirmations']);
         return ['data' => Present::incident($incident, $user, true)];
@@ -101,10 +101,13 @@ class IncidentController extends Controller
             'lat' => 'required|numeric|between:-90,90', 'lng' => 'required|numeric|between:-180,180',
             'area_name' => 'nullable|string|max:120', 'is_anonymous' => 'boolean',
             'media_ids' => 'array|max:4', 'media_ids.*' => 'string|size:26', 'analysis_id' => 'nullable|string|size:26',
-            'consent_public' => 'accepted', 'occurred_at' => 'nullable|date|before_or_equal:now',
+            'consent_public' => 'accepted', 'auto_post' => 'boolean', 'occurred_at' => 'nullable|date|before_or_equal:now',
         ]);
         $key = $r->header('Idempotency-Key');
         $user = $r->user();
+        $auto = (bool) ($d['auto_post'] ?? false);
+        // Auto post only for users who opted in with explicit consent, and only from a completed AI analysis.
+        abort_if($auto && (! $user->auto_post_enabled || empty($d['analysis_id'])), 403, 'Auto post is not enabled for this account');
         if ($key) {
             abort_unless(preg_match('/^[A-Za-z0-9_-]{8,80}$/', $key), 422, 'Invalid Idempotency-Key');
             $prev = IdempotencyKey::where('user_id', $user->id)->where('key', $key)->first();
@@ -114,13 +117,14 @@ class IncidentController extends Controller
             }
         }
 
-        $incident = DB::transaction(function () use ($d, $user, $key) {
+        $incident = DB::transaction(function () use ($d, $user, $key, $auto) {
             $i = Incident::create([
                 'user_id' => $user->id, 'title' => strip_tags($d['title']), 'description' => isset($d['description']) ? strip_tags($d['description']) : null,
                 'category' => $d['category'], 'severity' => $d['severity'], 'status' => 'reported',
                 'lat' => $d['lat'], 'lng' => $d['lng'], 'public_lat' => Incident::roundPublic($d['lat']), 'public_lng' => Incident::roundPublic($d['lng']),
                 'area_name' => $d['area_name'] ?? null, 'is_anonymous' => $d['is_anonymous'] ?? false,
                 'ai_assisted' => ! empty($d['analysis_id']), 'occurred_at' => $d['occurred_at'] ?? now(),
+                'source' => $auto ? 'auto_post' : 'user', 'ai_unverified' => $auto,
             ]);
             if (! empty($d['media_ids'])) {
                 IncidentMedia::whereIn('public_id', $d['media_ids'])->where('user_id', $user->id)->whereNull('incident_id')->update(['incident_id' => $i->id]);
@@ -128,15 +132,22 @@ class IncidentController extends Controller
             if (! empty($d['analysis_id'])) {
                 AiAnalysis::where('public_id', $d['analysis_id'])->where('user_id', $user->id)->update(['incident_id' => $i->id]);
             }
-            $i->history()->create(['actor_id' => $user->id, 'from_status' => null, 'to_status' => 'reported', 'note' => 'Submitted by reporter after confirmation']);
+            $i->history()->create(['actor_id' => $user->id, 'from_status' => null, 'to_status' => 'reported', 'note' => $auto ? 'Auto posted from AI analysis (AI detected, unverified); reporter consented in settings' : 'Submitted by reporter after confirmation']);
             if ($key) IdempotencyKey::create(['user_id' => $user->id, 'key' => $key, 'incident_id' => $i->id]);
             return $i;
         });
         AuditLog::record('incident.create', $incident);
-        $notified = $this->svc->notifyNearby($incident);
+        // Auto posts wait out the undo window before anyone nearby is alerted.
+        if ($auto) {
+            \App\Jobs\NotifyNearby::dispatch($incident->id)->delay(now()->addSeconds(config('rescuelens.auto_post_undo_seconds')));
+            $notified = 0;
+        } else {
+            $notified = $this->svc->notifyNearby($incident);
+        }
         app(\App\Services\Integrations\WebhookDispatcher::class)->dispatch('incident.created', $incident);
         $incident->load(['user', 'media', 'analyses.regions', 'confirmations']);
-        return response()->json(['data' => Present::incident($incident, $user, true), 'nearby_notified' => $notified], 201);
+        return response()->json(['data' => Present::incident($incident, $user, true), 'nearby_notified' => $notified,
+            'undo_seconds' => $auto ? config('rescuelens.auto_post_undo_seconds') : null], 201);
     }
 
     public function update(Request $r, Incident $incident)

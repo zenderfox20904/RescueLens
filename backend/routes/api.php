@@ -65,6 +65,12 @@ Route::prefix('v1')->middleware('throttle:api')->group(function () {
                 Route::get('overview', [\App\Http\Controllers\Api\AdminController::class, 'overview']);
                 Route::get('emergency-resources', [\App\Http\Controllers\Api\AdminController::class, 'resources']);
                 Route::post('emergency-resources', [\App\Http\Controllers\Api\AdminController::class, 'storeResource']);
+                Route::get('camera-feeds', [\App\Http\Controllers\Api\CameraFeedController::class, 'index']);
+                Route::post('camera-feeds', [\App\Http\Controllers\Api\CameraFeedController::class, 'store']);
+                Route::patch('camera-feeds/{feed}', [\App\Http\Controllers\Api\CameraFeedController::class, 'update']);
+                Route::delete('camera-feeds/{feed}', [\App\Http\Controllers\Api\CameraFeedController::class, 'destroy']);
+                Route::post('camera-feeds/{feed}/poll', [\App\Http\Controllers\Api\CameraFeedController::class, 'poll']);
+                Route::post('camera-feeds/{feed}/frames', [\App\Http\Controllers\Api\CameraFeedController::class, 'upload'])->middleware('throttle:uploads');
             });
         });
     });

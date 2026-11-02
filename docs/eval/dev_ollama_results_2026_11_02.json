@@ -1,0 +1,151 @@
+{
+ "accident1-en": {
+  "http": 201,
+  "secs": 3.9,
+  "status": "completed",
+  "mode": "dev",
+  "model": "ollama-dev:gemma4:31b-cloud",
+  "error": null,
+  "primary_hazard": "road_accident",
+  "severity": "high",
+  "is_scene": true,
+  "title": "Overturned truck on roadway",
+  "summary": "An orange truck has overturned on its side on a paved road. Another truck is parked nearby on the right side of the frame.",
+  "hazards": [
+   {
+    "type": "road_accident",
+    "evidence": "Orange truck lying on its side on the road.",
+    "likelihood": "clearly_visible"
+   },
+   {
+    "type": "debris",
+    "evidence": "Mud and fragments on the overturned vehicle and road surface.",
+    "likelihood": "likely"
+   }
+  ],
+  "people_at_risk": "possible",
+  "requires_review": true
+ },
+ "post": {
+  "http": 201,
+  "id": "01M6DT46YB9D3JA5TXJCPRNVAF",
+  "title": "Overturned truck on roadway",
+  "ai_assisted": true,
+  "source": "user"
+ },
+ "accident1-bn": {
+  "http": 201,
+  "secs": 2.3,
+  "status": "completed",
+  "mode": "dev",
+  "model": "ollama-dev:gemma4:31b-cloud",
+  "error": null,
+  "primary_hazard": "road_accident",
+  "severity": "high",
+  "is_scene": true,
+  "title": "রাস্তায় ট্রাক উল্টে পড়া",
+  "summary": "একটি বড় ট্রাক রাস্তার পাশে উল্টে পড়ে আছে। এর ফলে রাস্তায় চলাচলে বিঘ্ন ঘটতে পারে।",
+  "hazards": [
+   {
+    "type": "road_accident",
+    "evidence": "উল্টে পড়া ট্রাক",
+    "likelihood": "clearly_visible"
+   },
+   {
+    "type": "debris",
+    "evidence": "রাস্তায় ছড়িয়ে থাকা ট্রাকের অংশ",
+    "likelihood": "possible"
+   }
+  ],
+  "people_at_risk": "no_visible",
+  "requires_review": true
+ },
+ "accident2-en": {
+  "http": 201,
+  "secs": 3.7,
+  "status": "completed",
+  "mode": "dev",
+  "model": "ollama-dev:gemma4:31b-cloud",
+  "error": null,
+  "primary_hazard": "road_accident",
+  "severity": "moderate",
+  "is_scene": true,
+  "title": "Possible bicycle and car collision",
+  "summary": "A bicycle is lying on the ground next to a silver car, with a helmet on the road. This suggests a possible road accident has occurred.",
+  "hazards": [
+   {
+    "type": "road_accident",
+    "evidence": "Bicycle on the ground next to a car with a detached helmet nearby.",
+    "likelihood": "likely"
+   }
+  ],
+  "people_at_risk": "possible",
+  "requires_review": true
+ },
+ "accident3-en": {
+  "http": 201,
+  "secs": 2.1,
+  "status": "completed",
+  "mode": "dev",
+  "model": "ollama-dev:gemma4:31b-cloud",
+  "error": null,
+  "primary_hazard": "road_accident",
+  "severity": "moderate",
+  "is_scene": true,
+  "title": "Road crash at pedestrian crossing",
+  "summary": "Two cars have collided at a pedestrian crossing. Two people are standing near the vehicles assessing the situation.",
+  "hazards": [
+   {
+    "type": "road_accident",
+    "evidence": "Two cars are collided and positioned across a pedestrian crossing",
+    "likelihood": "clearly_visible"
+   }
+  ],
+  "people_at_risk": "possible",
+  "requires_review": true
+ },
+ "control-en": {
+  "http": 201,
+  "secs": 1.6,
+  "status": "completed",
+  "mode": "dev",
+  "model": "ollama-dev:gemma4:31b-cloud",
+  "error": null,
+  "primary_hazard": "other",
+  "severity": "low",
+  "is_scene": false,
+  "title": "Sunflower Image",
+  "summary": "The image shows a close-up of a sunflower against a clear blue sky. There is no incident or hazard visible.",
+  "hazards": [
+   {
+    "type": "other",
+    "evidence": "none",
+    "likelihood": "possible"
+   }
+  ],
+  "people_at_risk": "no_visible",
+  "requires_review": false
+ },
+ "control-bn": {
+  "http": 201,
+  "secs": 1.5,
+  "status": "completed",
+  "mode": "dev",
+  "model": "ollama-dev:gemma4:31b-cloud",
+  "error": null,
+  "primary_hazard": "other",
+  "severity": "low",
+  "is_scene": false,
+  "title": "কোনো দুর্ঘটনা নেই",
+  "summary": "ছবিতে একটি সূর্যমুখী ফুল দেখা যাচ্ছে। এখানে কোনো দুর্ঘটনা বা বিপদের চিহ্ন নেই।",
+  "hazards": [
+   {
+    "type": "other",
+    "evidence": "কোনো বিপদ দেখা যাচ্ছে না",
+    "likelihood": "possible"
+   }
+  ],
+  "people_at_risk": "no_visible",
+  "requires_review": false
+ }
+}

@@ -23,8 +23,9 @@ i18n.use(LanguageDetector).use(initReactI18next).init({
   nonExplicitSupportedLngs: true,
   fallbackLng: 'en',
   interpolation: { escapeValue: false },
-  // Order: saved choice, then the browser language. Bangladesh is the launch market but a browser in another language starts in English.
-  detection: { order: ['localStorage', 'navigator'], lookupLocalStorage: 'rl_lang', caches: ['localStorage'] },
+  // English by default. Only an explicit choice in the switcher (saved in rl_lang) changes it; no browser or region detection.
+  lng: localStorage.getItem('rl_lang') || 'en',
+  detection: { order: ['localStorage'], lookupLocalStorage: 'rl_lang', caches: ['localStorage'] },
 })
 
 export function applyDocumentLang(l: string) {

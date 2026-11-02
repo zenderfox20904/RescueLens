@@ -18,7 +18,7 @@ class User extends Authenticatable
     protected $fillable = ['name', 'email', 'password', 'locale', 'alert_lat', 'alert_lng', 'alert_radius_km', 'ai_consent', 'country_code', 'distance_unit', 'timezone'];
 
     /** Defaults mirror the column defaults so a freshly created model reports them. */
-    protected $attributes = ['role' => 'citizen', 'locale' => 'bn'];
+    protected $attributes = ['role' => 'citizen', 'locale' => 'en'];
 
     protected $hidden = ['password', 'remember_token', 'alert_lat', 'alert_lng'];
 
@@ -26,6 +26,8 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'auto_post_enabled' => 'boolean',
+            'auto_post_consent_at' => 'datetime',
             'password' => 'hashed',
             'ai_consent' => 'boolean',
             'is_demo' => 'boolean',

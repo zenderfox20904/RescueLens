@@ -197,7 +197,22 @@
     "forgot_password": "Forgotten password?",
     "create_account": "Create a new account",
     "quick_easy": "It is quick and easy.",
-    "signup_terms": "By signing up you agree that AI suggestions are reviewed by you before anything is published."
+    "signup_terms": "By signing up you agree that AI suggestions are reviewed by you before anything is published.",
+    "main_features": "Main features",
+    "report_emergency": "Report emergency",
+    "one_tap_report_hint": "Photo, location, AI draft. You confirm before it posts.",
+    "ai_auto_detect": "AI auto detect",
+    "ai_auto_detect_hint": "Upload or capture a photo; AI fills the report.",
+    "nearby_live_alerts": "Nearby live alerts",
+    "open_live_map": "Open live map",
+    "no_active_alerts_nearby": "No active alerts nearby right now. This does not mean the area is safe.",
+    "auto_post": "Auto post AI detected reports",
+    "auto_post_hint": "Off by default. Posts are labeled AI detected, unverified, and you get 10 seconds to undo.",
+    "auto_post_consent": "I agree that when AI detects an incident in my photo, it is posted publicly at once with an approximate location and labeled AI detected, unverified. I can undo within 10 seconds.",
+    "auto_posted_unverified": "Posted as AI detected, unverified. Undo within {{s}}s.",
+    "auto_post_undone": "Auto post undone.",
+    "undo": "Undo",
+    "ai_detected_unverified": "AI detected, unverified"
   },
   "cat": {
     "road_accident": "Road accident",

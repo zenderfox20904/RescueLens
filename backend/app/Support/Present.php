@@ -12,7 +12,7 @@ class Present
     public static function user(User $u): array
     {
         return ['id' => $u->public_id, 'name' => $u->name, 'email' => $u->email, 'role' => $u->role, 'locale' => $u->locale, 'country_code' => $u->country_code ?? 'BD', 'distance_unit' => $u->distance_unit ?? 'km', 'timezone' => $u->timezone,
-            'ai_consent' => $u->ai_consent, 'alert_radius_km' => $u->alert_radius_km,
+            'ai_consent' => $u->ai_consent, 'auto_post_enabled' => (bool) $u->auto_post_enabled, 'alert_radius_km' => $u->alert_radius_km,
             'alert_area_set' => $u->alert_lat !== null, 'is_demo' => $u->is_demo];
     }
 
@@ -20,7 +20,7 @@ class Present
     {
         return [
             'id' => $a->public_id, 'status' => $a->status, 'mode' => $a->mode,
-            'mode_label' => $a->mode === 'demo' ? 'DEMO sample output. Live AI is not configured; this is not a real analysis of the photo.' : 'AI suggestion from Meta Model API. Verify before relying on it.',
+            'mode_label' => $a->mode === 'dev' ? 'DEV ONLY local model (Ollama). Not Meta AI and not for production. Verify before relying on it.' : ($a->mode === 'demo' ? 'DEMO sample output. Live AI is not configured; this is not a real analysis of the photo.' : 'AI suggestion from Meta Model API. Verify before relying on it.'),
             'provider' => $a->provider, 'vision_model' => $a->vision_model, 'segmentation_model' => $a->segmentation_model,
             'language' => $a->language, 'primary_hazard' => $a->primary_hazard, 'severity' => $a->severity,
             'requires_human_review' => $a->requires_human_review, 'error_code' => $a->error_code,
@@ -39,7 +39,7 @@ class Present
         $out = [
             'id' => $i->public_id, 'title' => $i->title, 'description' => $i->description,
             'category' => $i->category, 'severity' => $i->severity, 'status' => $i->status, 'is_stale' => $i->isStale(),
-            'is_demo' => $i->is_demo, 'ai_assisted' => $i->ai_assisted,
+            'is_demo' => $i->is_demo, 'ai_assisted' => $i->ai_assisted, 'source' => $i->source ?? 'user', 'ai_unverified' => (bool) $i->ai_unverified,
             'location' => ['lat' => $i->public_lat, 'lng' => $i->public_lng, 'area_name' => $i->area_name, 'precision' => 'approximate'],
             'reporter' => ['name' => $i->is_anonymous && ! $mine ? null : $i->user?->name, 'anonymous' => $i->is_anonymous, 'is_me' => $mine],
             'counts' => ['confirm' => $i->confirmations_count, 'dispute' => $i->disputes_count, 'comments' => $i->comments_count],

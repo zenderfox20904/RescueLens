@@ -36,7 +36,18 @@ export default function Report() {
   const [err, setErr] = useState<string | null>(null)
   const [idemKey] = useState(newKey)
   const health = useQuery({ queryKey: ['health'], queryFn: () => api<any>('/health'), staleTime: 60_000 })
-  const demo = health.data?.ai?.mode !== 'live'
+  const demo = health.data?.ai?.mode === 'demo'
+  const [undo, setUndo] = useState<{ id: string; left: number } | null>(null)
+  useEffect(() => {
+    if (!undo) return
+    if (undo.left <= 0) { nav(`/incidents/${undo.id}`); return }
+    const h = setTimeout(() => setUndo({ ...undo, left: undo.left - 1 }), 1000)
+    return () => clearTimeout(h)
+  }, [undo])
+  const undoPost = async () => {
+    if (!undo) return
+    try { await api(`/incidents/${undo.id}/withdraw`, { body: {} }); qc.invalidateQueries({ queryKey: ['feed'] }); toast(t('ui.auto_post_undone')); setUndo(null); setStep('review') } catch (e) { setErr(errMsg(e)) }
+  }
 
   useEffect(() => { if (!user) nav('/login') }, [user])
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview) }, [preview])
@@ -64,6 +75,13 @@ export default function Report() {
       const r = await api<{ analysis: Analysis }>('/analyses', { body: { media_id: id, language: lang, country, ai_consent: true, ...(demo && scenario ? { demo_scenario: scenario } : {}) } })
       const a = r.analysis; setAnalysis(a)
       if (a.result) setForm((f) => ({ ...f, title: a.result!.suggested_title.slice(0, 160), description: a.result!.summary, category: a.primary_hazard || f.category, severity: a.severity || f.severity }))
+      // Opt in auto post: posts immediately labeled "AI detected, unverified", with a 10 second undo before nearby alerts go out.
+      if (user?.auto_post_enabled && a.status === 'completed' && a.result?.is_incident_scene) {
+        const body = { ...form, title: a.result.suggested_title.slice(0, 160), description: a.result.summary, category: a.primary_hazard || form.category, severity: a.severity || form.severity,
+          consent_public: true, auto_post: true, analysis_id: a.id, media_ids: [id] }
+        const p = await api<{ data: Incident; undo_seconds: number }>('/incidents', { body, headers: { 'Idempotency-Key': idemKey } })
+        qc.invalidateQueries({ queryKey: ['feed'] }); setUndo({ id: p.data.id, left: p.undo_seconds || 10 }); setStep('posting'); return
+      }
       setStep('review')
     } catch (e) { setErr(errMsg(e)); setStep(mediaId ? 'review' : 'photo') }
   }
@@ -107,6 +125,7 @@ export default function Report() {
         <div className="modal-head">{t('ui.create_report')}<button className="iconbtn" style={{ position: 'absolute', right: 12, top: 10 }} onClick={() => nav(-1)} aria-label={t('cancel')}><IX size={20} /></button></div>
         <div style={{ padding: 16, display: 'grid', gap: 12 }}>
           <EmergencyBanner compact />
+          {undo && <div className="card undo-bar" role="status"><span>✨ {t('ui.auto_posted_unverified', { s: undo.left })}</span><button className="btn btn-primary" data-testid="undo-auto-post" onClick={undoPost}>{t('ui.undo')}</button></div>}
 
           {preview ? (
             <div style={{ position: 'relative', borderRadius: 8, overflow: 'hidden', background: '#000' }}>

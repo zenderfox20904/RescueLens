@@ -18,6 +18,8 @@ class Incident extends Model
     {
         return [
             'is_anonymous' => 'boolean',
+            'ai_unverified' => 'boolean',
+            'feed_eligible' => 'boolean',
             'is_demo' => 'boolean',
             'ai_assisted' => 'boolean',
             'lat' => 'float', 'lng' => 'float', 'public_lat' => 'float', 'public_lng' => 'float',
@@ -60,7 +62,7 @@ class Incident extends Model
 
     public function scopePublic($q)
     {
-        return $q->whereIn('status', self::PUBLIC_STATUSES)->whereNull('merged_into_id');
+        return $q->whereIn('status', self::PUBLIC_STATUSES)->whereNull('merged_into_id')->where('feed_eligible', true);
     }
 
     /** Bounding box prefilter then haversine in PHP is fine for MVP volumes; SQL haversine works on MySQL and MariaDB. */

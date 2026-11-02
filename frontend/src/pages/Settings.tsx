@@ -34,6 +34,10 @@ export default function Settings() {
       <div className="card settings-card">
         <div className="settings-head">{t('ui.privacy_ai')}</div>
         {row(t('ui.ai_analysis_consent'), <label className="switch"><input type="checkbox" checked={user.ai_consent} onChange={(e) => save({ ai_consent: e.target.checked })} /><span /></label>, t('ui.ai_consent_hint'))}
+        {row(t('ui.auto_post'), <label className="switch"><input type="checkbox" data-testid="auto-post" checked={!!user.auto_post_enabled} onChange={(e) => {
+          if (e.target.checked && !window.confirm(t('ui.auto_post_consent'))) return
+          save({ auto_post_enabled: e.target.checked, ...(e.target.checked ? { auto_post_consent: true } : {}) })
+        }} /><span /></label>, t('ui.auto_post_hint'))}
       </div>
     </div>
   )

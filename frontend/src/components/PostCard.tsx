@@ -17,11 +17,12 @@ export function RegionOverlay({ regions, show = true }: { regions: Region[]; sho
     </div>))}</>
 }
 
-export function StatusBadge({ i }: { i: Pick<Incident, 'status' | 'is_stale' | 'is_demo' | 'severity'> }) {
+export function StatusBadge({ i }: { i: Pick<Incident, 'status' | 'is_stale' | 'is_demo' | 'severity'> & { ai_unverified?: boolean } }) {
   const { t, lang } = useI18n()
   return (
     <span className="row" style={{ gap: 4, flexWrap: 'wrap' }}>
       {i.is_demo && <span className="badge badge-demo">{t('demo')}</span>}
+      {i.ai_unverified && <span className="badge-ai">✨ {t('ui.ai_detected_unverified')}</span>}
       <span className="badge badge-sev" style={{ background: `var(--sev-${i.severity})` }}>{SEVS[i.severity]?.[lang]}</span>
       <span className={'badge' + (i.status === 'verified' ? ' badge-verified' : '')}>{i.status === 'verified' ? '✔ ' : ''}{t(i.status as any) || i.status}</span>
       {i.is_stale && <span className="badge">⏱ {t('stale')}</span>}

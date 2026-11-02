@@ -6,7 +6,7 @@ import { useAuth } from '../lib/auth'
 import { CATS, useI18n } from '../lib/i18n'
 import type { Incident, MapPoint } from '../lib/types'
 import { PostCard } from '../components/PostCard'
-import { Stories } from '../components/Stories'
+import { HomeTop } from '../components/HomeTop'
 import { PostSkeleton } from '../components/Skeleton'
 import { Avatar } from '../components/Shell'
 import { ICamera, IPin } from '../components/Icons'
@@ -26,7 +26,7 @@ export default function Feed() {
     getNextPageParam: (last) => last.meta.next_cursor || undefined,
     refetchInterval: 10000, // live feed polling
   })
-  const stories = useQuery({ queryKey: ['map', 48], queryFn: () => api<{ data: MapPoint[] }>('/incidents/map?hours=48'), refetchInterval: 15000 })
+  const live = useQuery({ queryKey: ['map', 48], queryFn: () => api<{ data: MapPoint[] }>('/incidents/map?hours=48'), refetchInterval: 15000 })
   useEffect(() => {
     const el = document.getElementById('feed-end')
     if (!el) return
@@ -36,7 +36,7 @@ export default function Feed() {
   const items = (feed.data?.pages.flatMap((p) => p.data) ?? []).filter((i) => !q || (i.title + ' ' + (i.description ?? '') + ' ' + (i.location.area_name ?? '')).toLowerCase().includes(q))
   return (
     <div className="main">
-      <Stories items={stories.data?.data} loading={stories.isLoading} />
+      <HomeTop points={live.data?.data} loading={live.isLoading} />
       <div className="card composer">
         <div className="row"><Avatar name={user?.name} size={40} /><Link to={user ? '/report' : '/login'} className="pill-input muted" style={{ padding: '10px 14px' }}>{t('whatsHappening')}</Link></div>
         <div className="divider" />
