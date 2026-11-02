@@ -51,14 +51,14 @@ class _HomeHeaderState extends State<HomeHeader> {
       IconButton(tooltip: tr('alerts'), onPressed: widget.onAlerts, icon: IconTheme(data: IconThemeData(color: white), child: AlertBadge(color: white))),
     ]);
     return SliverAppBar(
-      pinned: true, expandedHeight: 168, toolbarHeight: 60, backgroundColor: Colors.transparent, surfaceTintColor: Colors.transparent, elevation: 0,
+      pinned: true, expandedHeight: 172, toolbarHeight: 64, backgroundColor: Colors.transparent, surfaceTintColor: Colors.transparent, elevation: 0,
       automaticallyImplyLeading: false, titleSpacing: 16,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(bottom: Radius.circular(28))),
       
-      title: Row(mainAxisSize: MainAxisSize.min, children: [const LogoMark(size: 28), const SizedBox(width: 8), Text('RescueLens', style: TextStyle(color: white, fontWeight: FontWeight.w800, fontSize: 20))]),
+      title: Row(mainAxisSize: MainAxisSize.min, children: [const LogoMark(size: 28), const SizedBox(width: 8), const Text('RescueLens', style: TextStyle(color: Color(0xFF1877F2), fontWeight: FontWeight.w800, fontSize: 22, letterSpacing: -0.5))]),
       actions: [actions, const SizedBox(width: 4)],
       flexibleSpace: LayoutBuilder(builder: (_, c) {
-        final t = ((c.maxHeight - 60 - top) / (168 - 60)).clamp(0.0, 1.0);
+        final t = ((c.maxHeight - 64 - top) / (172 - 64)).clamp(0.0, 1.0);
         return DecoratedBox(
           decoration: BoxDecoration(color: bg, borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
             boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: dark ? .45 : .08), blurRadius: 18, offset: const Offset(0, 6))]),

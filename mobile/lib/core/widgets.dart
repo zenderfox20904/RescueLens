@@ -110,3 +110,18 @@ class _AlertBadgeState extends State<AlertBadge> {
   @override
   Widget build(BuildContext context) => Badge(isLabelVisible: n > 0, label: Text(n > 99 ? '99+' : '$n'), child: Icon(Icons.notifications_none_rounded, color: widget.color ?? RL.text2, size: 24));
 }
+
+/// Polished confirmation for destructive or important actions. Returns true only when confirmed.
+Future<bool> confirmAction(BuildContext context, {required String title, required String body, required String confirm, IconData icon = Icons.warning_amber_rounded, bool danger = true}) async {
+  final color = danger ? const Color(0xFFE41E3F) : RL.primary;
+  final ok = await showDialog<bool>(context: context, builder: (c) => AlertDialog(
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+    icon: Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: color.withValues(alpha: .12), shape: BoxShape.circle), child: Icon(icon, color: color, size: 28)),
+    title: Text(title, textAlign: TextAlign.center), content: Text(body, textAlign: TextAlign.center),
+    actionsAlignment: MainAxisAlignment.center,
+    actions: [
+      OutlinedButton(onPressed: () => Navigator.pop(c, false), child: Text(tr('cancel'))),
+      FilledButton(style: FilledButton.styleFrom(backgroundColor: color), onPressed: () => Navigator.pop(c, true), child: Text(confirm)),
+    ]));
+  return ok == true;
+}

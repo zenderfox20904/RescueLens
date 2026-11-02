@@ -35,6 +35,9 @@ class Api {
   static Future<dynamic> post(String path, Map<String, dynamic> body, {Map<String, String>? headers}) async =>
       _decode(await http.post(Uri.parse('$base$path'), headers: {..._h, ...?headers}, body: jsonEncode(body)));
 
+  static Future<dynamic> patch(String path, Map<String, dynamic> body) async =>
+      _decode(await http.patch(Uri.parse('$base$path'), headers: _h, body: jsonEncode(body)).timeout(const Duration(seconds: 15)));
+  static Future<dynamic> delete(String path) async => _decode(await http.delete(Uri.parse('$base$path'), headers: _h).timeout(const Duration(seconds: 15)));
   static Future<dynamic> upload(String path, String filePath) async {
     final req = http.MultipartRequest('POST', Uri.parse('$base$path'))
       ..headers.addAll({'Accept': 'application/json', if (token != null) 'Authorization': 'Bearer $token'})

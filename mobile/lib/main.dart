@@ -24,7 +24,7 @@ class RescueLensApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ListenableBuilder(listenable: L10n.i, builder: (_, _) => MaterialApp(
         title: 'RescueLens', debugShowCheckedModeBanner: false,
-        theme: RL.theme(Brightness.light), darkTheme: RL.theme(Brightness.dark), themeMode: ThemeMode.dark,
+        theme: RL.theme(Brightness.light), darkTheme: RL.theme(Brightness.dark), themeMode: L10n.i.themeMode,
         locale: Locale(L10n.i.lang),
         builder: (c, child) => Directionality(textDirection: L10n.i.isRtl ? TextDirection.rtl : TextDirection.ltr, child: child!),
         home: const Home(),
