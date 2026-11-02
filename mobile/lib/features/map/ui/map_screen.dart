@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rescuelens/core/api.dart';
@@ -24,11 +25,11 @@ class _MapState extends State<MapScreen> {
     SizedBox(height: 320, child: pts == null || maps == null ? const Shim(child: Sk(h: 320, r: 0)) : maps == false ? const MapUnavailable() : GoogleMap(
       initialCameraPosition: const CameraPosition(target: LatLng(23.78, 90.39), zoom: 11),
       markers: {for (final p in pts!) Marker(markerId: MarkerId(p['id']), position: LatLng((p['lat'] as num).toDouble(), (p['lng'] as num).toDouble()),
-        icon: BitmapDescriptor.defaultMarkerWithHue(hue(p['severity'])), infoWindow: InfoWindow(title: '${RL.catIcon[p['category']]} ${title(p)}', snippet: p['area_name'], onTap: () => openDetail(context, p['id'])))},
+        icon: BitmapDescriptor.defaultMarkerWithHue(hue(p['severity'])), infoWindow: InfoWindow(title: title(p), snippet: p['area_name'], onTap: () => openDetail(context, p['id'])))},
     )),
     Padding(padding: const EdgeInsets.all(8), child: Text(tr('map_note'), style: const TextStyle(color: RL.text2, fontSize: 12))),
     Expanded(child: pts == null ? ListView(children: const [PostSkeleton()]) : ListView(padding: const EdgeInsets.only(bottom: 120), children: [
-      for (final p in pts!) ListTile(leading: Text(RL.catIcon[p['category']] ?? '⚠️', style: const TextStyle(fontSize: 24)), title: Text(title(p)), subtitle: Text('${p['area_name'] ?? ''} · ${ago(p['created_at'])}'), onTap: () => openDetail(context, p['id'])),
+      for (final p in pts!) ListTile(leading: Icon(RL.cat(p['category']), size: 24, color: RL.primary), title: Text(title(p)), subtitle: Text('${p['area_name'] ?? ''} · ${ago(p['created_at'])}'), onTap: () => openDetail(context, p['id'])),
     ])),
   ]);
 }
@@ -38,7 +39,7 @@ class MapUnavailable extends StatelessWidget {
   const MapUnavailable({super.key});
   @override
   Widget build(BuildContext context) => Container(color: Theme.of(context).cardColor, alignment: Alignment.center, padding: const EdgeInsets.all(24), child: Column(mainAxisSize: MainAxisSize.min, children: [
-    const Icon(Icons.map_outlined, size: 40, color: RL.text2), const SizedBox(height: 8),
+    const Icon(LucideIcons.map, size: 40, color: RL.text2), const SizedBox(height: 8),
     Text(tr('map_unavailable'), textAlign: TextAlign.center, style: const TextStyle(color: RL.text2)),
   ]));
 }

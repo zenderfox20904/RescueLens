@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -58,7 +59,7 @@ class _AlertsState extends State<AlertsScreen> {
   }
 
   Future<void> clearAll() async {
-    if (!await confirmAction(context, title: tr('n_clear_q'), body: tr('n_clear_body'), confirm: tr('n_clear'), icon: Icons.delete_sweep_rounded)) return;
+    if (!await confirmAction(context, title: tr('n_clear_q'), body: tr('n_clear_body'), confirm: tr('n_clear'), icon: LucideIcons.trash)) return;
     setState(() { items = []; unread = 0; });
     try { await Api.delete('/notifications'); } catch (_) { load(); }
   }
@@ -68,30 +69,30 @@ class _AlertsState extends State<AlertsScreen> {
     Padding(padding: const EdgeInsets.fromLTRB(4, 0, 0, 4), child: Row(children: [
       Expanded(child: Text(tr('alerts'), style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800))),
       if (unread > 0) Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2), decoration: BoxDecoration(color: const Color(0xFFE41E3F), borderRadius: BorderRadius.circular(12)), child: Text('$unread', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 12))),
-      IconButton(tooltip: tr('n_prefs'), icon: const Icon(Icons.tune_rounded), onPressed: () => showPrefs(context)),
+      IconButton(tooltip: tr('n_prefs'), icon: const Icon(LucideIcons.slidersHorizontal), onPressed: () => showPrefs(context)),
       PopupMenuButton<String>(onSelected: (v) => v == 'read' ? markAll() : clearAll(), itemBuilder: (_) => [
-        PopupMenuItem(value: 'read', enabled: unread > 0, child: ListTile(leading: const Icon(Icons.done_all_rounded), title: Text(tr('n_mark_all')))),
-        PopupMenuItem(value: 'clear', enabled: (items ?? []).isNotEmpty, child: ListTile(leading: const Icon(Icons.delete_sweep_rounded), title: Text(tr('n_clear')))),
+        PopupMenuItem(value: 'read', enabled: unread > 0, child: ListTile(leading: const Icon(LucideIcons.checkCheck), title: Text(tr('n_mark_all')))),
+        PopupMenuItem(value: 'clear', enabled: (items ?? []).isNotEmpty, child: ListTile(leading: const Icon(LucideIcons.trash), title: Text(tr('n_clear')))),
       ]),
     ])),
     if (error) ErrorCard(onRetry: load),
     if (items == null && !error) ...[const PostSkeleton(), const PostSkeleton()],
     if (items != null && items!.isEmpty) Padding(padding: const EdgeInsets.all(40), child: Column(children: [
-      Icon(Icons.notifications_off_outlined, size: 48, color: RL.text2.withValues(alpha: .6)), const SizedBox(height: 12),
+      Icon(LucideIcons.bellOff, size: 48, color: RL.text2.withValues(alpha: .6)), const SizedBox(height: 12),
       Text(tr('no_alerts'), textAlign: TextAlign.center, style: const TextStyle(color: RL.text2))])),
     if ((items ?? []).isNotEmpty) Padding(padding: const EdgeInsets.fromLTRB(4, 0, 4, 6), child: Text(tr('n_swipe_hint'), style: const TextStyle(color: RL.text2, fontSize: 12))),
     for (final (n, a) in (items ?? []).indexed) Dismissible(
       key: ValueKey('n${a['id']}'), direction: DismissDirection.endToStart, onDismissed: (_) => remove(a, n),
       background: Container(margin: const EdgeInsets.symmetric(vertical: 6), alignment: AlignmentDirectional.centerEnd, padding: const EdgeInsets.symmetric(horizontal: 20),
-        decoration: BoxDecoration(color: const Color(0xFFE41E3F), borderRadius: BorderRadius.circular(16)), child: const Icon(Icons.delete_rounded, color: Colors.white)),
+        decoration: BoxDecoration(color: const Color(0xFFE41E3F), borderRadius: BorderRadius.circular(16)), child: const Icon(LucideIcons.trash2, color: Colors.white)),
       child: Card(child: ListTile(
         leading: Stack(clipBehavior: Clip.none, children: [
-          CircleAvatar(backgroundColor: RL.primary.withValues(alpha: .15), child: Icon(a['type'] == 'dispatch' ? Icons.local_hospital_rounded : Icons.campaign_rounded, color: RL.primary)),
+          CircleAvatar(backgroundColor: RL.primary.withValues(alpha: .15), child: Icon(a['type'] == 'dispatch' ? LucideIcons.hospital : LucideIcons.megaphone, color: RL.primary)),
           if (a['read'] != true) Positioned(right: -1, top: -1, child: Container(width: 10, height: 10, decoration: const BoxDecoration(color: RL.primary, shape: BoxShape.circle))),
         ]),
         title: Text('${a['title']}', style: TextStyle(fontWeight: a['read'] == true ? FontWeight.w500 : FontWeight.w800)),
         subtitle: Text([if (a['body'] != null) a['body'], ago(a['created_at'])].join(' · ')),
-        trailing: PopupMenuButton<String>(icon: const Icon(Icons.more_horiz_rounded),
+        trailing: PopupMenuButton<String>(icon: const Icon(LucideIcons.ellipsis),
           onSelected: (v) => v == 'toggle' ? setRead(a, a['read'] != true) : remove(a, n),
           itemBuilder: (_) => [
             PopupMenuItem(value: 'toggle', child: Text(tr(a['read'] == true ? 'n_mark_unread' : 'n_mark_read'))),
@@ -127,13 +128,13 @@ Future<void> showPrefs(BuildContext context) async {
       Text(tr('n_quiet_sub'), style: const TextStyle(color: RL.text2, fontSize: 12)), const SizedBox(height: 6),
       Row(children: [
         for (final (i, v) in [qs, qe].indexed) ...[
-          Expanded(child: OutlinedButton.icon(icon: const Icon(Icons.schedule_rounded, size: 18), label: Text(v ?? tr(i == 0 ? 'n_from' : 'n_to')), onPressed: () async {
+          Expanded(child: OutlinedButton.icon(icon: const Icon(LucideIcons.clock, size: 18), label: Text(v ?? tr(i == 0 ? 'n_from' : 'n_to')), onPressed: () async {
             final t = await showTimePicker(context: c, initialTime: parse(v) ?? TimeOfDay(hour: i == 0 ? 22 : 7, minute: 0));
             if (t != null) set(() => i == 0 ? qs = fmt(t) : qe = fmt(t));
           })),
           if (i == 0) const SizedBox(width: 8),
         ],
-        if (qs != null || qe != null) IconButton(onPressed: () => set(() { qs = null; qe = null; }), icon: const Icon(Icons.close_rounded)),
+        if (qs != null || qe != null) IconButton(onPressed: () => set(() { qs = null; qe = null; }), icon: const Icon(LucideIcons.x)),
       ]),
       const SizedBox(height: 18),
       SizedBox(width: double.infinity, child: FilledButton(onPressed: saving ? null : () async {

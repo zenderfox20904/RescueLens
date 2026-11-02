@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:rescuelens/core/api.dart';
 import 'package:rescuelens/core/format.dart';
@@ -51,7 +52,7 @@ class CommentsSectionState extends State<CommentsSection> {
     try { await Api.patch('/comments/${c['id']}', {'body': edit.text.trim()}); setState(() => editing = null); snack(tr('saved')); load(); } catch (e) { snack('$e'); }
   }
   Future<void> remove(Map c) async {
-    if (!await confirmAction(context, title: tr('delete_comment_q'), body: tr('delete_comment_body'), confirm: tr('delete'), icon: Icons.delete_outline_rounded)) return;
+    if (!await confirmAction(context, title: tr('delete_comment_q'), body: tr('delete_comment_body'), confirm: tr('delete'), icon: LucideIcons.trash2)) return;
     try {
       await Api.delete('/comments/${c['id']}'); await load();
       snack(tr('comment_deleted'), undo: () async { try { await Api.post('/comments/${c['id']}/restore', {}); await load(); } catch (_) {} });
@@ -79,15 +80,15 @@ class CommentsSectionState extends State<CommentsSection> {
           Flexible(child: Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), decoration: BoxDecoration(color: bubble, borderRadius: BorderRadius.circular(18)),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Row(mainAxisSize: MainAxisSize.min, children: [Flexible(child: Text('${c['author']}', overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13))),
-                if (mod) ...[const SizedBox(width: 4), const Icon(Icons.verified_rounded, size: 14, color: RL.primary)]]),
+                if (mod) ...[const SizedBox(width: 4), const Icon(LucideIcons.badgeCheck, size: 14, color: RL.primary)]]),
               ExpandableText('${c['body_translated'] ?? c['body']}', lines: 4),
             ]))),
-          if (c['can_manage'] == true) SizedBox(width: 32, child: PopupMenuButton<String>(padding: EdgeInsets.zero, icon: const Icon(Icons.more_horiz, size: 18, color: RL.text2),
+          if (c['can_manage'] == true) SizedBox(width: 32, child: PopupMenuButton<String>(padding: EdgeInsets.zero, icon: const Icon(LucideIcons.ellipsis, size: 18, color: RL.text2),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             onSelected: (v) { if (v == 'e') { edit.text = '${c['body']}'; setState(() => editing = c['id']); } else { remove(c); } },
             itemBuilder: (_) => [
-              if (c['is_mine'] == true) PopupMenuItem(value: 'e', child: ListTile(dense: true, contentPadding: EdgeInsets.zero, leading: const Icon(Icons.edit_outlined), title: Text(tr('edit')))),
-              PopupMenuItem(value: 'd', child: ListTile(dense: true, contentPadding: EdgeInsets.zero, leading: const Icon(Icons.delete_outline_rounded, color: Color(0xFFE41E3F)), title: Text(tr('delete'), style: const TextStyle(color: Color(0xFFE41E3F))))),
+              if (c['is_mine'] == true) PopupMenuItem(value: 'e', child: ListTile(dense: true, contentPadding: EdgeInsets.zero, leading: const Icon(LucideIcons.pencil), title: Text(tr('edit')))),
+              PopupMenuItem(value: 'd', child: ListTile(dense: true, contentPadding: EdgeInsets.zero, leading: const Icon(LucideIcons.trash2, color: Color(0xFFE41E3F)), title: Text(tr('delete'), style: const TextStyle(color: Color(0xFFE41E3F))))),
             ])),
         ]),
         Padding(padding: const EdgeInsets.only(left: 10, top: 2), child: Wrap(spacing: 14, crossAxisAlignment: WrapCrossAlignment.center, children: [
@@ -116,7 +117,7 @@ class CommentsSectionState extends State<CommentsSection> {
           Avatar(name: '${Me.user?['name'] ?? ''}', url: Me.user?['avatar_url'], r: 16), const SizedBox(width: 8),
           Expanded(child: TextField(key: const Key('comment-input'), controller: input, focusNode: focus, minLines: 1, maxLines: 4, maxLength: 1000, textInputAction: TextInputAction.send, onSubmitted: (_) => send(),
             decoration: InputDecoration(counterText: '', isDense: true, hintText: replyTo != null ? tr('write_reply') : tr('write_comment'), filled: true, border: OutlineInputBorder(borderRadius: BorderRadius.circular(22), borderSide: BorderSide.none)))),
-          IconButton(onPressed: sending ? null : send, icon: const Icon(Icons.send_rounded, color: RL.primary)),
+          IconButton(onPressed: sending ? null : send, icon: const Icon(LucideIcons.send, color: RL.primary)),
         ]),
       ])),
     ]));

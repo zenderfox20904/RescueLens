@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:rescuelens/core/api.dart';
 import 'package:rescuelens/core/i18n.dart';
@@ -14,12 +15,12 @@ class PostMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     if (i['can_manage'] != true) return const SizedBox.shrink();
     return PopupMenuButton<String>(
-      tooltip: tr('more'), icon: const Icon(Icons.more_horiz_rounded, color: RL.text2), position: PopupMenuPosition.under,
+      tooltip: tr('more'), icon: const Icon(LucideIcons.ellipsis, color: RL.text2), position: PopupMenuPosition.under,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       onSelected: (v) => v == 'edit' ? edit(context) : remove(context),
       itemBuilder: (_) => [
-        PopupMenuItem(value: 'edit', child: ListTile(contentPadding: EdgeInsets.zero, leading: const Icon(Icons.edit_outlined), title: Text(tr('edit_post')))),
-        PopupMenuItem(value: 'delete', child: ListTile(contentPadding: EdgeInsets.zero, leading: const Icon(Icons.delete_outline_rounded, color: _danger), title: Text(tr('move_to_trash'), style: const TextStyle(color: _danger)))),
+        PopupMenuItem(value: 'edit', child: ListTile(contentPadding: EdgeInsets.zero, leading: const Icon(LucideIcons.pencil), title: Text(tr('edit_post')))),
+        PopupMenuItem(value: 'delete', child: ListTile(contentPadding: EdgeInsets.zero, leading: const Icon(LucideIcons.trash2, color: _danger), title: Text(tr('move_to_trash'), style: const TextStyle(color: _danger)))),
       ]);
   }
 
@@ -29,7 +30,7 @@ class PostMenu extends StatelessWidget {
   }
 
   Future<void> remove(BuildContext context) async {
-    final ok = await confirmAction(context, title: tr('delete_post_q'), body: tr('delete_post_body'), confirm: tr('move_to_trash'), icon: Icons.delete_outline_rounded);
+    final ok = await confirmAction(context, title: tr('delete_post_q'), body: tr('delete_post_body'), confirm: tr('move_to_trash'), icon: LucideIcons.trash2);
     if (!ok || !context.mounted) return;
     final m = ScaffoldMessenger.of(context);
     try {
@@ -76,7 +77,7 @@ class _EditPostState extends State<EditPostScreen> {
       TextFormField(controller: desc, maxLength: 2000, minLines: 4, maxLines: 10, decoration: InputDecoration(labelText: tr('description'), alignLabelWithHint: true, border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)))),
       const SizedBox(height: 12),
       Text(tr('category'), style: const TextStyle(fontWeight: FontWeight.w700)), const SizedBox(height: 8),
-      Wrap(spacing: 8, runSpacing: 8, children: [for (final c in RL.catIcon.keys) ChoiceChip(showCheckmark: false, avatar: Text(RL.catIcon[c]!), label: Text(tr('c_$c')), selected: cat == c, onSelected: (_) => setState(() => cat = c))]),
+      Wrap(spacing: 8, runSpacing: 8, children: [for (final c in RL.catIcon.keys) ChoiceChip(showCheckmark: false, avatar: Icon(RL.cat(c), size: 18), label: Text(tr('c_$c')), selected: cat == c, onSelected: (_) => setState(() => cat = c))]),
       const SizedBox(height: 16),
       Text(tr('severity'), style: const TextStyle(fontWeight: FontWeight.w700)), const SizedBox(height: 8),
       Wrap(spacing: 8, runSpacing: 8, children: [for (final s in sevColor.keys) ChoiceChip(showCheckmark: false, avatar: CircleAvatar(radius: 6, backgroundColor: sevColor[s]), label: Text(tr(s)), selected: sev == s, onSelected: (_) => setState(() => sev = s))]),

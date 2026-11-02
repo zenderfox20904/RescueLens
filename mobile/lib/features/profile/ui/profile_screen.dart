@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:rescuelens/core/api.dart';
@@ -39,8 +40,8 @@ class _ProfileState extends State<ProfileScreen> {
 
   Future<void> pickPhoto() async {
     final src = await showModalBottomSheet<ImageSource>(context: context, showDragHandle: true, builder: (c) => SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
-      ListTile(leading: const Icon(Icons.photo_camera_rounded), title: Text(tr('camera')), onTap: () => Navigator.pop(c, ImageSource.camera)),
-      ListTile(leading: const Icon(Icons.photo_library_rounded), title: Text(tr('gallery')), onTap: () => Navigator.pop(c, ImageSource.gallery)),
+      ListTile(leading: const Icon(LucideIcons.camera), title: Text(tr('camera')), onTap: () => Navigator.pop(c, ImageSource.camera)),
+      ListTile(leading: const Icon(LucideIcons.images), title: Text(tr('gallery')), onTap: () => Navigator.pop(c, ImageSource.gallery)),
     ])));
     if (src == null) return;
     XFile? f;
@@ -78,16 +79,16 @@ class _ProfileState extends State<ProfileScreen> {
                 child: ClipOval(child: SizedBox.expand(child: me!['avatar_url'] != null ? NetImage('${me!['avatar_url']}', fit: BoxFit.cover)
                   : Center(child: Text('${me!['name']}'.trim().isEmpty ? '?' : '${me!['name']}'.trim()[0].toUpperCase(), style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w800, color: RL.primary)))))))),
             Positioned(right: 2, bottom: 2, child: Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: RL.primary, shape: BoxShape.circle, border: Border.all(color: card, width: 2)),
-              child: uploading ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Icon(Icons.photo_camera_rounded, size: 14, color: Colors.white))),
+              child: uploading ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Icon(LucideIcons.camera, size: 14, color: Colors.white))),
           ]))),
         ]),
         const SizedBox(height: 54),
         Text('${org?['name'] ?? me!['name']}', textAlign: TextAlign.center, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
         const SizedBox(height: 6),
         Wrap(alignment: WrapAlignment.center, spacing: 6, runSpacing: 6, children: [
-          Chip(avatar: Icon(type == 'citizen' ? Icons.person_rounded : Icons.apartment_rounded, size: 16, color: RL.primary), label: Text(tr('acct_$type')), visualDensity: VisualDensity.compact),
-          if (me!['role'] == 'admin' || me!['role'] == 'moderator') Chip(avatar: const Icon(Icons.shield_rounded, size: 16, color: RL.primary), label: Text(tr('role_${me!['role']}')), visualDensity: VisualDensity.compact),
-          Chip(avatar: const Icon(Icons.my_location_rounded, size: 16, color: RL.primary), label: Text('${me!['alert_area_set'] == true ? tr('your_alert_area') : tr('set_alert_area')} · ${me!['alert_radius_km'] ?? 5} ${me!['distance_unit'] ?? 'km'}'), visualDensity: VisualDensity.compact),
+          Chip(avatar: Icon(type == 'citizen' ? LucideIcons.user : LucideIcons.building2, size: 16, color: RL.primary), label: Text(tr('acct_$type')), visualDensity: VisualDensity.compact),
+          if (me!['role'] == 'admin' || me!['role'] == 'moderator') Chip(avatar: const Icon(LucideIcons.shield, size: 16, color: RL.primary), label: Text(tr('role_${me!['role']}')), visualDensity: VisualDensity.compact),
+          Chip(avatar: const Icon(LucideIcons.locateFixed, size: 16, color: RL.primary), label: Text('${me!['alert_area_set'] == true ? tr('your_alert_area') : tr('set_alert_area')} · ${me!['alert_radius_km'] ?? 5} ${me!['distance_unit'] ?? 'km'}'), visualDensity: VisualDensity.compact),
         ]),
         if ((me!['bio'] ?? '').toString().isNotEmpty) Padding(padding: const EdgeInsets.fromLTRB(20, 8, 20, 0), child: Text('${me!['bio']}', textAlign: TextAlign.center, style: const TextStyle(color: RL.text2))),
         Padding(padding: const EdgeInsets.fromLTRB(12, 14, 12, 4), child: Row(children: [
@@ -98,45 +99,45 @@ class _ProfileState extends State<ProfileScreen> {
           ])),
         ])),
         Padding(padding: const EdgeInsets.fromLTRB(16, 10, 16, 16), child: Row(children: [
-          Expanded(child: FilledButton.icon(onPressed: () => open(EditProfileScreen(me: me!)), icon: const Icon(Icons.edit_rounded, size: 18), label: Text(tr('edit_profile')))),
+          Expanded(child: FilledButton.icon(onPressed: () => open(EditProfileScreen(me: me!)), icon: const Icon(LucideIcons.pencil, size: 18), label: Text(tr('edit_profile')))),
           const SizedBox(width: 8),
-          Expanded(child: OutlinedButton.icon(onPressed: () => open(const MyReportsScreen()), icon: const Icon(Icons.article_rounded, size: 18), label: Text(tr('my_reports')))),
+          Expanded(child: OutlinedButton.icon(onPressed: () => open(const MyReportsScreen()), icon: const Icon(LucideIcons.newspaper, size: 18), label: Text(tr('my_reports')))),
         ])),
       ]))),
       if (authed && me?['id'] != null) ProfileTimeline(key: ValueKey('tl${me!['id']}'), userId: '${me!['id']}', isMe: true),
       if (!authed) Entrance(child: Card(child: Padding(padding: const EdgeInsets.all(20), child: Column(children: [
-        const Icon(Icons.account_circle_rounded, size: 56, color: RL.primary), const SizedBox(height: 8),
+        const Icon(LucideIcons.circleUser, size: 56, color: RL.primary), const SizedBox(height: 8),
         Text(tr('profile_signin'), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w700)),
         const SizedBox(height: 12),
         FilledButton(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AuthPage())).then((_) { widget.onChanged(); load(); }), child: Text(tr('login'))),
       ])))),
       if (authed) _Group(index: 1, title: tr('s_account'), tiles: [
-        _Tile(Icons.person_outline_rounded, tr('edit_profile'), onTap: () => open(EditProfileScreen(me: me ?? {}))),
-        _Tile(Icons.lock_outline_rounded, tr('change_password'), onTap: () => open(const ChangePasswordScreen())),
-        _Tile(Icons.link_rounded, tr('linked_accounts'), sub: 'Google · Facebook', onTap: () => showLinked(context)),
+        _Tile(LucideIcons.user, tr('edit_profile'), onTap: () => open(EditProfileScreen(me: me ?? {}))),
+        _Tile(LucideIcons.lock, tr('change_password'), onTap: () => open(const ChangePasswordScreen())),
+        _Tile(LucideIcons.link, tr('linked_accounts'), sub: 'Google · Facebook', onTap: () => showLinked(context)),
       ]),
       _Group(index: 2, title: tr('s_prefs'), tiles: [
-        _Tile(Icons.translate_rounded, tr('language'), sub: L10n.langs[L10n.i.lang], onTap: () => pickLanguage(context).then((_) => widget.onChanged())),
-        _Tile(Icons.dark_mode_outlined, tr('theme'), sub: tr('theme_${L10n.i.theme}'), onTap: () => pickTheme(context)),
-        if (authed) _Tile(Icons.radar_rounded, tr('alert_radius'), sub: '${me?['alert_radius_km'] ?? 5} ${me?['distance_unit'] ?? 'km'}', onTap: () => editRadius(context, me ?? {}).then((_) => load())),
+        _Tile(LucideIcons.languages, tr('language'), sub: L10n.langs[L10n.i.lang], onTap: () => pickLanguage(context).then((_) => widget.onChanged())),
+        _Tile(LucideIcons.moon, tr('theme'), sub: tr('theme_${L10n.i.theme}'), onTap: () => pickTheme(context)),
+        if (authed) _Tile(LucideIcons.radar, tr('alert_radius'), sub: '${me?['alert_radius_km'] ?? 5} ${me?['distance_unit'] ?? 'km'}', onTap: () => editRadius(context, me ?? {}).then((_) => load())),
       ]),
       if (authed) _Group(index: 3, title: tr('s_notifications'), tiles: [
-        _Tile(Icons.notifications_active_outlined, tr('n_prefs'), onTap: () => showPrefs(context)),
+        _Tile(LucideIcons.bellRing, tr('n_prefs'), onTap: () => showPrefs(context)),
       ]),
       if (authed) _Group(index: 4, title: tr('s_privacy'), tiles: [
-        _Tile(Icons.visibility_off_outlined, tr('privacy_location'), sub: tr('privacy_location_sub')),
-        _Tile(Icons.delete_forever_outlined, tr('delete_account'), color: kDanger, onTap: () => deleteAccount(context, widget.onChanged)),
+        _Tile(LucideIcons.eyeOff, tr('privacy_location'), sub: tr('privacy_location_sub')),
+        _Tile(LucideIcons.trash2, tr('delete_account'), color: kDanger, onTap: () => deleteAccount(context, widget.onChanged)),
       ]),
       if (authed) _Group(index: 5, title: tr('s_trash'), tiles: [
-        _Tile(Icons.restore_from_trash_outlined, tr('my_trash'), sub: tr('trash_sub'), onTap: () => open(const TrashScreen())),
+        _Tile(LucideIcons.archiveRestore, tr('my_trash'), sub: tr('trash_sub'), onTap: () => open(const TrashScreen())),
       ]),
       _Group(index: 6, title: tr('s_help'), tiles: [
-        _Tile(Icons.health_and_safety_outlined, tr('help_emergency'), sub: tr('sos')),
-        _Tile(Icons.info_outline_rounded, tr('about'), onTap: () => showAboutDialog(context: context, applicationName: 'RescueLens', applicationVersion: '1.0.0',
+        _Tile(LucideIcons.heartPulse, tr('help_emergency'), sub: tr('sos')),
+        _Tile(LucideIcons.info, tr('about'), onTap: () => showAboutDialog(context: context, applicationName: 'RescueLens', applicationVersion: '1.0.0',
           applicationIcon: const LogoMark(size: 40), applicationLegalese: '© 2026 RescueLens', children: [Padding(padding: const EdgeInsets.only(top: 12), child: Text(tr('about_body')))])),
       ]),
       if (authed) _Group(index: 7, tiles: [
-        _Tile(Icons.logout_rounded, tr('logout'), color: kDanger, onTap: () async { if (!await confirmAction(context, title: tr('logout_q'), body: tr('logout_body'), confirm: tr('logout'), icon: Icons.logout_rounded, danger: true)) return; await Api.setToken(null); Me.user = null; widget.onChanged(); }),
+        _Tile(LucideIcons.logOut, tr('logout'), color: kDanger, onTap: () async { if (!await confirmAction(context, title: tr('logout_q'), body: tr('logout_body'), confirm: tr('logout'), icon: LucideIcons.logOut, danger: true)) return; await Api.setToken(null); Me.user = null; widget.onChanged(); }),
       ]),
       const Padding(padding: EdgeInsets.all(16), child: Text('© 2026 RescueLens', textAlign: TextAlign.center, style: TextStyle(color: RL.text2, fontSize: 12))),
     ]));
@@ -162,7 +163,7 @@ class _Group extends StatelessWidget {
           leading: Container(width: 34, height: 34, decoration: BoxDecoration(color: (t.color ?? RL.primary).withValues(alpha: .12), borderRadius: BorderRadius.circular(10)), child: Icon(t.icon, size: 20, color: t.color ?? RL.primary)),
           title: Text(t.title, style: TextStyle(fontWeight: FontWeight.w600, color: t.color)),
           subtitle: t.sub == null ? null : Text(t.sub!, maxLines: 2, overflow: TextOverflow.ellipsis),
-          trailing: t.onTap == null ? null : const Icon(Icons.chevron_right_rounded, color: RL.text2),
+          trailing: t.onTap == null ? null : const Icon(LucideIcons.chevronRight, color: RL.text2),
           onTap: t.onTap),
       ],
     ])),

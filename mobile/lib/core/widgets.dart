@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'dart:async';
@@ -36,7 +37,7 @@ class LogoMark extends StatelessWidget {
   final double size;
   const LogoMark({super.key, this.size = 36});
   @override
-  Widget build(BuildContext context) => ClipRRect(borderRadius: BorderRadius.circular(size * 0.25), child: Image.asset('assets/icon.png', width: size, height: size, errorBuilder: (_, _, _) => Container(width: size, height: size, decoration: const BoxDecoration(gradient: RL.gradient), child: Icon(Icons.health_and_safety, color: Colors.white, size: size * .6))));
+  Widget build(BuildContext context) => ClipRRect(borderRadius: BorderRadius.circular(size * 0.25), child: Image.asset('assets/icon.png', width: size, height: size, errorBuilder: (_, _, _) => Container(width: size, height: size, decoration: const BoxDecoration(gradient: RL.gradient), child: Icon(LucideIcons.heartPulse, color: Colors.white, size: size * .6))));
 }
 
 /// Severity pill, always localized.
@@ -49,7 +50,7 @@ class StatusChip extends StatelessWidget {
     final sev = '${i['severity']}';
     final c = RL.sev[sev] ?? RL.text2;
     return Row(mainAxisSize: MainAxisSize.min, children: [
-      if (verified) Padding(padding: const EdgeInsetsDirectional.only(end: 4), child: Icon(Icons.verified_rounded, size: 16, color: RL.primary, semanticLabel: tr('verified'))),
+      if (verified) Padding(padding: const EdgeInsetsDirectional.only(end: 4), child: Icon(LucideIcons.badgeCheck, size: 16, color: RL.primary, semanticLabel: tr('verified'))),
       Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3), decoration: BoxDecoration(color: c.withValues(alpha: .16), borderRadius: BorderRadius.circular(20)),
         child: Text(tr(sev), style: TextStyle(color: c, fontSize: 12, fontWeight: FontWeight.w700))),
     ]);
@@ -83,9 +84,9 @@ class ErrorCard extends StatelessWidget {
   const ErrorCard({super.key, required this.onRetry});
   @override
   Widget build(BuildContext context) => Card(child: Padding(padding: const EdgeInsets.all(20), child: Column(children: [
-    const Icon(Icons.wifi_off_rounded, size: 36, color: RL.text2), const SizedBox(height: 8),
+    const Icon(LucideIcons.wifiOff, size: 36, color: RL.text2), const SizedBox(height: 8),
     Text(tr('load_error'), textAlign: TextAlign.center), const SizedBox(height: 12),
-    FilledButton.icon(onPressed: onRetry, icon: const Icon(Icons.refresh_rounded), label: Text(tr('retry'))),
+    FilledButton.icon(onPressed: onRetry, icon: const Icon(LucideIcons.refreshCw), label: Text(tr('retry'))),
   ])));
 }
 
@@ -108,11 +109,11 @@ class _AlertBadgeState extends State<AlertBadge> {
     try { final r = await Api.get('/notifications'); if (mounted) setState(() => n = (r['unread'] as num?)?.toInt() ?? 0); } catch (_) {}
   }
   @override
-  Widget build(BuildContext context) => Badge(isLabelVisible: n > 0, label: Text(n > 99 ? '99+' : '$n'), child: Icon(Icons.notifications_none_rounded, color: widget.color ?? RL.text2, size: 24));
+  Widget build(BuildContext context) => Badge(isLabelVisible: n > 0, label: Text(n > 99 ? '99+' : '$n'), child: Icon(LucideIcons.bell, color: widget.color ?? RL.text2, size: 24));
 }
 
 /// Polished confirmation for destructive or important actions. Returns true only when confirmed.
-Future<bool> confirmAction(BuildContext context, {required String title, required String body, required String confirm, IconData icon = Icons.warning_amber_rounded, bool danger = true}) async {
+Future<bool> confirmAction(BuildContext context, {required String title, required String body, required String confirm, IconData icon = LucideIcons.triangleAlert, bool danger = true}) async {
   final color = danger ? const Color(0xFFE41E3F) : RL.primary;
   final ok = await showDialog<bool>(context: context, builder: (c) => AlertDialog(
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),

@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -63,11 +64,11 @@ class _HomeState extends State<Home> {
 }
 
 const _dests = [
-  (Icons.home_outlined, Icons.home_rounded, 'home'),
-  (Icons.map_outlined, Icons.map_rounded, 'map'),
-  (Icons.add_a_photo_outlined, Icons.add_a_photo, 'report'),
-  (Icons.notifications_none_rounded, Icons.notifications_rounded, 'alerts'),
-  (Icons.person_outline_rounded, Icons.person_rounded, 'profile'),
+  (LucideIcons.house, LucideIcons.house, 'home'),
+  (LucideIcons.map, LucideIcons.map, 'map'),
+  (LucideIcons.imagePlus, LucideIcons.imagePlus, 'report'),
+  (LucideIcons.bell, LucideIcons.bell, 'alerts'),
+  (LucideIcons.user, LucideIcons.user, 'profile'),
 ];
 
 /// Floating pill navigation with a blurred surface, sliding active indicator and a raised center Report action.
@@ -84,7 +85,7 @@ class FloatingNav extends StatelessWidget {
           child: Row(children: [for (var i = 0; i < 5; i++) Expanded(child: i == 2 ? const SizedBox() : _NavItem(i: i, active: i == index, onTap: () => onTap(i)))]))))),
       Positioned(top: 0, child: GestureDetector(onTap: () => onTap(2), child: AnimatedScale(scale: index == 2 ? 1.08 : 1, duration: const Duration(milliseconds: 200), child: Container(
         width: 62, height: 62, decoration: BoxDecoration(shape: BoxShape.circle, gradient: RL.gradient, boxShadow: [BoxShadow(color: RL.primary.withValues(alpha: .45), blurRadius: 18, offset: const Offset(0, 6))], border: Border.all(color: dark ? RL.darkBg : Colors.white, width: 4)),
-        child: Semantics(label: tr('report'), button: true, child: const Icon(Icons.add_rounded, color: Colors.white, size: 32)))))),
+        child: Semantics(label: tr('report'), button: true, child: const Icon(LucideIcons.plus, color: Colors.white, size: 32)))))),
     ])));
   }
 }

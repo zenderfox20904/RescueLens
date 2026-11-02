@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -46,7 +47,7 @@ class _PostTileState extends State<PostTile> with SingleTickerProviderStateMixin
     return Card(clipBehavior: Clip.antiAlias, child: InkWell(onTap: open, onDoubleTap: verify, child: Stack(children: [
       Padding(padding: const EdgeInsets.all(12), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
-          CircleAvatar(backgroundColor: RL.primary, child: Text(RL.catIcon[i['category']] ?? '⚠️')),
+          CircleAvatar(backgroundColor: RL.primary, child: Icon(RL.cat(i['category']), color: Colors.white, size: 20)),
           const SizedBox(width: 8),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             GestureDetector(onTap: i['reporter']?['id'] == null ? null : () => Navigator.push(context, MaterialPageRoute(builder: (_) => UserProfileScreen('${i['reporter']['id']}'))),
@@ -62,9 +63,9 @@ class _PostTileState extends State<PostTile> with SingleTickerProviderStateMixin
         if (media.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 8), child: MediaStrip(media)),
         const SizedBox(height: 8),
         Row(children: [
-          Icon(mine ? Icons.visibility : Icons.visibility_outlined, size: 16, color: mine ? RL.primary : RL.text2), const SizedBox(width: 4),
+          Icon(mine ? LucideIcons.eye : LucideIcons.eye, size: 16, color: mine ? RL.primary : RL.text2), const SizedBox(width: 4),
           Flexible(child: Text(tr('seen_by', {'n': n}), style: meta, overflow: TextOverflow.ellipsis)), const SizedBox(width: 12),
-          const Icon(Icons.chat_bubble_outline_rounded, size: 16, color: RL.text2), const SizedBox(width: 4),
+          const Icon(LucideIcons.messageCircle, size: 16, color: RL.text2), const SizedBox(width: 4),
           Text(tr('comments', {'n': i['counts']?['comments'] ?? 0}), style: meta),
           const Spacer(),
           if (!widget.inDetail) TextButton(onPressed: open, child: Text(tr('view'))),
@@ -74,7 +75,7 @@ class _PostTileState extends State<PostTile> with SingleTickerProviderStateMixin
       Positioned.fill(child: IgnorePointer(child: AnimatedBuilder(animation: burst, builder: (_, _) {
         final t = burst.value; if (t == 0 || t == 1) return const SizedBox();
         return Center(child: Opacity(opacity: (1 - t).clamp(0, 1), child: Transform.scale(scale: 0.6 + Curves.elasticOut.transform(t.clamp(0, 1)) * 0.8,
-          child: const Icon(Icons.visibility_rounded, size: 88, color: Colors.white, shadows: [Shadow(blurRadius: 24, color: Colors.black54)]))));
+          child: const Icon(LucideIcons.eye, size: 88, color: Colors.white, shadows: [Shadow(blurRadius: 24, color: Colors.black54)]))));
       }))),
     ])));
   }
@@ -113,32 +114,32 @@ class _DetailState extends State<DetailScreen> {
       : RefreshIndicator(onRefresh: load, child: ListView(padding: const EdgeInsets.fromLTRB(8, 8, 8, 40), children: [
           PostTile(x, inDetail: true, onUpdated: (n) => setState(() => i = n), onRemoved: () => Navigator.pop(context)),
           SeverityCard(x),
-          section(tr('verifications'), Icons.verified_user_outlined, Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          section(tr('verifications'), LucideIcons.shieldCheck, Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(children: [
-              _Stat(Icons.visibility_rounded, '${x['counts']?['confirm'] ?? 0}', tr('confirmed')), const SizedBox(width: 10),
-              _Stat(Icons.flag_outlined, '${x['counts']?['dispute'] ?? 0}', tr('disputed')),
+              _Stat(LucideIcons.eye, '${x['counts']?['confirm'] ?? 0}', tr('confirmed')), const SizedBox(width: 10),
+              _Stat(LucideIcons.flag, '${x['counts']?['dispute'] ?? 0}', tr('disputed')),
             ]),
             if (x['reporter']?['is_me'] != true) Padding(padding: const EdgeInsets.only(top: 10), child: Row(children: [
-              Expanded(child: FilledButton.icon(onPressed: () => react('confirm'), icon: Icon(x['my_reaction'] == 'confirm' ? Icons.visibility : Icons.visibility_outlined), label: Text(tr('i_see_it')))),
+              Expanded(child: FilledButton.icon(onPressed: () => react('confirm'), icon: Icon(x['my_reaction'] == 'confirm' ? LucideIcons.eye : LucideIcons.eye), label: Text(tr('i_see_it')))),
               const SizedBox(width: 8),
-              OutlinedButton.icon(onPressed: () => react('dispute'), icon: const Icon(Icons.flag_outlined), label: Text(tr('not_there'))),
+              OutlinedButton.icon(onPressed: () => react('dispute'), icon: const Icon(LucideIcons.flag), label: Text(tr('not_there'))),
             ])),
           ])),
-          section(tr('location'), Icons.place_outlined, Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          section(tr('location'), LucideIcons.mapPin, Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             if (maps == true && x['location']?['lat'] != null) ClipRRect(borderRadius: BorderRadius.circular(12), child: SizedBox(height: 180, child: IgnorePointer(child: GoogleMap(liteModeEnabled: true, zoomControlsEnabled: false, myLocationButtonEnabled: false,
               initialCameraPosition: CameraPosition(target: LatLng((x['location']['lat'] as num).toDouble(), (x['location']['lng'] as num).toDouble()), zoom: 14),
               circles: {Circle(circleId: const CircleId('a'), center: LatLng((x['location']['lat'] as num).toDouble(), (x['location']['lng'] as num).toDouble()), radius: 250, fillColor: _sevC(x['severity']).withValues(alpha: .25), strokeColor: _sevC(x['severity']), strokeWidth: 2)})))),
             Padding(padding: const EdgeInsets.only(top: 8), child: Text('${x['location']?['area_name'] ?? ''}', style: const TextStyle(fontWeight: FontWeight.w600))),
             Text(tr('approx_location'), style: const TextStyle(color: RL.text2, fontSize: 12)),
           ])),
-          section(tr('responders'), Icons.local_hospital_outlined, responders == null ? const Shim(child: Sk(h: 40))
+          section(tr('responders'), LucideIcons.hospital, responders == null ? const Shim(child: Sk(h: 40))
             : responders!.isEmpty ? Text(tr('no_responders'), style: const TextStyle(color: RL.text2))
             : Column(children: [for (final d in responders!) ListTile(contentPadding: EdgeInsets.zero, dense: true,
                 leading: CircleAvatar(backgroundColor: RL.primary.withValues(alpha: .15), child: Icon(_orgIcon('${d['organization']?['type']}'), color: RL.primary, size: 20)),
-                title: Row(children: [Flexible(child: Text('${d['organization']?['name'] ?? ''}', overflow: TextOverflow.ellipsis)), if (d['organization']?['verified'] == true) const Padding(padding: EdgeInsets.only(left: 4), child: Icon(Icons.verified_rounded, size: 14, color: RL.primary))]),
+                title: Row(children: [Flexible(child: Text('${d['organization']?['name'] ?? ''}', overflow: TextOverflow.ellipsis)), if (d['organization']?['verified'] == true) const Padding(padding: EdgeInsets.only(left: 4), child: Icon(LucideIcons.badgeCheck, size: 14, color: RL.primary))]),
                 subtitle: Text('${tr('st_${d['status']}')} · ${(d['distance_km'] as num?)?.toStringAsFixed(1) ?? '?'} km'))])),
           Card(key: commentsKey, margin: const EdgeInsets.only(top: 10), child: Padding(padding: const EdgeInsets.all(14), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(children: [const Icon(Icons.chat_bubble_outline_rounded, size: 20, color: RL.primary), const SizedBox(width: 8), Text(tr('comments_title'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16))]),
+            Row(children: [const Icon(LucideIcons.messageCircle, size: 20, color: RL.primary), const SizedBox(width: 8), Text(tr('comments_title'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16))]),
             CommentsSection(x['id']),
           ]))),
           const SizedBox(height: 10),
@@ -147,7 +148,7 @@ class _DetailState extends State<DetailScreen> {
   }
 }
 
-IconData _orgIcon(String t) => switch (t) { 'hospital' => Icons.local_hospital_rounded, 'ambulance' => Icons.emergency_rounded, 'fire_service' => Icons.local_fire_department_rounded, 'police' => Icons.local_police_rounded, _ => Icons.volunteer_activism_rounded };
+IconData _orgIcon(String t) => switch (t) { 'hospital' => LucideIcons.hospital, 'ambulance' => LucideIcons.ambulance, 'fire_service' => LucideIcons.flame, 'police' => LucideIcons.siren, _ => LucideIcons.handHeart };
 
 class _Stat extends StatelessWidget {
   final IconData icon; final String n, label;
@@ -166,10 +167,10 @@ class SeverityCard extends StatelessWidget {
     final c = _sevC(i['severity']); final a = i['analysis'] as Map?;
     return Card(margin: const EdgeInsets.only(top: 10), child: Container(decoration: BoxDecoration(borderRadius: BorderRadius.circular(16), border: Border(left: BorderSide(color: c, width: 5))), padding: const EdgeInsets.all(14),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [Icon(Icons.warning_amber_rounded, color: c), const SizedBox(width: 8), Text('${tr('severity')}: ${tr('${i['severity']}')}', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: c))]),
+        Row(children: [Icon(LucideIcons.triangleAlert, color: c), const SizedBox(width: 8), Text('${tr('severity')}: ${tr('${i['severity']}')}', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: c))]),
         if (i['severity_reason'] != null) Padding(padding: const EdgeInsets.only(top: 6), child: Text('${i['severity_reason']}', style: const TextStyle(color: RL.text2))),
         const Divider(height: 22),
-        Row(children: [const Icon(Icons.auto_awesome, color: RL.primary, size: 20), const SizedBox(width: 8), Text(tr('ai_analysis'), style: const TextStyle(fontWeight: FontWeight.w800)),
+        Row(children: [const Icon(LucideIcons.sparkles, color: RL.primary, size: 20), const SizedBox(width: 8), Text(tr('ai_analysis'), style: const TextStyle(fontWeight: FontWeight.w800)),
           const Spacer(), if (a?['mode'] == 'demo') Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2), decoration: BoxDecoration(color: Colors.orange.withValues(alpha: .2), borderRadius: BorderRadius.circular(8)), child: const Text('DEMO', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.orange)))]),
         const SizedBox(height: 6),
         Text(a == null ? tr('no_ai_analysis') : '${a['summary'] ?? a['description'] ?? tr('ai_done')}', style: const TextStyle(height: 1.35)),

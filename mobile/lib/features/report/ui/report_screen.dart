@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'dart:io';
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -55,9 +56,9 @@ class _ReportState extends State<ReportScreen> {
   Widget build(BuildContext context) => ListView(padding: const EdgeInsets.fromLTRB(12, 12, 12, 120), children: [
     const SosBanner(),
     Row(children: [
-      Expanded(child: OutlinedButton.icon(onPressed: busy ? null : () => pick(ImageSource.camera), icon: const Icon(Icons.photo_camera), label: Text(tr('camera')))),
+      Expanded(child: OutlinedButton.icon(onPressed: busy ? null : () => pick(ImageSource.camera), icon: const Icon(LucideIcons.camera), label: Text(tr('camera')))),
       const SizedBox(width: 8),
-      Expanded(child: OutlinedButton.icon(onPressed: busy ? null : () => pick(ImageSource.gallery), icon: const Icon(Icons.photo), label: Text(tr('gallery')))),
+      Expanded(child: OutlinedButton.icon(onPressed: busy ? null : () => pick(ImageSource.gallery), icon: const Icon(LucideIcons.image), label: Text(tr('gallery')))),
     ]),
     if (file != null) Padding(padding: const EdgeInsets.only(top: 12), child: ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.file(File(file!.path), height: 200, width: double.infinity, fit: BoxFit.cover))),
     if (busy) Padding(padding: const EdgeInsets.only(top: 12), child: Card(child: Padding(padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -70,7 +71,7 @@ class _ReportState extends State<ReportScreen> {
       TextField(controller: desc, maxLines: 3, decoration: InputDecoration(labelText: tr('description'))),
       const SizedBox(height: 8),
       Text(tr('category'), style: const TextStyle(fontWeight: FontWeight.w600)), const SizedBox(height: 8),
-      Wrap(spacing: 8, runSpacing: 8, children: [for (final c in RL.catIcon.keys) ChoiceChip(showCheckmark: false, avatar: Text(RL.catIcon[c]!), label: Text(tr('c_$c')), selected: category == c, onSelected: (_) => setState(() => category = c))]),
+      Wrap(spacing: 8, runSpacing: 8, children: [for (final c in RL.catIcon.keys) ChoiceChip(showCheckmark: false, avatar: Icon(RL.cat(c), size: 18), label: Text(tr('c_$c')), selected: category == c, onSelected: (_) => setState(() => category = c))]),
       const SizedBox(height: 16),
       Text(tr('severity'), style: const TextStyle(fontWeight: FontWeight.w600)), const SizedBox(height: 8),
       Wrap(spacing: 8, runSpacing: 8, children: [for (final s in RL.sev.keys) ChoiceChip(showCheckmark: false, label: Text(tr(s)), selected: severity == s, selectedColor: RL.sev[s]!.withValues(alpha: .25), onSelected: (_) => setState(() => severity = s))]),
@@ -92,14 +93,14 @@ class AiCard extends StatelessWidget {
     final color = RL.sev[sev] ?? RL.primary;
     return Card(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: (ok ? color : RL.text2).withValues(alpha: .5))), child: Padding(padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(children: [
-        const Icon(Icons.auto_awesome, color: RL.primary, size: 20), const SizedBox(width: 8),
+        const Icon(LucideIcons.sparkles, color: RL.primary, size: 20), const SizedBox(width: 8),
         Expanded(child: Text(tr('ai_suggestion'), style: const TextStyle(fontWeight: FontWeight.w700))),
         if (a['mode'] == 'demo') Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2), decoration: BoxDecoration(color: Colors.amber.withValues(alpha: .2), borderRadius: BorderRadius.circular(8)), child: Text(tr('demo'), style: const TextStyle(color: Colors.amber, fontSize: 12, fontWeight: FontWeight.w700))),
       ]),
       const SizedBox(height: 12),
       if (!ok) Text(tr('ai_not_incident'), style: const TextStyle(color: RL.text2))
       else Wrap(spacing: 8, runSpacing: 8, children: [
-        Chip(avatar: Text(RL.catIcon[x['category']] ?? '⚠️'), label: Text(tr('c_${x['category']}'))),
+        Chip(avatar: Icon(RL.cat(x['category']), size: 18), label: Text(tr('c_${x['category']}'))),
         Chip(backgroundColor: color.withValues(alpha: .2), side: BorderSide.none, label: Text(tr(sev), style: TextStyle(color: color, fontWeight: FontWeight.w700))),
       ]),
       const SizedBox(height: 12),

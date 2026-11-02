@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:rescuelens/core/api.dart';
 import 'package:rescuelens/core/format.dart';
@@ -37,7 +38,7 @@ class ProfileTimelineState extends State<ProfileTimeline> {
     if (first) ...[const PostSkeleton(), const PostSkeleton()],
     if (error && items.isEmpty) ErrorCard(onRetry: () { setState(() => error = false); more(); }),
     if (!first && !error && items.isEmpty) Card(child: Padding(padding: const EdgeInsets.all(28), child: Column(children: [
-      const Icon(Icons.article_outlined, size: 44, color: RL.text2), const SizedBox(height: 8),
+      const Icon(LucideIcons.newspaper, size: 44, color: RL.text2), const SizedBox(height: 8),
       Text(tr('no_reports_profile'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)), const SizedBox(height: 4),
       Text(widget.isMe ? tr('no_reports_profile_me') : tr('no_reports_profile_other'), textAlign: TextAlign.center, style: const TextStyle(color: RL.text2)),
     ]))),

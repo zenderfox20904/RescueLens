@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:rescuelens/core/theme.dart';
@@ -19,7 +20,7 @@ class MediaStrip extends StatelessWidget {
       onTap: () => openViewer(context, media, 0),
       child: ClipRRect(borderRadius: BorderRadius.circular(12), child: AspectRatio(aspectRatio: ratio, child: Stack(fit: StackFit.expand, children: [
         Hero(tag: 'm${m['id']}', child: isVideo(m) ? const ColoredBox(color: Colors.black) : NetImage(m['url'])),
-        if (isVideo(m)) const Center(child: CircleAvatar(radius: 28, backgroundColor: Colors.black54, child: Icon(Icons.play_arrow_rounded, size: 36, color: Colors.white))),
+        if (isVideo(m)) const Center(child: CircleAvatar(radius: 28, backgroundColor: Colors.black54, child: Icon(LucideIcons.play, size: 36, color: Colors.white))),
         if (media.length > 1) Positioned(right: 8, top: 8, child: Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(12)),
           child: Text('+${media.length - 1}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)))),
       ]))),
@@ -34,7 +35,7 @@ class NetImage extends StatelessWidget {
   Widget build(BuildContext context) => CachedNetworkImage(imageUrl: url, fit: fit,
     cacheKey: url.split('?').first,
     placeholder: (_, _) => const Shim(child: Sk(h: double.infinity, r: 0)),
-    errorWidget: (_, _, _) => const ColoredBox(color: Color(0x22000000), child: Center(child: Icon(Icons.broken_image_outlined, color: RL.text2))));
+    errorWidget: (_, _, _) => const ColoredBox(color: Color(0x22000000), child: Center(child: Icon(LucideIcons.imageOff, color: RL.text2))));
 }
 
 void openViewer(BuildContext c, List media, int start) => Navigator.push(c, PageRouteBuilder(opaque: false, barrierColor: Colors.black,
@@ -78,11 +79,11 @@ class _VideoBoxState extends State<VideoBox> {
   void dispose() { v.dispose(); super.dispose(); }
   @override
   Widget build(BuildContext context) {
-    if (failed) return const Center(child: Icon(Icons.error_outline, color: Colors.white54, size: 40));
+    if (failed) return const Center(child: Icon(LucideIcons.circleAlert, color: Colors.white54, size: 40));
     if (!v.value.isInitialized) return const Center(child: CircularProgressIndicator());
     return GestureDetector(onTap: () => setState(() => v.value.isPlaying ? v.pause() : v.play()), child: Center(child: AspectRatio(aspectRatio: v.value.aspectRatio, child: Stack(alignment: Alignment.center, children: [
       VideoPlayer(v),
-      if (!v.value.isPlaying) const Icon(Icons.play_circle_fill_rounded, color: Colors.white70, size: 64),
+      if (!v.value.isPlaying) const Icon(LucideIcons.circlePlay, color: Colors.white70, size: 64),
       Positioned(left: 0, right: 0, bottom: 0, child: VideoProgressIndicator(v, allowScrubbing: true)),
     ]))));
   }

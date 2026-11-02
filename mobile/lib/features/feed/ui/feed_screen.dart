@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:rescuelens/core/api.dart';
@@ -63,5 +64,5 @@ class SosBanner extends StatelessWidget {
   const SosBanner({super.key});
   @override
   Widget build(BuildContext context) => Container(margin: const EdgeInsets.only(bottom: 6), padding: const EdgeInsets.all(14), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFFE41E3F), Color(0xFFF5533D)]), borderRadius: BorderRadius.circular(16)),
-    child: Row(children: [const Icon(Icons.phone_in_talk_rounded, color: Colors.white), const SizedBox(width: 10), Expanded(child: Text(tr('sos'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)))]));
+    child: Row(children: [const Icon(LucideIcons.phoneCall, color: Colors.white), const SizedBox(width: 10), Expanded(child: Text(tr('sos'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)))]));
 }

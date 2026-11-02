@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:rescuelens/core/api.dart';
 import 'package:rescuelens/core/i18n.dart';
@@ -44,14 +45,14 @@ class _EditProfileState extends State<EditProfileScreen> {
   }
   @override
   Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: Text(tr('edit_profile'))), body: Form(key: form, autovalidateMode: AutovalidateMode.onUserInteraction, child: ListView(padding: const EdgeInsets.all(16), children: [
-    TextFormField(controller: name, decoration: field(tr('name'), icon: Icons.person_outline_rounded), validator: (v) => (v ?? '').trim().length < 2 ? tr('v_name') : null),
+    TextFormField(controller: name, decoration: field(tr('name'), icon: LucideIcons.user), validator: (v) => (v ?? '').trim().length < 2 ? tr('v_name') : null),
     const SizedBox(height: 12),
-    TextFormField(controller: phone, keyboardType: TextInputType.phone, decoration: field(tr('phone'), hint: '+880 1711 000000', icon: Icons.phone_outlined),
+    TextFormField(controller: phone, keyboardType: TextInputType.phone, decoration: field(tr('phone'), hint: '+880 1711 000000', icon: LucideIcons.phone),
       validator: (v) => (v ?? '').trim().isEmpty || RegExp(r'^\+?[0-9 ()]{6,20}$').hasMatch(v!.trim()) ? null : tr('v_phone')),
     const SizedBox(height: 12),
-    TextFormField(controller: bio, maxLength: 200, maxLines: 3, decoration: field(tr('bio'), icon: Icons.notes_rounded)),
+    TextFormField(controller: bio, maxLength: 200, maxLines: 3, decoration: field(tr('bio'), icon: LucideIcons.notebookText)),
     const SizedBox(height: 4),
-    TextFormField(controller: country, maxLength: 2, textCapitalization: TextCapitalization.characters, decoration: field(tr('country'), hint: 'BD', icon: Icons.flag_outlined),
+    TextFormField(controller: country, maxLength: 2, textCapitalization: TextCapitalization.characters, decoration: field(tr('country'), hint: 'BD', icon: LucideIcons.flag),
       validator: (v) => RegExp(r'^[A-Za-z]{2}$').hasMatch((v ?? '').trim()) ? null : tr('v_country')),
     const SizedBox(height: 4),
     Text(tr('units'), style: const TextStyle(fontWeight: FontWeight.w700)), const SizedBox(height: 6),
@@ -81,11 +82,11 @@ class _ChangePasswordState extends State<ChangePasswordScreen> {
   }
   @override
   Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: Text(tr('change_password'))), body: Form(key: form, autovalidateMode: AutovalidateMode.onUserInteraction, child: ListView(padding: const EdgeInsets.all(16), children: [
-    TextFormField(controller: cur, obscureText: !show, decoration: field(tr('current_password'), icon: Icons.lock_outline_rounded), validator: (v) => (v ?? '').isEmpty ? tr('v_required') : null),
+    TextFormField(controller: cur, obscureText: !show, decoration: field(tr('current_password'), icon: LucideIcons.lock), validator: (v) => (v ?? '').isEmpty ? tr('v_required') : null),
     const SizedBox(height: 12),
-    TextFormField(controller: pw, obscureText: !show, decoration: field(tr('new_password'), icon: Icons.lock_reset_rounded), validator: passwordRule),
+    TextFormField(controller: pw, obscureText: !show, decoration: field(tr('new_password'), icon: LucideIcons.keyRound), validator: passwordRule),
     const SizedBox(height: 12),
-    TextFormField(controller: pw2, obscureText: !show, decoration: field(tr('confirm_password'), icon: Icons.lock_reset_rounded), validator: (v) => v != pw.text ? tr('v_match') : null),
+    TextFormField(controller: pw2, obscureText: !show, decoration: field(tr('confirm_password'), icon: LucideIcons.keyRound), validator: (v) => v != pw.text ? tr('v_match') : null),
     CheckboxListTile(contentPadding: EdgeInsets.zero, value: show, onChanged: (v) => setState(() => show = v!), title: Text(tr('show_password'))),
     FilledButton(onPressed: busy ? null : save, child: Padding(padding: const EdgeInsets.all(12), child: Text(tr('save')))),
   ])));
@@ -96,17 +97,17 @@ String? passwordRule(String? v) => (v ?? '').length < 8 || !RegExp(r'[A-Za-z]').
 Future<void> pickLanguage(BuildContext context) => showModalBottomSheet(context: context, isScrollControlled: true, showDragHandle: true, builder: (c) {
   var q = '';
   return StatefulBuilder(builder: (c, set) => SafeArea(child: Padding(padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(c).bottom), child: Column(mainAxisSize: MainAxisSize.min, children: [
-    Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 8), child: TextField(autofocus: false, onChanged: (v) => set(() => q = v.toLowerCase()), decoration: field(tr('search_language'), icon: Icons.search_rounded))),
+    Padding(padding: const EdgeInsets.fromLTRB(16, 0, 16, 8), child: TextField(autofocus: false, onChanged: (v) => set(() => q = v.toLowerCase()), decoration: field(tr('search_language'), icon: LucideIcons.search))),
     for (final e in L10n.langs.entries.where((e) => q.isEmpty || e.value.toLowerCase().contains(q) || e.key.contains(q)))
-      ListTile(title: Text(e.value), subtitle: Text(e.key.toUpperCase()), trailing: L10n.i.lang == e.key ? const Icon(Icons.check_circle_rounded, color: RL.primary) : null,
+      ListTile(title: Text(e.value), subtitle: Text(e.key.toUpperCase()), trailing: L10n.i.lang == e.key ? const Icon(LucideIcons.circleCheck, color: RL.primary) : null,
         onTap: () async { await L10n.i.set(e.key); if (Api.token != null) { Api.patch('/auth/me', {'locale': e.key}).ignore(); } if (c.mounted) Navigator.pop(c); }),
     const SizedBox(height: 12),
   ]))));
 });
 
 Future<void> pickTheme(BuildContext context) => showModalBottomSheet(context: context, showDragHandle: true, builder: (c) => SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
-  for (final (k, i) in [('light', Icons.light_mode_rounded), ('dark', Icons.dark_mode_rounded), ('system', Icons.brightness_auto_rounded)])
-    ListTile(leading: Icon(i), title: Text(tr('theme_$k')), trailing: L10n.i.theme == k ? const Icon(Icons.check_circle_rounded, color: RL.primary) : null,
+  for (final (k, i) in [('light', LucideIcons.sun), ('dark', LucideIcons.moon), ('system', LucideIcons.sunMoon)])
+    ListTile(leading: Icon(i), title: Text(tr('theme_$k')), trailing: L10n.i.theme == k ? const Icon(LucideIcons.circleCheck, color: RL.primary) : null,
       onTap: () async { await L10n.i.setTheme(k); if (Api.token != null) { Api.patch('/auth/me', {'theme': k}).ignore(); } if (c.mounted) Navigator.pop(c); }),
   const SizedBox(height: 12),
 ])));
@@ -128,14 +129,14 @@ Future<void> showLinked(BuildContext context) async {
   try { social = (await Api.get('/health'))['social'] ?? {}; } catch (_) {}
   if (!context.mounted) return;
   showModalBottomSheet(context: context, showDragHandle: true, builder: (c) => SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
-    for (final p in ['google', 'facebook']) ListTile(leading: Icon(p == 'google' ? Icons.g_mobiledata_rounded : Icons.facebook_rounded, size: 32),
+    for (final p in ['google', 'facebook']) ListTile(leading: Icon(p == 'google' ? LucideIcons.globe : LucideIcons.userRound, size: 32),
       title: Text(p == 'google' ? 'Google' : 'Facebook'), subtitle: Text(social[p] == true ? tr('linked_available') : tr('linked_disabled'))),
     const SizedBox(height: 12),
   ])));
 }
 
 Future<void> deleteAccount(BuildContext context, VoidCallback onChanged) async {
-  if (!await confirmAction(context, title: tr('delete_account_q'), body: tr('delete_account_body'), confirm: tr('delete_account'), icon: Icons.delete_forever_rounded)) return;
+  if (!await confirmAction(context, title: tr('delete_account_q'), body: tr('delete_account_body'), confirm: tr('delete_account'), icon: LucideIcons.trash2)) return;
   try { await Api.delete('/auth/me'); await Api.setToken(null); Me.user = null; onChanged(); } catch (e) { if (context.mounted) _toast(context, '$e'); }
 }
 
@@ -161,9 +162,9 @@ class _TrashState extends State<TrashScreen> {
     Padding(padding: const EdgeInsets.all(4), child: Text(tr('trash_sub'), style: const TextStyle(color: RL.text2))),
     if (items == null) const PostSkeleton(),
     if (items != null && items!.isEmpty) Padding(padding: const EdgeInsets.all(40), child: Column(children: [
-      Icon(Icons.delete_outline_rounded, size: 48, color: RL.text2.withValues(alpha: .6)), const SizedBox(height: 12),
+      Icon(LucideIcons.trash2, size: 48, color: RL.text2.withValues(alpha: .6)), const SizedBox(height: 12),
       Text(tr('trash_empty'), textAlign: TextAlign.center, style: const TextStyle(color: RL.text2))])),
     for (final i in items ?? []) Card(child: ListTile(title: Text('${i['title']}'), subtitle: Text('${tr('deleted')} ${i['deleted_at'] ?? ''}'),
-      trailing: TextButton.icon(onPressed: () => restore(i), icon: const Icon(Icons.restore_rounded), label: Text(tr('restore'))))),
+      trailing: TextButton.icon(onPressed: () => restore(i), icon: const Icon(LucideIcons.rotateCcw), label: Text(tr('restore'))))),
   ])));
 }

@@ -1,3 +1,4 @@
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:rescuelens/core/api.dart';
 import 'package:rescuelens/core/i18n.dart';
@@ -53,7 +54,7 @@ class _HomeHeaderState extends State<HomeHeader> {
     final area = me?['alert_area_set'] == true ? tr('your_alert_area') : tr('set_alert_area');
     final white = fg;
     final actions = Row(mainAxisSize: MainAxisSize.min, children: [
-      PopupMenuButton<String>(tooltip: tr('language'), icon: Icon(Icons.translate_rounded, color: white),
+      PopupMenuButton<String>(tooltip: tr('language'), icon: Icon(LucideIcons.languages, color: white),
         onSelected: (l) => L10n.i.set(l),
         itemBuilder: (_) => [for (final e in L10n.langs.entries) CheckedPopupMenuItem(value: e.key, checked: L10n.i.lang == e.key, child: Text(e.value))]),
       IconButton(tooltip: tr('alerts'), onPressed: widget.onAlerts, icon: IconTheme(data: IconThemeData(color: white), child: AlertBadge(color: white))),
@@ -77,7 +78,7 @@ class _HomeHeaderState extends State<HomeHeader> {
               const SizedBox(height: 8),
               Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6), decoration: BoxDecoration(color: const Color(0xFF0866FF).withValues(alpha: .12), borderRadius: BorderRadius.circular(20)),
                 child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  const Icon(Icons.my_location_rounded, color: Color(0xFF0866FF), size: 16), const SizedBox(width: 6),
+                  const Icon(LucideIcons.locateFixed, color: Color(0xFF0866FF), size: 16), const SizedBox(width: 6),
                   Flexible(child: Text('$area · $radius $unit', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Color(0xFF0866FF), fontWeight: FontWeight.w600, fontSize: 13))),
                 ])),
             ])))),
@@ -99,6 +100,6 @@ class MyAvatar extends StatelessWidget {
     return GestureDetector(onTap: onTap, child: CircleAvatar(radius: radius, backgroundColor: RL.primary.withValues(alpha: .18),
       child: url != null ? ClipOval(child: SizedBox.expand(child: NetImage('$url', fit: BoxFit.cover)))
         : name.isNotEmpty ? Text(name[0].toUpperCase(), style: TextStyle(color: RL.primary, fontWeight: FontWeight.w800, fontSize: radius * .8))
-        : Icon(Icons.person_rounded, color: RL.primary, size: radius)));
+        : Icon(LucideIcons.user, color: RL.primary, size: radius)));
   });
 }
