@@ -19,16 +19,20 @@ class ReportScreen extends StatefulWidget {
 }
 
 class _ReportState extends State<ReportScreen> {
-  XFile? file; Map? analysis; String? mediaId; String? err; bool busy = false, confirm = false;
+  XFile? file; String? poster; bool isVideo = false; Map? analysis; String? mediaId; String? err; bool busy = false, confirm = false;
   final title = TextEditingController(), desc = TextEditingController();
   String category = 'road_accident', severity = 'moderate';
 
-  Future<void> pick(ImageSource src) async {
-    final f = await ImagePicker().pickImage(source: src, maxWidth: 2048, imageQuality: 85);
-    if (f == null) return;
-    setState(() { file = f; busy = true; err = null; });
+  Future<void> pick(ImageSource src, {bool video = false}) async {
+    final XFile? f;
     try {
-      mediaId = (await Api.upload('/media', f.path))['id'];
+      f = video ? await ImagePicker().pickVideo(source: src, maxDuration: const Duration(seconds: 60)) : await ImagePicker().pickImage(source: src, maxWidth: 2048, imageQuality: 85);
+    } catch (_) { setState(() => err = tr('camera_unavailable')); return; }
+    if (f == null) return;
+    setState(() { file = f; isVideo = video; poster = null; busy = true; err = null; });
+    try {
+      final m = await Api.upload('/media', f.path, field: video ? 'video' : 'image');
+      mediaId = m['id']; if (video) setState(() => poster = m['url']);
       final a = (await Api.post('/analyses', {'media_id': mediaId, 'ai_consent': true, 'language': curLang}))['analysis'];
       setState(() {
         analysis = a;
@@ -59,8 +63,15 @@ class _ReportState extends State<ReportScreen> {
       Expanded(child: OutlinedButton.icon(onPressed: busy ? null : () => pick(ImageSource.camera), icon: const Icon(LucideIcons.camera), label: Text(tr('camera')))),
       const SizedBox(width: 8),
       Expanded(child: OutlinedButton.icon(onPressed: busy ? null : () => pick(ImageSource.gallery), icon: const Icon(LucideIcons.image), label: Text(tr('gallery')))),
+      const SizedBox(width: 8),
+      Expanded(child: OutlinedButton.icon(onPressed: busy ? null : () => pick(ImageSource.gallery, video: true), icon: const Icon(LucideIcons.film), label: Text(tr('video')))),
     ]),
-    if (file != null) Padding(padding: const EdgeInsets.only(top: 12), child: ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.file(File(file!.path), height: 200, width: double.infinity, fit: BoxFit.cover))),
+    if (file != null) Padding(padding: const EdgeInsets.only(top: 12), child: ClipRRect(borderRadius: BorderRadius.circular(12), child: isVideo
+        ? Stack(alignment: Alignment.center, children: [
+            Container(height: 200, color: Colors.black, child: poster != null ? Image.network(poster!, height: 200, width: double.infinity, fit: BoxFit.cover) : null),
+            const Icon(LucideIcons.circlePlay, size: 48, color: Colors.white),
+          ])
+        : Image.file(File(file!.path), height: 200, width: double.infinity, fit: BoxFit.cover))),
     if (busy) Padding(padding: const EdgeInsets.only(top: 12), child: Card(child: Padding(padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(children: [const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)), const SizedBox(width: 12), Expanded(child: Text(tr('ai_analyzing')))]),
       const SizedBox(height: 12), const Shim(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Sk(h: 14), SizedBox(height: 8), Sk(w: 200, h: 14)])),

@@ -5,7 +5,7 @@ export interface Org { id: string; type: string; name: string; phone: string; la
 export interface DispatchRow { id: number; status: string; distance_km: number; reason: string | null; updated_at: string; organization: { id: string; name: string; type: string; phone: string; verified: boolean } | null; incident?: { id: string; title: string; category: string; severity: string; area_name: string | null; lat: number; lng: number } | null }
 export const ORG_TYPES = ['hospital', 'ambulance', 'fire_service', 'police', 'help_center', 'ngo', 'volunteer'] as const
 export interface Region { label: string; source: string; box: [number, number, number, number]; image_width: number; image_height: number; confidence?: number | null }
-export interface Media { id: string; url: string; width: number; height: number }
+export interface Media { id: string; url: string; video_url?: string | null; width: number; height: number }
 export interface Incident {
   title_translated?: string | null
   description_translated?: string | null

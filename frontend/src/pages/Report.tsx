@@ -58,8 +58,9 @@ export default function Report() {
 
   const pick = (f: File | undefined) => {
     if (!f) return
-    if (!/^image\/(jpeg|png|webp)$/.test(f.type)) return setErr(t('ui.only_images'))
-    if (f.size > 8 * 1024 * 1024) return setErr(t('ui.max_size'))
+    const isVid = /^video\/(mp4|quicktime|webm|x-m4v)$/.test(f.type)
+    if (!isVid && !/^image\/(jpeg|png|webp)$/.test(f.type)) return setErr(t('ui.only_images'))
+    if (f.size > (isVid ? 50 : 8) * 1024 * 1024) return setErr(t('ui.max_size'))
     setErr(null); setFile(f); setPreview(URL.createObjectURL(f)); setMediaId(null); setAnalysis(null)
   }
 
@@ -69,7 +70,7 @@ export default function Report() {
     setStep('analyzing'); setErr(null)
     try {
       let id = mediaId
-      if (!id) { const fd = new FormData(); fd.append('image', file); id = (await api<{ id: string }>('/media', { body: fd })).id; setMediaId(id) }
+      if (!id) { const fd = new FormData(); fd.append(file.type.startsWith('video/') ? 'video' : 'image', file); id = (await api<{ id: string }>('/media', { body: fd })).id; setMediaId(id) }
       if (!consentAi) { setStep('review'); return }
       const r = await api<{ analysis: Analysis }>('/analyses', { body: { media_id: id, language: lang, country, ai_consent: true, ...(demo && scenario ? { demo_scenario: scenario } : {}) } })
       const a = r.analysis; setAnalysis(a)
@@ -129,7 +130,7 @@ export default function Report() {
           {preview ? (
             <div style={{ position: 'relative', borderRadius: 8, overflow: 'hidden', background: '#000' }}>
               <div style={{ position: 'relative', width: 'fit-content', margin: '0 auto' }}>
-                <img src={preview} alt="" style={{ maxWidth: '100%', maxHeight: 380, display: 'block' }} />
+                {file?.type.startsWith('video/') ? <video src={preview} controls muted playsInline style={{ maxWidth: '100%', maxHeight: 380, display: 'block' }} /> : <img src={preview} alt="" style={{ maxWidth: '100%', maxHeight: 380, display: 'block' }} />}
                 {analysis && <RegionOverlay regions={analysis.evidence_regions} />}
                 {step === 'analyzing' && <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg,transparent,rgba(24,119,242,.35),transparent)', backgroundSize: '200% 100%', animation: 'shimmer 1.2s infinite' }} />}
               </div>
@@ -140,7 +141,7 @@ export default function Report() {
               <ICamera size={36} /><div style={{ fontWeight: 600, marginTop: 8 }}>{t('photo')}</div><div className="small muted">JPEG, PNG, WebP · 8 MB · {t('ui.location_metadata_is_stripped')}</div>
             </button>
           )}
-          <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" hidden onChange={(e) => pick(e.target.files?.[0])} />
+          <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm" capture="environment" hidden onChange={(e) => pick(e.target.files?.[0])} />
 
           {step === 'photo' && file && <>
             <label className="row small"><input type="checkbox" checked={consentAi} onChange={(e) => setConsentAi(e.target.checked)} /> {t('aiConsent')}</label>

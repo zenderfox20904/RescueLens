@@ -88,7 +88,8 @@ export function PostCard({ i, detail = false }: { i: Incident; detail?: boolean 
       {img && (
         <div className="post-media" onClick={() => setShowRegions((v) => !v)}>
           <div style={{ position: 'relative', width: 'fit-content', margin: '0 auto' }}>
-            <img src={img.url} alt={i.title} loading="lazy" decoding="async" width={img.width} height={img.height} style={{ height: 'auto' }} />
+            {img.video_url ? <video src={img.video_url} poster={img.url} controls muted playsInline preload="none" width={img.width} height={img.height} style={{ height: 'auto', width: '100%' }} onClick={(e) => e.preventDefault()} aria-label={i.title} />
+              : <img src={img.url} alt={i.title} loading="lazy" decoding="async" width={img.width} height={img.height} style={{ height: 'auto' }} />}
             <RegionOverlay regions={regions} show={showRegions} />
           </div>
         </div>

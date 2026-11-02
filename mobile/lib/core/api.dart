@@ -38,10 +38,10 @@ class Api {
   static Future<dynamic> patch(String path, Map<String, dynamic> body) async =>
       _decode(await http.patch(Uri.parse('$base$path'), headers: _h, body: jsonEncode(body)).timeout(const Duration(seconds: 15)));
   static Future<dynamic> delete(String path) async => _decode(await http.delete(Uri.parse('$base$path'), headers: _h).timeout(const Duration(seconds: 15)));
-  static Future<dynamic> upload(String path, String filePath) async {
+  static Future<dynamic> upload(String path, String filePath, {String field = 'image'}) async {
     final req = http.MultipartRequest('POST', Uri.parse('$base$path'))
       ..headers.addAll({'Accept': 'application/json', if (token != null) 'Authorization': 'Bearer $token'})
-      ..files.add(await http.MultipartFile.fromPath('image', filePath));
+      ..files.add(await http.MultipartFile.fromPath(field, filePath));
     return _decode(await http.Response.fromStream(await req.send()));
   }
 }
