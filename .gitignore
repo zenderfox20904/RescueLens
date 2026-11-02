@@ -26,3 +26,10 @@ mobile/android/key.properties
 coverage/
 .phpunit.result.cache
 *.local.txt
+.env.*
+!.env.example
+backend/vendor
+mobile/android/local.properties
+mobile/ios/Flutter/Secrets.xcconfig
+DEMO_ACCOUNTS*
+*.sqlite

@@ -8,7 +8,7 @@ RescueLens uses AI to draft reports, never to decide what is true. Every AI outp
 |---|---|---|
 | `META_MODEL_API_KEY` set (default `AI_PROVIDER=meta`) | Meta Muse Spark vision plus SAM 3.1 evidence regions | AI suggestion from Meta Model API |
 | No key | Demo fixtures | DEMO sample output |
-| `AI_PROVIDER=ollama` (DEV ONLY) | Local Ollama, see [DEV_OLLAMA.md](DEV_OLLAMA.md) | DEV ONLY local model |
+| `AI_PROVIDER=llama` plus `LLAMA_API_KEY` | Meta Llama API (Llama 4 Maverick, vision) | Meta AI |
 
 All providers implement `App\Services\AI\VisionAnalysisProvider` and `ImageSegmentationProvider`. Output passes `AnalysisValidator` before it is stored.
 
@@ -48,20 +48,18 @@ All providers implement `App\Services\AI\VisionAnalysisProvider` and `ImageSegme
 
 `backend/tests/Feature/AutoDetectionTest.php` covers consent gating, undo, allowlist, admin only access, moderation, feed thresholds, dedupe and provider selection.
 
-## Default provider: Meta Llama (open weights)
+## Alternative provider: Meta Llama API
 
-RescueLens now defaults to `AI_PROVIDER=llama`, which runs Meta Llama open weights through any OpenAI compatible endpoint.
+Set `AI_PROVIDER=llama` to use the Meta Llama API through its OpenAI compatible endpoint.
 
-* Local: Ollama at `http://localhost:11434/v1` with `LLAMA_MODEL=llama3.2-vision` (`ollama pull llama3.2-vision`, about 7.8 GB on disk, 16 GB RAM is enough).
-* Hosted later: set `LLAMA_BASE_URL`, `LLAMA_API_KEY` and `LLAMA_MODEL` for Baseten, Modal or Fireworks. Keys live only in `.env`.
-* Users see only "Meta AI" plus `LLAMA_MODEL_LABEL` (default "Llama 3.2 Vision").
+* `LLAMA_BASE_URL=https://api.llama.com/compat/v1`, `LLAMA_API_KEY` (from llama.developer.meta.com), `LLAMA_MODEL=Llama-4-Maverick-17B-128E-Instruct-FP8`. Keys live only in `.env`.
+* Users see only "Meta AI".
 * Code: `app/Services/AI/Llama` (OpenAiCompatClient, LlamaVisionProvider, LlamaTextTranslator). Output is validated against the same schema and retried once.
-* There is no segmentation model on this path, so region masks are skipped.
-* `AI_PROVIDER=meta` still selects the Meta Model API; the legacy native Ollama provider remains DEV ONLY.
+* This path has no segmentation model, so evidence regions are skipped (`NoSegmentationProvider`).
 
 ## Meta Model API (production provider)
 
-Set `AI_PROVIDER=meta` and `META_MODEL_API_KEY` in `backend/.env` (never commit it). Everything below follows the official docs, checked on 2 Nov 2026.
+Set `AI_PROVIDER=meta` (the default) and `META_MODEL_API_KEY` in `backend/.env` (never commit it). Everything below follows the official docs, checked on 2 Nov 2026.
 
 | Item | Value | Source |
 | --- | --- | --- |

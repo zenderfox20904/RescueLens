@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
-/** Step 3: one tap auto post with consent and undo, CCTV feeds with allowlist, moderation and feed thresholds, and the dev only Ollama provider. */
+/** Step 3: one tap auto post with consent and undo, CCTV feeds with allowlist, moderation and feed thresholds. */
 class AutoDetectionTest extends TestCase
 {
     use RefreshDatabase;
@@ -103,16 +103,5 @@ class AutoDetectionTest extends TestCase
         $this->assertFalse(CameraIngestService::feedEligible('high', 0.5, true));
         $this->assertFalse(CameraIngestService::feedEligible('high', null, true));
         $this->assertFalse(CameraIngestService::feedEligible('high', 0.9, false));
-    }
-
-    public function test_dev_ollama_provider_is_selected_by_env_and_labeled_dev(): void
-    {
-        config(['rescuelens.ai_provider' => 'ollama']);
-        $this->refreshApplication(); config(['rescuelens.ai_provider' => 'ollama']);
-        (new \App\Providers\AppServiceProvider($this->app))->register();
-        Http::fake(['*/api/chat' => Http::response(['message' => ['content' => "```json\n".json_encode(\App\Services\AI\DemoFixtures::analysis('fire', 'en') + ['is_incident_scene' => true, 'summary_en' => 'x', 'suggested_title_en' => 'x', 'vehicles_involved' => [], 'people_at_risk' => 'possible', 'people_at_risk_reason' => 'x', 'severity_reason' => 'x'])."\n```"]])]);
-        $p = app(\App\Services\AI\VisionAnalysisProvider::class);
-        $this->assertSame('ollama-dev', $p->name());
-        $this->assertSame('dev', $p->mode());
     }
 }

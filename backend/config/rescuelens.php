@@ -35,22 +35,14 @@ return [
         'secret' => env('RL_WEBHOOK_SECRET', ''),
     ],
 
-    // llama (default): Meta Llama open weights over an OpenAI compatible endpoint (local Ollama or a hosted Llama).
-    // meta: Meta Model API. ollama: legacy DEV ONLY native Ollama provider, ignored when APP_ENV=production.
-    'ai_provider' => env('AI_PROVIDER', 'llama'),
+    // meta (default): Meta Model API. llama: Meta Llama API (OpenAI compatible). Both are Meta AI.
+    'ai_provider' => env('AI_PROVIDER', 'meta'),
     'llama' => [
-        // Local Ollama by default. For hosted Llama (Baseten, Modal, Fireworks) set the base URL, key and model id.
-        'base_url' => env('LLAMA_BASE_URL', 'http://localhost:11434/v1'),
+        'base_url' => env('LLAMA_BASE_URL', 'https://api.llama.com/compat/v1'),
         'api_key' => env('LLAMA_API_KEY', ''),
-        'model' => env('LLAMA_MODEL', 'llama3.2-vision'),
-        // Name shown to users next to "Meta AI".
-        'label' => env('LLAMA_MODEL_LABEL', 'Llama 3.2 Vision'),
-        'timeout' => (int) env('LLAMA_TIMEOUT', 240),
-    ],
-    'dev_ollama' => [
-        'url' => env('OLLAMA_URL', 'http://localhost:11434'),
-        'model' => env('OLLAMA_MODEL', 'llama3.2-vision'),
-        'timeout' => (int) env('OLLAMA_TIMEOUT', 180),
+        'model' => env('LLAMA_MODEL', 'Llama-4-Maverick-17B-128E-Instruct-FP8'),
+        'label' => env('LLAMA_MODEL_LABEL', 'Meta AI'),
+        'timeout' => (int) env('LLAMA_TIMEOUT', 120),
     ],
 
     'camera' => [

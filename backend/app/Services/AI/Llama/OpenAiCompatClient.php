@@ -7,8 +7,7 @@ use Illuminate\Support\Facades\Http;
 
 /**
  * Minimal OpenAI compatible chat client for Meta Llama open weights models.
- * Works with a local Ollama server (default, http://localhost:11434/v1) or any hosted
- * OpenAI compatible endpoint serving Llama (Baseten, Modal, Fireworks) by setting
+ * Calls the Meta Llama API (https://api.llama.com/compat/v1) using
  * LLAMA_BASE_URL, LLAMA_API_KEY and LLAMA_MODEL. The key is never logged.
  */
 class OpenAiCompatClient
