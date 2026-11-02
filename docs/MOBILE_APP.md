@@ -12,7 +12,7 @@ The release APK points to `http://10.0.2.2:8000/api/v1`, which is your computer 
 2. Start an Android emulator and drag the APK onto it, or run `adb install RescueLens-android.apk`.
 3. Sign in with any demo account, password `RescueLensDemo2026!`.
 
-Map tiles need a Google Maps key, which is not included in the release. Everything else works without it.
+The map works without any key: when the build has no Google Maps key, the app shows OpenStreetMap tiles with the same incident markers. Add a Google Maps key (below) to use Google Maps instead.
 
 ## Point the app to another API
 
@@ -35,13 +35,13 @@ flutter pub get
 flutter build apk --release        # output: build/app/outputs/flutter-apk/app-release.apk
 ```
 
-Optional Google Maps key for Android: add `MAPS_API_KEY=your_key` to `mobile/android/local.properties` (not committed).
+Optional Google Maps key for Android: add `MAPS_API_KEY=your_key` to `mobile/android/local.properties` (not committed), or set it for one build with `MAPS_API_KEY=your_key flutter build apk --release`. Without a key the app falls back to OpenStreetMap.
 
 ## iOS
 
 Needs macOS, Xcode and CocoaPods.
 
-1. Optional maps key: create `mobile/ios/Flutter/Secrets.xcconfig` with `MAPS_API_KEY=your_key` (this file is gitignored).
+1. Optional maps key (OpenStreetMap is used without one): create `mobile/ios/Flutter/Secrets.xcconfig` with `MAPS_API_KEY=your_key` (this file is gitignored).
 2. `cd mobile && flutter pub get && cd ios && pod install && cd ..`
 3. `open -a Simulator`
 4. `flutter run -d ios --dart-define=API_BASE_URL=http://127.0.0.1:8000/api/v1`

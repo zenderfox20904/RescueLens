@@ -12,7 +12,8 @@
 | 419 or 401 after changing `.env` | `php artisan config:clear` and sign in again |
 | Web loads but shows network errors | Check the API is on port 8000, or set `VITE_API_URL` and rebuild the web app |
 | Images do not load | `php artisan storage:link` |
-| Map is grey or shows a watermark | Add a Google Maps key for that platform. See [MOBILE_APP.md](MOBILE_APP.md) |
+| App map shows OpenStreetMap instead of Google Maps | Expected without a key. Add a Google Maps key to switch. See [MOBILE_APP.md](MOBILE_APP.md) |
+| Web map is grey or shows a watermark | Set `VITE_GOOGLE_MAPS_API_KEY` and rebuild the web app |
 | APK cannot reach the API | The APK targets the Android emulator (`10.0.2.2:8000`). For a phone, rebuild with `--dart-define=API_BASE_URL=http://YOUR_LAN_IP:8000/api/v1` and serve the API with `--host=0.0.0.0` |
 | Android blocks the APK install | Allow installs from unknown sources, or use `adb install` |
 | iOS build fails on pods | `cd mobile/ios && pod install --repo-update` |

@@ -10,6 +10,7 @@ import 'package:rescuelens/core/theme.dart';
 import 'package:rescuelens/core/widgets.dart';
 import 'package:rescuelens/features/incident/ui/incident_widgets.dart';
 import 'package:rescuelens/features/map/ui/map_pins.dart';
+import 'package:rescuelens/features/map/ui/osm_map.dart';
 
 /// Google map of incidents (approximate public points) with a list fallback for accessibility.
 class MapScreen extends StatefulWidget {
@@ -80,6 +81,13 @@ class _MapState extends State<MapScreen> {
   double hue(String s) => {'low': BitmapDescriptor.hueGreen, 'moderate': BitmapDescriptor.hueYellow, 'high': BitmapDescriptor.hueOrange}[s] ?? BitmapDescriptor.hueRed;
   @override
   Widget build(BuildContext context) { warmPins(Theme.of(context).brightness == Brightness.dark); return _body(context); }
+  (double, double, double) get camLatLngZoom => scope == 'world' ? (20, 40, 1.3)
+    : scope == 'nearby' ? ((here ?? const LatLng(23.78, 90.39)).latitude, (here ?? const LatLng(23.78, 90.39)).longitude, 11)
+    : here != null ? (here!.latitude, here!.longitude, 6.5)
+    : centers[cc] != null ? (centers[cc]![0], centers[cc]![1], centers[cc]![2]) : (20, 40, 1.3);
+  /// No Google Maps key in this build: show OpenStreetMap tiles with the same points.
+  Widget _osm(BuildContext context) { final c = camLatLngZoom; return OsmMap(key: ValueKey('$scope:${here?.latitude}:$cc'), lat: c.$1, lng: c.$2, zoom: c.$3,
+    points: [for (final p in shown) OsmPoint('${p['id']}', (p['lat'] as num).toDouble(), (p['lng'] as num).toDouble(), '${p['category']}', '${p['severity']}', onTap: () => openDetail(context, p['id']))]); }
   Widget _body(BuildContext context) => SafeArea(bottom: false, child: Column(children: [
     SizedBox(height: 44, child: ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 8), children: [
       for (final v in const [('nearby', LucideIcons.locateFixed), ('country', LucideIcons.flag), ('world', LucideIcons.globe)])
@@ -88,7 +96,7 @@ class _MapState extends State<MapScreen> {
       const SizedBox(width: 6),
       for (final c in RL.categories) Padding(padding: const EdgeInsets.only(right: 6), child: FilterChip(avatar: Icon(RL.cat(c), size: 16), label: Text(tr('c_$c')), selected: cats.contains(c), onSelected: (v) => setState(() => v ? cats.add(c) : cats.remove(c)))),
     ])),
-    SizedBox(height: 320, child: pts == null || maps == null ? const Shim(child: Sk(h: 320, r: 0)) : maps == false ? const MapUnavailable() : GoogleMap(
+    SizedBox(height: 320, child: pts == null || maps == null ? const Shim(child: Sk(h: 320, r: 0)) : maps == false ? _osm(context) : GoogleMap(
       style: Theme.of(context).brightness == Brightness.dark ? darkMapStyle : null,
       initialCameraPosition: const CameraPosition(target: LatLng(20, 40), zoom: 1.3), onMapCreated: (c) { ctl = c; c.moveCamera(cam); },
       onCameraIdle: () async { final z = await ctl?.getZoomLevel(); if (z != null && (z - zoom).abs() > 0.2) setState(() => zoom = z); },

@@ -46,13 +46,13 @@ class Api {
   }
 }
 
-/// Native capability checks. iOS reports whether a Google Maps key was provided at build time.
+/// Native capability checks. iOS and Android report whether a Google Maps key was provided at build time; without one the map uses OpenStreetMap.
 class NativeConfig {
   static const _ch = MethodChannel('rescuelens/config');
   static bool? _maps;
   static Future<bool> hasMapsKey() async {
     if (_maps != null) return _maps!;
-    if (kIsWeb || !Platform.isIOS) return _maps = true;
+    if (kIsWeb || !(Platform.isIOS || Platform.isAndroid)) return _maps = true;
     try { return _maps = (await _ch.invokeMethod<bool>('hasMapsKey')) ?? false; } catch (_) { return _maps = false; }
   }
 }

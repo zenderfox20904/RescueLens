@@ -8,6 +8,7 @@ import 'package:rescuelens/features/incident/ui/post_actions.dart';
 import 'package:rescuelens/features/incident/ui/comments.dart';
 import 'package:rescuelens/features/profile/ui/timeline.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:rescuelens/features/map/ui/osm_map.dart';
 import 'package:rescuelens/core/api.dart';
 import 'package:rescuelens/core/format.dart';
 import 'package:rescuelens/core/i18n.dart';
@@ -133,6 +134,8 @@ class _DetailState extends State<DetailScreen> {
             ])),
           ])),
           section(tr('location'), LucideIcons.mapPin, Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            if (maps == false && x['location']?['lat'] != null) ClipRRect(borderRadius: BorderRadius.circular(12), child: SizedBox(height: 180, child: IgnorePointer(child: OsmMap(interactive: false, zoom: 14, areaRadiusMeters: 250,
+              lat: (x['location']['lat'] as num).toDouble(), lng: (x['location']['lng'] as num).toDouble(), points: [OsmPoint('a', 0, 0, '', '${x['severity']}')])))),
             if (maps == true && x['location']?['lat'] != null) ClipRRect(borderRadius: BorderRadius.circular(12), child: SizedBox(height: 180, child: IgnorePointer(child: GoogleMap(liteModeEnabled: true, zoomControlsEnabled: false, myLocationButtonEnabled: false,
               initialCameraPosition: CameraPosition(target: LatLng((x['location']['lat'] as num).toDouble(), (x['location']['lng'] as num).toDouble()), zoom: 14),
               circles: {Circle(circleId: const CircleId('a'), center: LatLng((x['location']['lat'] as num).toDouble(), (x['location']['lng'] as num).toDouble()), radius: 250, fillColor: _sevC(x['severity']).withValues(alpha: .25), strokeColor: _sevC(x['severity']), strokeWidth: 2)})))),
