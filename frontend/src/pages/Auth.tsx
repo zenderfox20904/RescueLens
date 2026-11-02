@@ -1,9 +1,10 @@
+import { ORG_ICON } from '../lib/icons'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { API, api, errMsg } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { fmtNumber, useI18n } from '../lib/i18n'
-import { ORG_ICON, ORG_TYPES, type User } from '../lib/types'
+import { ORG_TYPES, type User } from '../lib/types'
 import { LocationPicker, type PickedLocation } from '../components/location/LocationPicker'
 import { Wordmark } from '../components/Logo'
 import { IFacebook, IGoogle } from '../components/Icons'
@@ -108,7 +109,7 @@ export function Register() {
           <div className="acct-grid" role="radiogroup">
             {types.map((x) => (
               <button type="button" key={x} role="radio" aria-checked={type === x} className={'acct' + (type === x ? ' on' : '')} onClick={() => setType(x)} data-testid={`acct-${x}`}>
-                <span aria-hidden>{x === 'citizen' ? '🙂' : ORG_ICON[x]}</span><b>{t(x === 'citizen' ? 'ui.org_citizen' : `ui.org_${x}`)}</b>
+                <span aria-hidden>{ORG_ICON[x]}</span><b>{t(x === 'citizen' ? 'ui.org_citizen' : `ui.org_${x}`)}</b>
               </button>))}
           </div>
           {isOrg && <div className="small muted">{t('ui.org_review_note')}</div>}

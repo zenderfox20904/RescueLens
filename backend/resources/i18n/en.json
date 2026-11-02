@@ -147,22 +147,22 @@
     "lng": "Longitude",
     "steps": [
       [
-        "📸",
+        "",
         "Snap",
         "Take or upload a photo of the scene."
       ],
       [
-        "✨",
+        "",
         "AI draft",
         "Muse Spark suggests a description, SAM 3.1 highlights the evidence."
       ],
       [
-        "✅",
+        "",
         "You confirm",
         "Edit it. Nothing is published without your consent."
       ],
       [
-        "📍",
+        "",
         "Nearby alerts",
         "People nearby are alerted and moderators verify."
       ]

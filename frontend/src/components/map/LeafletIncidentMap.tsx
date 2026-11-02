@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { useState } from 'react'
 import { MapContainer, TileLayer, CircleMarker, Popup, Tooltip, useMapEvents } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
-import { CATS, timeAgo, useI18n } from '../../lib/i18n'
+import { timeAgo, useI18n } from '../../lib/i18n'
 import { type MapPoint, ttl } from '../../lib/types'
 
 const SEV = { low: '#31A24C', moderate: '#F7B928', high: '#F5793B', critical: '#E41E3F' }
@@ -22,7 +22,7 @@ export default function LeafletIncidentMap({ points }: { points: MapPoint[] }) {
       <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" />
       {singles.map((p) => (
         <CircleMarker key={p.id} center={[p.lat, p.lng]} radius={p.severity === 'critical' ? 14 : 10} className={p.severity === 'critical' ? 'pulse' : undefined} pathOptions={{ color: '#fff', weight: 2, fillColor: SEV[p.severity], fillOpacity: p.is_stale ? 0.4 : 0.9 }}>
-          <Popup><b>{CATS[p.category]?.icon} {ttl(p)}</b><br />{p.area_name} · {timeAgo(p.created_at, lang)}<br /><Link to={`/incidents/${p.id}`}>{t('ui.details')}</Link></Popup>
+          <Popup><b>{ttl(p)}</b><br />{p.area_name} · {timeAgo(p.created_at, lang)}<br /><Link to={`/incidents/${p.id}`}>{t('ui.details')}</Link></Popup>
         </CircleMarker>))}
     </MapContainer>
   )

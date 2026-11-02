@@ -12,6 +12,7 @@ import { RegionOverlay, StatusBadge } from '../components/PostCard'
 import { Sk } from '../components/Skeleton'
 import { ICamera, ISpark, IX } from '../components/Icons'
 import { useToast } from '../components/Toast'
+import { Sparkles, TriangleAlert, Eye } from 'lucide-react'
 
 type Step = 'photo' | 'analyzing' | 'review' | 'duplicates' | 'posting'
 const DHAKA = { lat: 23.8103, lng: 90.4125 }
@@ -123,7 +124,7 @@ export default function Report() {
         <div className="modal-head">{t('ui.create_report')}<button className="iconbtn" style={{ position: 'absolute', right: 12, top: 10 }} onClick={() => nav(-1)} aria-label={t('cancel')}><IX size={20} /></button></div>
         <div style={{ padding: 16, display: 'grid', gap: 12 }}>
           <EmergencyBanner compact />
-          {undo && <div className="card undo-bar" role="status"><span>✨ {t('ui.auto_posted_unverified', { s: undo.left })}</span><button className="btn btn-primary" data-testid="undo-auto-post" onClick={undoPost}>{t('ui.undo')}</button></div>}
+          {undo && <div className="card undo-bar" role="status"><span><Sparkles size={14} /> {t('ui.auto_posted_unverified', { s: undo.left })}</span><button className="btn btn-primary" data-testid="undo-auto-post" onClick={undoPost}>{t('ui.undo')}</button></div>}
 
           {preview ? (
             <div style={{ position: 'relative', borderRadius: 8, overflow: 'hidden', background: '#000' }}>
@@ -151,7 +152,7 @@ export default function Report() {
             <button className="btn btn-grad" style={{ padding: 12 }} onClick={analyze}><ISpark size={18} /> {consentAi ? t('analyze') : t('next')}</button>
           </>}
 
-          {step === 'analyzing' && <div><b>✨ Muse Spark {t('ui.is_analyzing_sam_31_is')}</b><Sk h={14} style={{ marginTop: 10 }} /><Sk w="80%" h={14} style={{ marginTop: 8 }} /><Sk w="60%" h={14} style={{ marginTop: 8 }} /></div>}
+          {step === 'analyzing' && <div><b><Sparkles size={14} /> Meta AI {t('ui.is_analyzing_sam_31_is')}</b><Sk h={14} style={{ marginTop: 10 }} /><Sk w="80%" h={14} style={{ marginTop: 8 }} /><Sk w="60%" h={14} style={{ marginTop: 8 }} /></div>}
 
           {analysis && step !== 'analyzing' && (
             <div className="card" style={{ padding: 12, background: 'var(--primary-soft)', boxShadow: 'none' }}>
@@ -182,11 +183,11 @@ export default function Report() {
           </>}
 
           {step === 'duplicates' && <>
-            <b>⚠️ {t('duplicateFound')}</b>
+            <b><TriangleAlert size={16} style={{ verticalAlign: -3 }} /> {t('duplicateFound')}</b>
             {dups.map((d) => (
               <div key={d.id} className="card" style={{ padding: 12 }}>
                 <div className="row"><b className="grow">{d.title}</b><StatusBadge i={d} /></div>
-                <div className="small muted">{d.location.area_name} · 👁️ {d.counts.confirm}</div>
+                <div className="small muted">{d.location.area_name} · <Eye size={12} /> {d.counts.confirm}</div>
                 <button className="btn btn-primary" style={{ marginTop: 8 }} onClick={() => join(d)}>{t('joinExisting')}</button>
               </div>))}
             <button className="btn" onClick={submit}>{t('postAnyway')}</button>

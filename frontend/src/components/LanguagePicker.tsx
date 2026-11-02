@@ -5,6 +5,7 @@ import { useAuth } from '../lib/auth'
 import { BUNDLED, chooseLanguage, type Language, useI18n } from '../lib/i18n'
 import { IGlobe } from './Icons'
 import { Sk } from './Skeleton'
+import { X, Check } from 'lucide-react'
 
 export const useLanguages = () => useQuery({ queryKey: ['languages'], queryFn: () => api<{ data: Language[] }>('/languages'), staleTime: 3_600_000, placeholderData: { data: BUNDLED } })
 
@@ -41,7 +42,7 @@ export function LanguagePicker({ variant = 'icon' }: { variant?: 'icon' | 'field
       {open && (
         <div className="modal-bg" onClick={() => setOpen(false)}>
           <div className="card modal lang-modal fade-in" role="dialog" aria-modal="true" aria-label={t('ui.language')} onClick={(e) => e.stopPropagation()}>
-            <div className="modal-head"><b>{t('ui.choose_language')}</b><button className="iconbtn" onClick={() => setOpen(false)} aria-label={t('cancel')}>✕</button></div>
+            <div className="modal-head"><b>{t('ui.choose_language')}</b><button className="iconbtn" onClick={() => setOpen(false)} aria-label={t('cancel')}><X size={18} /></button></div>
             <input ref={input} data-testid="lang-search" className="pill-input" placeholder={t('ui.search_languages')} value={q} onChange={(e) => setQ(e.target.value)} />
             <div className="lang-list" role="listbox">
               {list.isFetching && !list.data ? Array.from({ length: 6 }).map((_, i) => <Sk key={i} h={44} r={8} style={{ marginBottom: 6 }} />)
@@ -52,7 +53,7 @@ export function LanguagePicker({ variant = 'icon' }: { variant?: 'icon' | 'field
                     <span className="muted small">{l.english_name}{l.rtl ? ' · RTL' : ''}</span>
                     <span className="grow" />
                     {busy === l.code ? <span className="spinner" /> : !l.hand_translated && <span className="badge" title={t('ui.machine_translated_hint')}>{t('ui.machine_translated')}</span>}
-                    {l.code === lang && <span aria-hidden>✓</span>}
+                    {l.code === lang && <Check size={16} aria-hidden />}
                   </button>
                 ))}
             </div>

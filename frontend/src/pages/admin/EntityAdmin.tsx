@@ -8,6 +8,7 @@ import { Sk } from '../../components/Skeleton'
 import { useToast } from '../../components/Toast'
 import { LocationPicker, type PickedLocation } from '../../components/location/LocationPicker'
 import type { Col, Entity, Field } from './entities'
+import { Trash2, ChevronUp, ChevronDown, ChevronsUpDown, Eye, Pencil, RotateCcw, X, Check } from 'lucide-react'
 
 type Row = Record<string, any> & { id: string }
 type ListRes = { data: Row[]; meta: { total: number; page: number; last_page: number; per_page: number; trash_count?: number } }
@@ -95,7 +96,7 @@ export function EntityAdmin({ ent }: { ent: Entity }) {
       <div className="ent-bar">
         <div className="seg" role="tablist">
           <button role="tab" aria-selected={tab === 'active'} className={tab === 'active' ? 'on' : ''} onClick={() => setTab('active')}>{t('ui.all')}{tab === 'active' && meta ? ` · ${fmtNumber(meta.total, lang)}` : ''}</button>
-          <button role="tab" aria-selected={tab === 'trash'} className={tab === 'trash' ? 'on' : ''} onClick={() => setTab('trash')} data-testid="trash-tab">🗑 {t('ui.trash')}{meta?.trash_count ? ` · ${fmtNumber(meta.trash_count, lang)}` : ''}</button>
+          <button role="tab" aria-selected={tab === 'trash'} className={tab === 'trash' ? 'on' : ''} onClick={() => setTab('trash')} data-testid="trash-tab"><Trash2 size={14} /> {t('ui.trash')}{meta?.trash_count ? ` · ${fmtNumber(meta.trash_count, lang)}` : ''}</button>
         </div>
         <input className="pill-input ent-search" placeholder={t('ui.search')} value={q} onChange={(e) => setQ(e.target.value)} aria-label={t('ui.search')} />
         {Object.entries(ent.filters ?? {}).map(([k, opts]) => (
@@ -112,7 +113,7 @@ export function EntityAdmin({ ent }: { ent: Entity }) {
         <table className="tbl">
           <thead><tr>{ent.cols.map((c) => (
             <th key={c.key} className={c.sort ? 'sortable' : ''} onClick={() => sortBy(c)} aria-sort={sort.col === c.sort ? (sort.dir === 'asc' ? 'ascending' : 'descending') : undefined}>
-              {t(c.label)}{c.sort && <span className="sort-ic">{sort.col === c.sort ? (sort.dir === 'asc' ? ' ▲' : ' ▼') : ' ↕'}</span>}
+              {t(c.label)}{c.sort && <span className="sort-ic">{sort.col === c.sort ? (sort.dir === 'asc' ? <ChevronUp size={12} /> : <ChevronDown size={12} />) : <ChevronsUpDown size={12} />}</span>}
             </th>))}<th className="ent-actions-h">{t('ui.actions')}</th></tr></thead>
           <tbody>
             {list.isLoading ? Array.from({ length: 6 }).map((_, i) => <tr key={i}>{ent.cols.map((c) => <td key={c.key}><Sk h={12} w={c.kind === 'date' ? 110 : '80%'} /></td>)}<td><Sk h={12} w={90} /></td></tr>)
@@ -122,12 +123,12 @@ export function EntityAdmin({ ent }: { ent: Entity }) {
                   {ent.cols.map((c) => <td key={c.key}><Cell c={c} v={r[c.key]} row={r} /></td>)}
                   <td className="ent-actions" onClick={(e) => e.stopPropagation()}>
                     {tab === 'active' ? <>
-                      <button className="mini" onClick={() => open(r)} aria-label={t('ui.view')} title={t('ui.view')}>👁</button>
-                      {canWrite && <button className="mini" onClick={() => setEditing(r)} aria-label={t('ui.edit')} title={t('ui.edit')} data-testid="row-edit">✎</button>}
-                      <button className="mini danger" onClick={() => setConfirm({ row: r, force: false })} aria-label={t('ui.delete')} title={t('ui.delete')} data-testid="row-delete">🗑</button>
+                      <button className="mini" onClick={() => open(r)} aria-label={t('ui.view')} title={t('ui.view')}><Eye size={16} /></button>
+                      {canWrite && <button className="mini" onClick={() => setEditing(r)} aria-label={t('ui.edit')} title={t('ui.edit')} data-testid="row-edit"><Pencil size={16} /></button>}
+                      <button className="mini danger" onClick={() => setConfirm({ row: r, force: false })} aria-label={t('ui.delete')} title={t('ui.delete')} data-testid="row-delete"><Trash2 size={16} /></button>
                     </> : <>
-                      <button className="mini" onClick={() => restore(r)} title={t('ui.restore')} data-testid="row-restore">↺ {t('ui.restore')}</button>
-                      <button className="mini danger" onClick={() => setConfirm({ row: r, force: true })} title={t('ui.delete_forever')}>✕</button>
+                      <button className="mini" onClick={() => restore(r)} title={t('ui.restore')} data-testid="row-restore"><RotateCcw size={14} /> {t('ui.restore')}</button>
+                      <button className="mini danger" onClick={() => setConfirm({ row: r, force: true })} title={t('ui.delete_forever')}><X size={16} /></button>
                     </>}
                   </td>
                 </tr>))}
@@ -167,7 +168,7 @@ function Cell({ c, v, row }: { c: Col; v: any; row: Row }) {
   switch (c.kind) {
     case 'date': return <span className="muted nowrap">{fmtDateTime(v, lang)}</span>
     case 'number': return <span className="num">{fmtNumber(+v, lang)}</span>
-    case 'bool': return v ? <span className="badge badge-verified">✓</span> : <span className="badge">✕</span>
+    case 'bool': return v ? <span className="badge badge-verified"><Check size={12} /></span> : <span className="badge"><X size={12} /></span>
     case 'badge': return <span className="badge">{String(v).replace(/_/g, ' ')}</span>
     case 'code': return <code>{v}</code>
     case 'severity': return <span className={'sev-pill sev-pill-' + v}><i aria-hidden />{SEVS[v]?.label ?? v}</span>
@@ -192,15 +193,15 @@ function Drawer({ ent, id, onClose, onEdit, onDelete, onRestore }: { ent: Entity
         <header className="drawer-head">
           <span className="drawer-ic">{ent.icon}</span>
           <div className="grow" style={{ minWidth: 0 }}>{q.isLoading ? <Sk h={16} w="70%" /> : <b className="drawer-title">{r ? ent.title(r) : t('ui.not_found')}</b>}<div className="small muted">{t(ent.label)} · <code>{id}</code></div></div>
-          <button className="iconbtn" onClick={onClose} aria-label={t('cancel')}>✕</button>
+          <button className="iconbtn" onClick={onClose} aria-label={t('cancel')}><X size={18} /></button>
         </header>
         {q.isLoading ? <div className="drawer-body">{Array.from({ length: 7 }).map((_, i) => <Sk key={i} h={14} style={{ marginBottom: 14 }} />)}</div>
           : q.isError || !r ? <div className="drawer-body muted">{errMsg(q.error)}</div>
           : <>
-            {r.deleted_at && <div className="drawer-trash small">🗑 {t('ui.in_trash_since', { when: fmtDateTime(r.deleted_at, lang) })}</div>}
+            {r.deleted_at && <div className="drawer-trash small"><Trash2 size={14} /> {t('ui.in_trash_since', { when: fmtDateTime(r.deleted_at, lang) })}</div>}
             <dl className="drawer-body kv">
               {Object.entries(r).filter(([k]) => !['deleted_at'].includes(k)).map(([k, v]) => (
-                <div key={k}><dt>{k.replace(/_/g, ' ')}</dt><dd>{v === null || v === '' ? <span className="muted">·</span> : typeof v === 'boolean' ? (v ? '✓' : '✕') : /_at$/.test(k) && typeof v === 'string' ? fmtDateTime(v, lang) : typeof v === 'object' ? <code>{JSON.stringify(v)}</code> : String(v)}</dd></div>
+                <div key={k}><dt>{k.replace(/_/g, ' ')}</dt><dd>{v === null || v === '' ? <span className="muted">·</span> : typeof v === 'boolean' ? (v ? <Check size={14} /> : <X size={14} />) : /_at$/.test(k) && typeof v === 'string' ? fmtDateTime(v, lang) : typeof v === 'object' ? <code>{JSON.stringify(v)}</code> : String(v)}</dd></div>
               ))}
             </dl>
             <footer className="drawer-foot">
@@ -211,10 +212,10 @@ function Drawer({ ent, id, onClose, onEdit, onDelete, onRestore }: { ent: Entity
               {ent.key === 'camera-feeds' && !r.deleted_at && r.kind === 'snapshot_url' && <button className="btn" onClick={() => act(`/mod/admin/camera-feeds/${r.id}/poll`)}>{t('ui.poll_now')}</button>}
               <span className="grow" />
               {r.deleted_at ? <>
-                <button className="btn" onClick={() => onRestore(r)}>↺ {t('ui.restore')}</button>
+                <button className="btn" onClick={() => onRestore(r)}><RotateCcw size={14} /> {t('ui.restore')}</button>
                 <button className="btn btn-danger" onClick={() => onDelete(r, true)}>{t('ui.delete_forever')}</button>
               </> : <>
-                {ent.edit && <button className="btn" onClick={() => onEdit(r)}>✎ {t('ui.edit')}</button>}
+                {ent.edit && <button className="btn" onClick={() => onEdit(r)}><Pencil size={14} /> {t('ui.edit')}</button>}
                 <button className="btn btn-danger" onClick={() => onDelete(r, false)}>{t('ui.delete')}</button>
               </>}
             </footer>

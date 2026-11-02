@@ -4,6 +4,7 @@ import { useI18n } from '../lib/i18n'
 import { LangToggle } from '../components/Shell'
 import { EmergencyBanner } from '../components/Emergency'
 import { Wordmark } from '../components/Logo'
+import { Camera, Sparkles, CircleCheck, MapPin } from 'lucide-react'
 
 export default function Landing() {
   const { user } = useAuth()
@@ -27,7 +28,7 @@ export default function Landing() {
       <div style={{ maxWidth: 980, margin: '24px auto', padding: 16 }}>
         <EmergencyBanner />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 12, marginTop: 16 }}>
-          {steps.map(([i, h, p]) => <div key={h} className="card" style={{ padding: 16 }}><div style={{ fontSize: 32 }}>{i}</div><b>{h}</b><p className="muted small">{p}</p></div>)}
+          {steps.map(([, h, p], n) => <div key={h} className="card" style={{ padding: 16 }}><div style={{ color: 'var(--primary)' }}>{[<Camera size={30} />, <Sparkles size={30} />, <CircleCheck size={30} />, <MapPin size={30} />][n]}</div><b>{h}</b><p className="muted small">{p}</p></div>)}
         </div>
         <p className="small muted" style={{ marginTop: 16 }}>{t('ui.ai_output_is_a_suggestion')}</p>
       </div>

@@ -1,7 +1,9 @@
+import { ORG_ICON, PIN } from '../lib/icons'
+import { Phone, Navigation, BadgeCheck } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '../lib/api'
 import { fmtNumber, useI18n } from '../lib/i18n'
-import { ORG_ICON, type Org } from '../lib/types'
+import { type Org } from '../lib/types'
 import { ListSkeleton } from './Skeleton'
 
 /** Verified responder organizations near a point. Humans tap to call; nothing is dialed automatically. */
@@ -20,13 +22,13 @@ export function NearbyHelp({ lat, lng, radiusKm = 10, types, compact }: { lat: n
         <ul className="nearby-list">
           {rows.map((o) => (
             <li key={o.id} className="nearby-item">
-              <span className="nearby-ic" aria-hidden>{ORG_ICON[o.type] ?? '📍'}</span>
+              <span className="nearby-ic" aria-hidden>{ORG_ICON[o.type] ?? PIN}</span>
               <div className="nearby-body">
-                <div className="nearby-name">{o.name}{o.verified && <span className="vbadge" title={t('ui.verified_org')}>✓</span>}</div>
+                <div className="nearby-name">{o.name}{o.verified && <span className="vbadge" title={t('ui.verified_org')}><BadgeCheck size={14} /></span>}</div>
                 <div className="small muted">{t(`ui.org_${o.type}`)} · {t('ui.km_away', { km: fmtNumber(o.distance_km ?? 0, lang, 1) })}{o.service_hours ? ` · ${o.service_hours}` : ''}</div>
               </div>
-              <a className="mini" href={`tel:${o.phone.replace(/[^0-9+]/g, '')}`} aria-label={t('ui.call')}>📞 {t('ui.call')}</a>
-              <a className="mini" href={`https://www.google.com/maps/dir/?api=1&destination=${o.lat},${o.lng}`} target="_blank" rel="noopener noreferrer">🧭 {t('ui.directions')}</a>
+              <a className="mini" href={`tel:${o.phone.replace(/[^0-9+]/g, '')}`} aria-label={t('ui.call')}><Phone size={16} /> {t('ui.call')}</a>
+              <a className="mini" href={`https://www.google.com/maps/dir/?api=1&destination=${o.lat},${o.lng}`} target="_blank" rel="noopener noreferrer"><Navigation size={16} /> {t('ui.directions')}</a>
             </li>))}
         </ul>)}
       <div className="small muted nearby-note">{t('ui.nearby_help_note')}</div>

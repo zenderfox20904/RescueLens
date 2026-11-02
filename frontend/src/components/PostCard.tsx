@@ -10,6 +10,7 @@ import { IChat, IEye, IFlag, IShare, IWhatsApp } from './Icons'
 import { useToast } from './Toast'
 import { Comments, SeeMore } from './Comments'
 import { PostMenu } from './PostManage'
+import { Sparkles, Check, Clock, MapPin, Eye, Link2 } from 'lucide-react'
 
 export function RegionOverlay({ regions, show = true }: { regions: Region[]; show?: boolean }) {
   return <>{regions.map((r, i) => (
@@ -23,10 +24,10 @@ export function StatusBadge({ i }: { i: Pick<Incident, 'status' | 'is_stale' | '
   return (
     <span className="row" style={{ gap: 4, flexWrap: 'wrap' }}>
       {i.is_demo && <span className="badge badge-demo">{t('demo')}</span>}
-      {i.ai_unverified && <span className="badge-ai">✨ {t('ui.ai_detected_unverified')}</span>}
+      {i.ai_unverified && <span className="badge-ai"><Sparkles size={12} /> {t('ui.ai_detected_unverified')}</span>}
       <span className="badge badge-sev" style={{ background: `var(--sev-${i.severity})` }}>{SEVS[i.severity]?.[lang]}</span>
-      <span className={'badge' + (i.status === 'verified' ? ' badge-verified' : '')}>{i.status === 'verified' ? '✔ ' : ''}{t(i.status as any) || i.status}</span>
-      {i.is_stale && <span className="badge">⏱ {t('stale')}</span>}
+      <span className={'badge' + (i.status === 'verified' ? ' badge-verified' : '')}>{i.status === 'verified' ? <Check size={12} /> : ''}{t(i.status as any) || i.status}</span>
+      {i.is_stale && <span className="badge"><Clock size={12} /> {t('stale')}</span>}
     </span>
   )
 }
@@ -36,7 +37,7 @@ export function shareLinks(i: Incident) {
   return {
     url,
     // WhatsApp click to chat: https://faq.whatsapp.com/5913398998672934
-    whatsapp: `https://wa.me/?text=${encodeURIComponent(`⚠️ ${i.title}\n${i.location.area_name ?? ''}\n${url}`)}`,
+    whatsapp: `https://wa.me/?text=${encodeURIComponent(`${i.title}\n${i.location.area_name ?? ''}\n${url}`)}`,
   }
 }
 
@@ -75,7 +76,7 @@ export function PostCard({ i, detail = false }: { i: Incident; detail?: boolean 
         {i.reporter.avatar ? <img src={i.reporter.avatar} alt="" width={40} height={40} style={{ borderRadius: '50%', objectFit: 'cover' }} /> : <Avatar name={i.reporter.anonymous ? '?' : i.reporter.name} />}
         <div className="grow">
           {i.reporter.id ? <Link to={`/u/${i.reporter.id}`} style={{ color: 'inherit' }}><b>{i.reporter.name}</b></Link> : <b>{i.reporter.name ?? (t('ui.anonymous'))}</b>} <span className="muted">· {cat?.icon} {cat?.[lang]}</span>
-          <div className="small muted row" style={{ gap: 4 }}><Link to={`/incidents/${i.id}`} className="muted">{timeAgo(i.created_at, lang)}</Link>{i.edited_at ? ` · ${t('ui.edited')}` : ''} · 📍 {i.location.area_name ?? (t('ui.approximate_location'))}</div>
+          <div className="small muted row" style={{ gap: 4 }}><Link to={`/incidents/${i.id}`} className="muted">{timeAgo(i.created_at, lang)}</Link>{i.edited_at ? ` · ${t('ui.edited')}` : ''} · <MapPin size={12} style={{ verticalAlign: -1 }} /> {i.location.area_name ?? (t('ui.approximate_location'))}</div>
         </div>
         <StatusBadge i={i} />
         <PostMenu i={i} detail={detail} />
@@ -83,7 +84,7 @@ export function PostCard({ i, detail = false }: { i: Incident; detail?: boolean 
       <Link to={`/incidents/${i.id}`} style={{ color: 'inherit' }}><div className="post-title">{orig ? i.title.replace('[DEMO] ', '') : ttl(i)}</div></Link>
       {i.description && (detail ? <div style={{ whiteSpace: 'pre-wrap' }}>{orig ? i.description : i.description_translated || i.description}</div> : <SeeMore text={orig ? i.description : i.description_translated || i.description} />)}
       {hasTr && <button type="button" className="link-btn small" onClick={() => setOrig((v) => !v)}>{orig ? t('ui.see_translation') : t('ui.see_original')}</button>}
-      {i.analysis && <div className="small muted" style={{ marginTop: 6 }}>✨ {t('aiSuggestion')}{i.analysis.mode === 'demo' ? ' (DEMO)' : ''}: {i.analysis.hazards.map((h) => CATS[h]?.[lang] ?? h).join(', ')}</div>}
+      {i.analysis && <div className="small muted" style={{ marginTop: 6 }}><Sparkles size={12} /> {t('aiSuggestion')}{i.analysis.mode === 'demo' ? ' (DEMO)' : ''}: {i.analysis.hazards.map((h) => CATS[h]?.[lang] ?? h).join(', ')}</div>}
       {img && (
         <div className="post-media" onClick={() => setShowRegions((v) => !v)}>
           <div style={{ position: 'relative', width: 'fit-content', margin: '0 auto' }}>
@@ -93,7 +94,7 @@ export function PostCard({ i, detail = false }: { i: Incident; detail?: boolean 
         </div>
       )}
       <div className="post-stats">
-        <span>👁️ {i.counts.confirm} {t('ui.confirmed')}{i.counts.dispute ? ` · ${i.counts.dispute} ${t('ui.disputed')}` : ''}</span>
+        <span><Eye size={14} /> {i.counts.confirm} {t('ui.confirmed')}{i.counts.dispute ? ` · ${i.counts.dispute} ${t('ui.disputed')}` : ''}</span>
         <button className="btn btn-ghost small" style={{ padding: 0 }} onClick={() => setShowComments((v) => !v)}>{i.counts.comments} {t('comment')}</button>
       </div>
       <div className="post-actions">
@@ -105,7 +106,7 @@ export function PostCard({ i, detail = false }: { i: Incident; detail?: boolean 
             <div className="card dropdown fade-in" style={{ width: 240, top: 40 }} onMouseLeave={() => setShareOpen(false)}>
               {typeof navigator.share === 'function' && <button className="notif btn-ghost" style={{ border: 0, width: '100%', background: 'none' }} onClick={() => { navigator.share({ title: ttl(i), url: s.url }).catch(() => {}); setShareOpen(false) }}><IShare /> {t('share')}</button>}
               <a className="notif" href={s.whatsapp} target="_blank" rel="noopener noreferrer"><IWhatsApp /> {t('ui.send_on_whatsapp')}</a>
-              <button className="notif btn-ghost" style={{ border: 0, width: '100%', background: 'none' }} onClick={() => { navigator.clipboard?.writeText(s.url); toast(t('ui.link_copied')); setShareOpen(false) }}>🔗 {t('ui.copy_link')}</button>
+              <button className="notif btn-ghost" style={{ border: 0, width: '100%', background: 'none' }} onClick={() => { navigator.clipboard?.writeText(s.url); toast(t('ui.link_copied')); setShareOpen(false) }}><Link2 size={16} /> {t('ui.copy_link')}</button>
             </div>)}
         </div>
         {!i.reporter.is_me && <button className={'btn' + (i.my_reaction === 'dispute' ? ' on' : '')} style={{ flex: 'none' }} title={t('notThere')} onClick={() => act('dispute')}><IFlag size={18} /></button>}

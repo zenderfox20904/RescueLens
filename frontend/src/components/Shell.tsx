@@ -12,6 +12,8 @@ import { IBell, IHome, IMap, IMoon, IPlus, IShield, ISun, IUser, ILogout, ISetti
 import { ListSkeleton, Sk } from './Skeleton'
 import { drafts, flushDrafts } from '../lib/offline'
 import { useToast } from './Toast'
+import { Ambulance } from 'lucide-react'
+import { notifIcon } from '../lib/icons'
 
 export function useTheme() {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem('rl_theme') as any) || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'))
@@ -40,7 +42,7 @@ function Bell() {
           {isLoading ? <ListSkeleton rows={4} /> : !data?.data.length ? <p className="muted" style={{ padding: 8 }}>{t('noNotif')}</p> :
             data.data.map((n) => (
               <a key={n.id} className={'notif' + (n.read ? '' : ' unread')} href="#" onClick={(e) => { e.preventDefault(); setOpen(false); if (n.incident_id) nav('/incidents/' + n.incident_id) }}>
-                <div className="sideicon" style={{ flex: 'none' }}>{n.type === 'nearby' ? '📍' : n.type === 'comment' ? '💬' : n.type === 'status' ? '✅' : '🔔'}</div>
+                <div className="sideicon" style={{ flex: 'none' }}>{notifIcon(n.type)}</div>
                 <div><div className="small">{n.title}</div>{n.body && <div className="small muted">{n.body}</div>}<div className="small" style={{ color: 'var(--primary)' }}>{timeAgo(n.created_at, lang)}</div></div>
               </a>
             ))}
@@ -91,7 +93,7 @@ export function LeftSidebar() {
       {item('/report', <IPlus size={18} />, t('report'))}
       {item('/feed?mine=1', <IUser size={18} />, t('ui.my_reports'))}
       {user && item('/notifications', <IBell size={18} />, t('notifications'))}
-      {user && user.account_type && user.account_type !== 'citizen' && item('/responder', <span aria-hidden>🚑</span>, t('ui.responder_inbox'))}
+      {user && user.account_type && user.account_type !== 'citizen' && item('/responder', <Ambulance size={20} />, t('ui.responder_inbox'))}
       {user && (user.role === 'moderator' || user.role === 'admin') && item('/admin', <IShield size={18} />, t('ui.admin_panel'))}
       {user && item('/settings', <ISettings size={18} />, t('ui.settings'))}
       {n > 0 && <div className="card" style={{ padding: 12, marginTop: 8 }}><b>{t('drafts')}: {n}</b><button className="btn btn-primary" style={{ width: '100%', marginTop: 8 }} onClick={async () => toast(`${await flushDrafts()} sent`)}>{t('sendNow')}</button></div>}
@@ -129,7 +131,7 @@ export function RightSidebar() {
       <div className="section-title">AI</div>
       <div className="card small" style={{ padding: 12 }}>
         {health.isLoading ? <Sk h={30} /> : health.data?.ai?.mode === 'live'
-          ? <>✅ Meta Model API live: {health.data.ai.vision_model} + {health.data.ai.segmentation_model}</>
+          ? <>Meta Model API live: {health.data.ai.vision_model} + {health.data.ai.segmentation_model}</>
           : <><span className="badge badge-demo">DEMO</span> {t('ui.live_ai_not_configured_demo')}</>}
       </div>
       <p className="footer-note">{t('neverSafe')}</p>

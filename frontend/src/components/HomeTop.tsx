@@ -6,6 +6,7 @@ import { CATS, SEVS, fmtNumber, timeAgo, useI18n } from '../lib/i18n'
 import { type MapPoint, ttl } from '../lib/types'
 import { EmergencyBanner } from './Emergency'
 import { Sk } from './Skeleton'
+import { Sparkles } from 'lucide-react'
 
 const LeafletIncidentMap = lazy(() => import('./map/LeafletIncidentMap'))
 const RANK: Record<string, number> = { critical: 0, high: 1, moderate: 2, low: 3 }
@@ -40,7 +41,7 @@ export function HomeTop({ points, loading }: { points?: MapPoint[]; loading: boo
           <span><b>{t('ui.report_emergency')}</b><small>{t('ui.one_tap_report_hint')}</small></span>
         </Link>
         <Link to="/report?auto=1" className="hero-ai card">
-          <span className="hero-ai-icon" aria-hidden>✨</span>
+          <span className="hero-ai-icon" aria-hidden><Sparkles size={20} /></span>
           <span><b>{t('ui.ai_auto_detect')}</b><small>{t('ui.ai_auto_detect_hint')}</small></span>
         </Link>
       </div>

@@ -6,6 +6,7 @@ import { CATS, SEVS, useI18n } from '../lib/i18n'
 import type { Incident } from '../lib/types'
 import { useToast } from './Toast'
 import { useConfirm } from './Confirm'
+import { Pencil, Trash2, X } from 'lucide-react'
 
 /** Three dot menu on a post. Only rendered when the viewer owns it or is a moderator/admin (server sets can_manage). */
 export function PostMenu({ i, detail }: { i: Incident; detail?: boolean }) {
@@ -30,8 +31,8 @@ export function PostMenu({ i, detail }: { i: Incident; detail?: boolean }) {
   return <>
     <div className="kebab" data-testid="post-menu"><button aria-label={t('ui.more')} onClick={() => setOpen((v) => !v)}>⋯</button>
       {open && <div className="card menu fade-in" onMouseLeave={() => setOpen(false)}>
-        <button onClick={() => { setOpen(false); setEdit(true) }}>✏️ {t('ui.edit_post')}</button>
-        <button className="danger" onClick={trash}>🗑️ {t('ui.move_to_trash')}</button>
+        <button onClick={() => { setOpen(false); setEdit(true) }}><Pencil size={16} /> {t('ui.edit_post')}</button>
+        <button className="danger" onClick={trash}><Trash2 size={16} /> {t('ui.move_to_trash')}</button>
       </div>}
     </div>
     {edit && <EditPost i={i} onClose={(saved) => { setEdit(false); if (saved) { refresh(); toast(t('ui.saved')) } }} />}
@@ -51,7 +52,7 @@ function EditPost({ i, onClose }: { i: Incident; onClose: (saved: boolean) => vo
   }
   return <div className="modal-bg" onClick={() => onClose(false)}>
     <div className="card modal fade-in" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-      <div className="modal-head">{t('ui.edit_post')}<button className="btn btn-ghost" style={{ position: 'absolute', right: 8, top: 8 }} aria-label={t('ui.cancel')} onClick={() => onClose(false)}>✕</button></div>
+      <div className="modal-head">{t('ui.edit_post')}<button className="btn btn-ghost" style={{ position: 'absolute', right: 8, top: 8 }} aria-label={t('ui.cancel')} onClick={() => onClose(false)}><X size={18} /></button></div>
       <div style={{ padding: 16, display: 'grid', gap: 12 }}>
         <label><b className="small">{t('ui.title')}</b><input className={'input' + (bad ? ' invalid' : '')} value={f.title} maxLength={160} onChange={(e) => setF({ ...f, title: e.target.value })} /></label>
         <label><b className="small">{t('ui.description')}</b><textarea className="input" rows={5} maxLength={2000} value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} /></label>

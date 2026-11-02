@@ -1,3 +1,4 @@
+import { X } from 'lucide-react'
 import { createContext, useContext, useState, useCallback, useRef, useEffect, type ReactNode } from 'react'
 export type ToastAction = { label: string; onClick: () => void }
 export type ToastRich = { avatar?: string | null; name?: string; severity?: string; time?: string; onOpen?: () => void; kind?: 'info' | 'error' | 'success' }
@@ -48,7 +49,7 @@ function ToastView({ it, onClose }: { it: Item; onClose: () => void }) {
       {r?.name !== undefined && (r.avatar ? <img className="toast-av" src={r.avatar} alt="" style={{ boxShadow: r.severity ? `0 0 0 2px ${SEV[r.severity]}` : undefined }} /> : <span className="toast-av" style={{ boxShadow: r.severity ? `0 0 0 2px ${SEV[r.severity]}` : undefined }}>{(r.name || '?').slice(0, 1).toUpperCase()}</span>)}
       <div className="grow"><div>{it.m}</div>{r?.time && <div className="toast-time">{r.time}</div>}</div>
       {it.a && <button className="toast-act" onClick={() => { it.a!.onClick(); onClose() }}>{it.a.label}</button>}
-      <button className="toast-x" aria-label="Close" onClick={onClose}>✕</button>
+      <button className="toast-x" aria-label="Close" onClick={onClose}><X size={16} /></button>
     </div>
   )
 }

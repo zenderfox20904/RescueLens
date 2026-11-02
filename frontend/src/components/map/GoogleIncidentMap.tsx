@@ -30,9 +30,9 @@ const FB_DARK: google.maps.MapTypeStyle[] = [
   { featureType: "water", elementType: "geometry", stylers: [{ color: "#18191A" }] },
 ]
 
-/** Marker icon: severity colored circle with the hazard emoji, as an inline SVG. */
+/** Marker icon: severity colored circle with the white center dot, as an inline SVG. */
 function icon(p: MapPoint): google.maps.Icon {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><circle cx="20" cy="20" r="17" fill="${SEV[p.severity]}" fill-opacity="${p.is_stale ? 0.5 : 1}" stroke="#fff" stroke-width="3"/><text x="20" y="26" font-size="17" text-anchor="middle">${CATS[p.category]?.icon ?? '⚠️'}</text></svg>`
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><circle cx="20" cy="20" r="17" fill="${SEV[p.severity]}" fill-opacity="${p.is_stale ? 0.5 : 1}" stroke="#fff" stroke-width="3"/><circle cx="20" cy="20" r="5" fill="#fff"/></svg>`
   return { url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg), scaledSize: new google.maps.Size(40, 40), anchor: new google.maps.Point(20, 20) }
 }
 

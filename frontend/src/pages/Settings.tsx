@@ -10,6 +10,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Incident } from '../lib/types'
+import { Bot, TriangleAlert, Trash2, RotateCcw } from 'lucide-react'
 
 const ZONES: string[] = (Intl as any).supportedValuesOf ? (Intl as any).supportedValuesOf('timeZone') : ['Asia/Dhaka', 'UTC']
 
@@ -48,7 +49,7 @@ export default function Settings() {
         {row(t('ui.ai_analysis_consent'), <label className="switch"><input type="checkbox" checked={user.ai_consent} onChange={(e) => save({ ai_consent: e.target.checked })} /><span /></label>, t('ui.ai_consent_hint'))}
         {row(t('ui.auto_post'), <label className="switch"><input type="checkbox" data-testid="auto-post" checked={!!user.auto_post_enabled} onChange={async (e) => {
           const on = e.target.checked
-          if (on && !(await confirm({ title: t('ui.auto_post'), body: t('ui.auto_post_consent'), confirm: t('ui.enable'), danger: false, icon: '🤖' }))) return
+          if (on && !(await confirm({ title: t('ui.auto_post'), body: t('ui.auto_post_consent'), confirm: t('ui.enable'), danger: false, icon: <Bot size={26} /> }))) return
           save({ auto_post_enabled: on, ...(on ? { auto_post_consent: true } : {}) })
         }} /><span /></label>, t('ui.auto_post_hint'))}
       </div>
@@ -90,21 +91,21 @@ export function TrashCard({ all = false }: { all?: boolean }) {
   const done = () => { qc.invalidateQueries({ queryKey: ['trash'] }); qc.invalidateQueries({ queryKey: ['feed'] }) }
   const restore = async (i: Incident) => { try { await api(`/incidents/${i.id}/restore`, { method: 'POST' }); toast(t('ui.restored')); done() } catch (e) { toast(errMsg(e), undefined, undefined, { kind: 'error' }) } }
   const purge = async (i: Incident) => {
-    if (!(await confirm({ title: t('ui.delete_forever_q'), body: t('ui.delete_forever_body'), confirm: t('ui.delete_forever'), icon: '⚠️' }))) return
+    if (!(await confirm({ title: t('ui.delete_forever_q'), body: t('ui.delete_forever_body'), confirm: t('ui.delete_forever'), icon: <TriangleAlert size={26} /> }))) return
     try { await api(`/incidents/${i.id}/force`, { method: 'DELETE' }); toast(t('ui.deleted_forever')); done() } catch (e) { toast(errMsg(e), undefined, undefined, { kind: 'error' }) }
   }
   const empty = async () => {
-    if (!(await confirm({ title: t('ui.empty_trash_q'), body: t('ui.empty_trash_body', { count: items.length }), confirm: t('ui.empty_trash'), icon: '⚠️' }))) return
+    if (!(await confirm({ title: t('ui.empty_trash_q'), body: t('ui.empty_trash_body', { count: items.length }), confirm: t('ui.empty_trash'), icon: <TriangleAlert size={26} /> }))) return
     try { await api('/me/trash' + (all ? '?all=1' : ''), { method: 'DELETE' }); toast(t('ui.trash_emptied')); done() } catch (e) { toast(errMsg(e), undefined, undefined, { kind: 'error' }) }
   }
   return (
     <div className="card settings-card" id="trash" data-testid="trash-card">
-      <div className="settings-head row"><span className="grow">🗑️ {t('ui.trash')}</span>{items.length > 0 && <button className="btn btn-danger" data-testid="empty-trash" onClick={empty}>{t('ui.empty_trash')}</button>}</div>
+      <div className="settings-head row"><span className="grow"><Trash2 size={18} style={{ verticalAlign: -3 }} /> {t('ui.trash')}</span>{items.length > 0 && <button className="btn btn-danger" data-testid="empty-trash" onClick={empty}>{t('ui.empty_trash')}</button>}</div>
       {q.isLoading ? <div style={{ padding: 12 }}><Sk h={16} /><Sk h={16} style={{ marginTop: 8 }} /></div>
         : items.length === 0 ? <div className="muted small" style={{ padding: '8px 16px 16px' }}>{t('ui.trash_empty')}</div>
         : items.map((i) => <div key={i.id} className="setting-row" data-testid="trash-item">
             <div className="grow"><div>{i.title}</div><div className="small muted">{t('ui.trash_deleted_at', { date: new Date((i as any).deleted_at ?? i.created_at).toLocaleString() })}</div></div>
-            <button className="btn" onClick={() => restore(i)}>↩️ {t('ui.restore')}</button>
+            <button className="btn" onClick={() => restore(i)}><RotateCcw size={16} /> {t('ui.restore')}</button>
             <button className="btn btn-danger" data-testid="delete-forever" onClick={() => purge(i)}>{t('ui.delete_forever')}</button>
           </div>)}
     </div>

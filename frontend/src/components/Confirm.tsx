@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useI18n } from '../lib/i18n'
+import { Info, TriangleAlert } from 'lucide-react'
 
-type Opts = { title: string; body?: string; confirm?: string; danger?: boolean; icon?: string }
+type Opts = { title: string; body?: string; confirm?: string; danger?: boolean; icon?: React.ReactNode }
 type Ask = (o: Opts) => Promise<boolean>
 const C = createContext<Ask>(async () => false)
 
@@ -23,7 +24,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
   return <C.Provider value={ask}>{children}{o && (
     <div className="modal-bg confirm-bg" onClick={() => close(false)} data-testid="confirm-dialog">
       <div className="card confirm fade-in" role="alertdialog" aria-modal="true" aria-labelledby="cf-title" onClick={(e) => e.stopPropagation()}>
-        <div className={'confirm-icon' + (o.danger === false ? '' : ' danger')}>{o.icon ?? (o.danger === false ? 'ℹ️' : '🗑️')}</div>
+        <div className={'confirm-icon' + (o.danger === false ? '' : ' danger')}>{o.icon ?? (o.danger === false ? <Info size={26} /> : <TriangleAlert size={26} />)}</div>
         <h3 id="cf-title">{o.title}</h3>
         {o.body && <p className="muted">{o.body}</p>}
         <div className="confirm-actions">

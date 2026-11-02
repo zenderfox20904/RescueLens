@@ -8,6 +8,7 @@ import { Avatar } from './Shell'
 import { ListSkeleton } from './Skeleton'
 import { useToast } from './Toast'
 import { useConfirm } from './Confirm'
+import { ThumbsUp, Pencil, Trash2 } from 'lucide-react'
 
 export type Cmt = { id: number; parent_id: number | null; body: string; body_translated?: string; author: string; author_role: string; author_avatar?: string | null; is_mine: boolean; can_manage: boolean; likes: number; liked: boolean; edited_at?: string | null; created_at: string }
 
@@ -77,7 +78,7 @@ export function Comments({ id, preview = false }: { id: string; preview?: boolea
         <div className="c-actions">
           <span className="muted" style={{ fontWeight: 400 }}>{timeAgo(c.created_at, lang)}{c.edited_at ? ` · ${t('ui.edited')}` : ''}</span>
           {user && <button className={c.liked ? 'on' : ''} onClick={() => like(c)}>{t('ui.like')}{c.likes ? ` · ${c.likes}` : ''}</button>}
-          {!user && c.likes > 0 && <span>👍 {c.likes}</span>}
+          {!user && c.likes > 0 && <span><ThumbsUp size={12} /> {c.likes}</span>}
           {user && <button onClick={() => { setReplyTo(c.parent_id ? rows.find((x) => x.id === c.parent_id) ?? c : c); setAll(true) }}>{t('ui.reply')}</button>}
         </div>
       </div>
@@ -105,7 +106,7 @@ function CommentMenu({ onEdit, onDelete, canEdit }: { onEdit: () => void; onDele
   const [open, setOpen] = useState(false)
   return <div className="kebab"><button aria-label={t('ui.more')} onClick={() => setOpen((v) => !v)}>⋯</button>
     {open && <div className="card menu fade-in" onMouseLeave={() => setOpen(false)}>
-      {canEdit && <button onClick={() => { setOpen(false); onEdit() }}>✏️ {t('ui.edit')}</button>}
-      <button className="danger" onClick={() => { setOpen(false); onDelete() }}>🗑️ {t('ui.delete')}</button>
+      {canEdit && <button onClick={() => { setOpen(false); onEdit() }}><Pencil size={16} /> {t('ui.edit')}</button>}
+      <button className="danger" onClick={() => { setOpen(false); onDelete() }}><Trash2 size={16} /> {t('ui.delete')}</button>
     </div>}</div>
 }

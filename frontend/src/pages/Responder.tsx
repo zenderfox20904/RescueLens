@@ -1,8 +1,10 @@
+import { ORG_ICON } from '../lib/icons'
+import { Navigation, BadgeCheck } from 'lucide-react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { api, errMsg } from '../lib/api'
 import { fmtDateTime, fmtNumber, useI18n } from '../lib/i18n'
-import { ORG_ICON, type DispatchRow, type Org } from '../lib/types'
+import { type DispatchRow, type Org } from '../lib/types'
 import { ListSkeleton } from '../components/Skeleton'
 import { useToast } from '../components/Toast'
 
@@ -27,7 +29,7 @@ export default function Responder() {
         {q.isLoading ? <ListSkeleton rows={1} /> : !org ? <div className="muted">{t('ui.not_an_org')}</div> : (
           <div className="row" style={{ gap: 8, marginTop: 8 }}>
             <span style={{ fontSize: 22 }}>{ORG_ICON[org.type]}</span><b>{org.name}</b>
-            {org.verified ? <span className="vbadge">✓ {t('ui.verified_org')}</span> : <span className="sev-pill sev-pill-moderate">{t('ui.pending_verification')}</span>}
+            {org.verified ? <span className="vbadge"><BadgeCheck size={14} /> {t('ui.verified_org')}</span> : <span className="sev-pill sev-pill-moderate">{t('ui.pending_verification')}</span>}
           </div>)}
       </div>
       {q.isLoading ? <ListSkeleton rows={4} /> : !q.data?.data.length ? <div className="card nearby-empty muted" style={{ padding: 16 }}>{t('ui.no_requests_yet')}</div> : q.data.data.map((d) => (
@@ -39,7 +41,7 @@ export default function Responder() {
           <div className="small muted">{d.incident?.area_name} · {t('ui.km_away', { km: fmtNumber(d.distance_km, lang, 1) })} · {fmtDateTime(d.updated_at, lang)}</div>
           <div className="row" style={{ gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
             {NEXT[d.status].map((s) => <button key={s} className={'btn' + (s === 'declined' ? '' : ' btn-primary')} disabled={m.isPending} onClick={() => m.mutate({ id: d.id, status: s })}>{t(`ui.dispatch_action_${s}`)}</button>)}
-            {d.incident && <a className="btn" href={`https://www.google.com/maps/dir/?api=1&destination=${d.incident.lat},${d.incident.lng}`} target="_blank" rel="noopener noreferrer">🧭 {t('ui.directions')}</a>}
+            {d.incident && <a className="btn" href={`https://www.google.com/maps/dir/?api=1&destination=${d.incident.lat},${d.incident.lng}`} target="_blank" rel="noopener noreferrer"><Navigation size={16} /> {t('ui.directions')}</a>}
           </div>
         </article>))}
     </div>

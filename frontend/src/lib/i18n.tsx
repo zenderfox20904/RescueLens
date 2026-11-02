@@ -46,11 +46,11 @@ export function applyDocumentLang(l: string) {
 i18n.on('languageChanged', applyDocumentLang)
 applyDocumentLang(i18n.language || 'en')
 
-const ICONS: Record<string, string> = { road_accident: '🚗', flood: '🌊', fire: '🔥', electrical: '⚡', building_collapse: '🏚️', injury: '🩹', crowd_stampede: '👥', landslide: '⛰️', earthquake: '🌐', wildfire: '🌲', tsunami: '🌊', cyclone_storm: '🌀', snow_ice: '❄️', other: '⚠️' }
-type Label = { icon: string } & Record<string, string>
+import { CAT_ICON as ICONS } from './icons'
+type Label = { icon: React.ReactNode } & Record<string, string>
 // Category and severity labels resolve through i18next for any language: CATS[k][lang] or CATS[k].label.
-const labels = (ns: string, keys: string[], icons?: Record<string, string>) =>
-  Object.fromEntries(keys.map((k) => [k, new Proxy({ icon: icons?.[k] ?? '' } as Label, { get: (o, p) => (p === 'icon' ? o.icon : typeof p === 'string' ? i18n.t(`${ns}.${k}`) : undefined) })]))
+const labels = (ns: string, keys: string[], icons?: Record<string, React.ReactNode>) =>
+  Object.fromEntries(keys.map((k) => [k, new Proxy({ icon: icons?.[k] ?? null } as unknown as Label, { get: (o, p) => (p === 'icon' ? o.icon : typeof p === 'string' ? i18n.t(`${ns}.${k}`) : undefined) })]))
 export const CATS: Record<string, Label> = labels('cat', Object.keys(ICONS), ICONS)
 export const SEVS: Record<string, Label> = labels('sev', ['low', 'moderate', 'high', 'critical'])
 export type Key = keyof typeof en

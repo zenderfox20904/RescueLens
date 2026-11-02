@@ -1,7 +1,9 @@
+import { ORG_ICON, PIN } from '../lib/icons'
+import { Phone, BadgeCheck } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '../lib/api'
 import { fmtNumber, useI18n } from '../lib/i18n'
-import { ORG_ICON, type DispatchRow } from '../lib/types'
+import { type DispatchRow } from '../lib/types'
 import { ListSkeleton } from './Skeleton'
 
 /** Which verified responders were alerted for this incident, and their live response status. */
@@ -16,13 +18,13 @@ export function DispatchPanel({ incidentId }: { incidentId: string }) {
         <ul className="nearby-list">
           {q.data.data.map((d) => (
             <li key={d.id} className="nearby-item">
-              <span className="nearby-ic" aria-hidden>{ORG_ICON[d.organization?.type ?? ''] ?? '📍'}</span>
+              <span className="nearby-ic" aria-hidden>{ORG_ICON[d.organization?.type ?? ''] ?? PIN}</span>
               <div className="nearby-body">
-                <div className="nearby-name">{d.organization?.name}{d.organization?.verified && <span className="vbadge">✓</span>}</div>
+                <div className="nearby-name">{d.organization?.name}{d.organization?.verified && <span className="vbadge"><BadgeCheck size={14} /></span>}</div>
                 <div className="small muted">{t(`ui.org_${d.organization?.type}`)} · {t('ui.km_away', { km: fmtNumber(d.distance_km, lang, 1) })}</div>
               </div>
               <span className={`dstatus dstatus-${d.status}`}>{t(`ui.dispatch_${d.status}`)}</span>
-              {d.organization && <a className="mini" href={`tel:${d.organization.phone.replace(/[^0-9+]/g, '')}`}>📞 {t('ui.call')}</a>}
+              {d.organization && <a className="mini" href={`tel:${d.organization.phone.replace(/[^0-9+]/g, '')}`}><Phone size={16} /> {t('ui.call')}</a>}
             </li>))}
         </ul>)}
       <div className="small muted nearby-note">{t('ui.dispatch_note')}</div>

@@ -7,6 +7,7 @@ import { type Incident, ttl } from '../lib/types'
 import { StatusBadge } from '../components/PostCard'
 import { ListSkeleton } from '../components/Skeleton'
 import { useToast } from '../components/Toast'
+import { ShieldCheck, Eye, Flag } from 'lucide-react'
 
 export function ModActions({ i }: { i: Incident }) {
   const { t } = useI18n()
@@ -22,11 +23,11 @@ export function ModActions({ i }: { i: Incident }) {
   const merge = async () => { try { await api(`/mod/incidents/${i.id}/merge`, { body: { into } }); qc.invalidateQueries(); toast(t('ui.merged')) } catch (e) { toast(errMsg(e)) } }
   return (
     <div className="card" style={{ padding: 12, display: 'grid', gap: 8 }}>
-      <b>🛡️ {t('ui.moderator_actions')}</b>
+      <b><ShieldCheck size={16} style={{ verticalAlign: -3 }} /> {t('ui.moderator_actions')}</b>
       {i.private && <div className="small muted">{t('ui.precise_location_private')}: {i.private.lat}, {i.private.lng}</div>}
       <input className="input" placeholder={t('ui.note_optional')} value={note} maxLength={500} onChange={(e) => setNote(e.target.value)} />
       <div className="chips">
-        {[['verified', '✔ Verify', 'btn-primary'], ['disputed', 'Dispute', ''], ['resolved', 'Resolve', ''], ['expired', 'Expire', ''], ['removed', 'Remove', 'btn-danger']].map(([s, l, c]) => (
+        {[['verified', 'Verify', 'btn-primary'], ['disputed', 'Dispute', ''], ['resolved', 'Resolve', ''], ['expired', 'Expire', ''], ['removed', 'Remove', 'btn-danger']].map(([s, l, c]) => (
           <button key={s} className={'btn ' + c} disabled={m.isPending || i.status === s} onClick={() => m.mutate(s)}>{l}</button>))}
       </div>
       <div className="row"><input className="input" placeholder={t('ui.merge_into_report_id')} value={into} onChange={(e) => setInto(e.target.value)} /><button className="btn" disabled={into.length !== 26} onClick={merge}>{t('ui.merge')}</button></div>
@@ -41,12 +42,12 @@ export default function Moderation() {
   return (
     <div className="main">
       <div className="card" style={{ padding: 12 }}>
-        <h2 style={{ margin: '0 0 8px' }}>🛡️ {t('ui.moderation_queue')}</h2>
+        <h2 style={{ margin: '0 0 8px' }}><ShieldCheck size={20} style={{ verticalAlign: -3 }} /> {t('ui.moderation_queue')}</h2>
         <div className="chips">{['reported', 'corroborated', 'disputed', 'verified', 'resolved', 'removed'].map((s) => <button key={s} className={'chip' + (status === s ? ' on' : '')} onClick={() => setStatus(s)}>{s}</button>)}</div>
       </div>
       {q.isLoading ? <div className="card" style={{ padding: 12 }}><ListSkeleton rows={6} /></div> : q.data?.data.length === 0 ? <div className="card muted" style={{ padding: 16 }}>{t('ui.empty')}</div> : q.data?.data.map((i) => (
         <div key={i.id} className="card" style={{ padding: 12 }}>
-          <div className="row"><span style={{ fontSize: 24 }}>{CATS[i.category]?.icon}</span><Link to={`/incidents/${i.id}`} className="grow" style={{ color: 'var(--text)' }}><b>{ttl(i)}</b><div className="small muted">{i.location.area_name} · {timeAgo(i.created_at, lang)} · 👁️ {i.counts.confirm} · ⚑ {i.counts.dispute} · ID {i.id}</div></Link><StatusBadge i={i} /></div>
+          <div className="row"><span style={{ fontSize: 24 }}>{CATS[i.category]?.icon}</span><Link to={`/incidents/${i.id}`} className="grow" style={{ color: 'var(--text)' }}><b>{ttl(i)}</b><div className="small muted">{i.location.area_name} · {timeAgo(i.created_at, lang)} · <Eye size={12} /> {i.counts.confirm} · <Flag size={12} /> {i.counts.dispute} · ID {i.id}</div></Link><StatusBadge i={i} /></div>
           <div style={{ marginTop: 8 }}><ModActions i={i} /></div>
         </div>))}
     </div>
