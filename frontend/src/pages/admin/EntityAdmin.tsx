@@ -8,7 +8,7 @@ import { Sk } from '../../components/Skeleton'
 import { useToast } from '../../components/Toast'
 import { LocationPicker, type PickedLocation } from '../../components/location/LocationPicker'
 import type { Col, Entity, Field } from './entities'
-import { Trash2, ChevronUp, ChevronDown, ChevronsUpDown, Eye, Pencil, RotateCcw, X, Check } from 'lucide-react'
+import { Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ChevronsUpDown, Eye, Pencil, Plus, RotateCcw, Trash2, X } from 'lucide-react'
 
 type Row = Record<string, any> & { id: string }
 type ListRes = { data: Row[]; meta: { total: number; page: number; last_page: number; per_page: number; trash_count?: number } }
@@ -106,7 +106,7 @@ export function EntityAdmin({ ent }: { ent: Entity }) {
           </select>
         ))}
         <span className="grow" />
-        {ent.create && tab === 'active' && <button className="btn btn-primary" onClick={() => setEditing('new')} data-testid="create-btn">＋ {t('ui.create')}</button>}
+        {ent.create && tab === 'active' && <button className="btn btn-primary" onClick={() => setEditing('new')} data-testid="create-btn"><Plus size={16} aria-hidden /> {t('ui.create')}</button>}
       </div>
 
       <div className="card table-card ent-table">
@@ -138,8 +138,8 @@ export function EntityAdmin({ ent }: { ent: Entity }) {
       {meta && meta.last_page > 1 && (
         <div className="ent-pager small">
           <span className="muted">{t('ui.page_of', { page: fmtNumber(meta.page, lang), pages: fmtNumber(meta.last_page, lang) })}</span>
-          <button className="btn" disabled={page <= 1} onClick={() => setPage(page - 1)}>{t('ui.previous')}</button>
-          <button className="btn" disabled={page >= meta.last_page} onClick={() => setPage(page + 1)}>{t('ui.next')}</button>
+          <button className="btn" disabled={page <= 1} onClick={() => setPage(page - 1)}><ChevronLeft size={16} aria-hidden /> {t('ui.previous')}</button>
+          <button className="btn" disabled={page >= meta.last_page} onClick={() => setPage(page + 1)}><ChevronRight size={16} aria-hidden /> {t('ui.next')}</button>
         </div>
       )}
 
@@ -152,7 +152,7 @@ export function EntityAdmin({ ent }: { ent: Entity }) {
             <p className="muted">{ent.title(confirm.row)}</p>
             <p className="small muted">{confirm.force ? t('ui.delete_forever_hint') : t('ui.move_to_trash_hint')}</p>
             <div className="row" style={{ justifyContent: 'flex-end' }}>
-              <button className="btn" onClick={() => setConfirm(null)} autoFocus>{t('cancel')}</button>
+              <button className="btn" onClick={() => setConfirm(null)} autoFocus><X size={16} aria-hidden /> {t('cancel')}</button>
               <button className="btn btn-danger" onClick={() => doDelete(confirm)} data-testid="confirm-delete">{confirm.force ? t('ui.delete_forever') : t('ui.delete')}</button>
             </div>
           </div>
@@ -213,10 +213,10 @@ function Drawer({ ent, id, onClose, onEdit, onDelete, onRestore }: { ent: Entity
               <span className="grow" />
               {r.deleted_at ? <>
                 <button className="btn" onClick={() => onRestore(r)}><RotateCcw size={14} /> {t('ui.restore')}</button>
-                <button className="btn btn-danger" onClick={() => onDelete(r, true)}>{t('ui.delete_forever')}</button>
+                <button className="btn btn-danger" onClick={() => onDelete(r, true)}><Trash2 size={16} aria-hidden /> {t('ui.delete_forever')}</button>
               </> : <>
                 {ent.edit && <button className="btn" onClick={() => onEdit(r)}><Pencil size={14} /> {t('ui.edit')}</button>}
-                <button className="btn btn-danger" onClick={() => onDelete(r, false)}>{t('ui.delete')}</button>
+                <button className="btn btn-danger" onClick={() => onDelete(r, false)}><Trash2 size={16} aria-hidden /> {t('ui.delete')}</button>
               </>}
             </footer>
           </>}
@@ -265,7 +265,7 @@ function EditModal({ ent, row, onClose, onSave }: { ent: Entity; row: Row | 'new
           ))}
         </div>
         {err && <div className="err small" role="alert">{err}</div>}
-        <div className="row ent-form-foot"><button type="button" className="btn" onClick={onClose}>{t('cancel')}</button><button className="btn btn-primary" disabled={busy} data-testid="save-btn">{busy ? '…' : t('ui.save')}</button></div>
+        <div className="row ent-form-foot"><button type="button" className="btn" onClick={onClose}><X size={16} aria-hidden /> {t('cancel')}</button><button className="btn btn-primary" disabled={busy} data-testid="save-btn">{busy ? '…' : t('ui.save')}</button></div>
       </form>
     </div>
   )

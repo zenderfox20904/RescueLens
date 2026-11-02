@@ -1,3 +1,4 @@
+import { ArrowLeft, LogIn } from 'lucide-react'
 import { ORG_ICON } from '../lib/icons'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
@@ -61,7 +62,7 @@ export function Login() {
         <input className="input" type="email" required autoComplete="email" placeholder={t('ui.email')} value={email} onChange={(e) => setEmail(e.target.value)} />
         <input className="input" type="password" required autoComplete="current-password" placeholder={t('ui.password')} value={password} onChange={(e) => setPassword(e.target.value)} />
         {err && <div className="small" role="alert" style={{ color: 'var(--danger)' }}>{err}</div>}
-        <button className="btn btn-primary" style={{ padding: 12, fontSize: 18 }} disabled={busy}>{t('login')}</button>
+        <button className="btn btn-primary" style={{ padding: 12, fontSize: 18 }} disabled={busy}><LogIn size={16} aria-hidden /> {t('login')}</button>
         <Link to="/forgot-password" className="small" style={{ textAlign: 'center' }}>{t('ui.forgot_password')}</Link>
         <div className="divider" />
         <SocialButtons />
@@ -136,7 +137,7 @@ export function Register() {
         {err && <div className="small" role="alert" style={{ color: 'var(--danger)' }}>{err}</div>}
         {step === last && <div className="small muted">{t('ui.signup_terms')}</div>}
         <div className="row" style={{ justifyContent: 'space-between' }}>
-          {step > 0 ? <button type="button" className="btn" onClick={() => setStep(step - 1)}>{t('ui.back')}</button> : <span />}
+          {step > 0 ? <button type="button" className="btn" onClick={() => setStep(step - 1)}><ArrowLeft size={16} aria-hidden /> {t('ui.back')}</button> : <span />}
           <button className="btn btn-primary" style={{ padding: '10px 28px' }} disabled={busy || (step === 1 && !accountOk) || (step === 2 && !orgOk)} data-testid="register-next">{step < last ? t('ui.next') : t('register')}</button>
         </div>
         {step === 0 && <SocialButtons />}

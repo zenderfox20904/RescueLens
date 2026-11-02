@@ -69,7 +69,7 @@ class _EditPostState extends State<EditPostScreen> {
   Widget build(BuildContext context) {
     final sevColor = {'low': const Color(0xFF31A24C), 'moderate': const Color(0xFFF7B928), 'high': const Color(0xFFF5793B), 'critical': _danger};
     return Scaffold(appBar: AppBar(title: Text(tr('edit_post')), actions: [
-      Padding(padding: const EdgeInsets.only(right: 12), child: FilledButton(onPressed: busy ? null : save, child: Text(tr('save')))),
+      Padding(padding: const EdgeInsets.only(right: 12), child: FilledButton.icon(onPressed: busy ? null : save, icon: const Icon(LucideIcons.save, size: 18), label: Text(tr('save')))),
     ]), body: Form(key: form, autovalidateMode: AutovalidateMode.onUserInteraction, child: ListView(padding: const EdgeInsets.fromLTRB(16, 20, 16, 40), children: [
       TextFormField(controller: title, maxLength: 160, decoration: InputDecoration(labelText: tr('title'), border: OutlineInputBorder(borderRadius: BorderRadius.circular(12))),
         validator: (v) => (v ?? '').trim().length < 3 ? tr('v_title') : null),

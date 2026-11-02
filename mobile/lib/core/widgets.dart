@@ -121,7 +121,7 @@ Future<bool> confirmAction(BuildContext context, {required String title, require
     title: Text(title, textAlign: TextAlign.center), content: Text(body, textAlign: TextAlign.center),
     actionsAlignment: MainAxisAlignment.center,
     actions: [
-      OutlinedButton(onPressed: () => Navigator.pop(c, false), child: Text(tr('cancel'))),
+      OutlinedButton.icon(onPressed: () => Navigator.pop(c, false), icon: const Icon(LucideIcons.x, size: 18), label: Text(tr('cancel'))),
       FilledButton(style: FilledButton.styleFrom(backgroundColor: color), onPressed: () => Navigator.pop(c, true), child: Text(confirm)),
     ]));
   return ok == true;

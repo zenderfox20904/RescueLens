@@ -120,7 +120,7 @@ Future<void> editRadius(BuildContext context, Map me) async {
     Text(tr('alert_radius'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
     Text('${v.round()} km', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: RL.primary)),
     Slider(value: v, min: 1, max: 50, divisions: 49, label: '${v.round()} km', onChanged: (x) => set(() => v = x)),
-    SizedBox(width: double.infinity, child: FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(tr('save')))),
+    SizedBox(width: double.infinity, child: FilledButton.icon(onPressed: () => Navigator.pop(c, true), icon: const Icon(LucideIcons.save, size: 18), label: Text(tr('save')))),
   ])))));
   if (ok != true) return;
   try { final r = await Api.patch('/auth/me', {'alert_radius_km': v.round()}); Me.user = r['user']; if (context.mounted) _toast(context, tr('saved')); } catch (e) { if (context.mounted) _toast(context, '$e'); }

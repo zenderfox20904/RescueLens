@@ -87,7 +87,7 @@ class _ReportState extends State<ReportScreen> {
       Text(tr('severity'), style: const TextStyle(fontWeight: FontWeight.w600)), const SizedBox(height: 8),
       Wrap(spacing: 8, runSpacing: 8, children: [for (final s in RL.sev.keys) ChoiceChip(showCheckmark: false, label: Text(tr(s)), selected: severity == s, selectedColor: RL.sev[s]!.withValues(alpha: .25), onSelected: (_) => setState(() => severity = s))]),
       CheckboxListTile(value: confirm, onChanged: (v) => setState(() => confirm = v ?? false), title: Text(tr('confirm_publish'))),
-      FilledButton(onPressed: confirm && !busy && title.text.isNotEmpty ? post : null, child: Text(tr('post'))),
+      FilledButton.icon(onPressed: confirm && !busy && title.text.isNotEmpty ? post : null, icon: const Icon(LucideIcons.send, size: 18), label: Text(tr('post'))),
     ],
     if (err != null) Text(err!, style: const TextStyle(color: Color(0xFFE41E3F))),
   ]);

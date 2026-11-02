@@ -12,7 +12,7 @@ import { RegionOverlay, StatusBadge } from '../components/PostCard'
 import { Sk } from '../components/Skeleton'
 import { ICamera, ISpark, IX } from '../components/Icons'
 import { useToast } from '../components/Toast'
-import { Sparkles, TriangleAlert, Eye } from 'lucide-react'
+import { Eye, GitMerge, Send, Sparkles, TriangleAlert } from 'lucide-react'
 
 type Step = 'photo' | 'analyzing' | 'review' | 'duplicates' | 'posting'
 const DHAKA = { lat: 23.8103, lng: 90.4125 }
@@ -190,9 +190,9 @@ export default function Report() {
               <div key={d.id} className="card" style={{ padding: 12 }}>
                 <div className="row"><b className="grow">{d.title}</b><StatusBadge i={d} /></div>
                 <div className="small muted">{d.location.area_name} · <Eye size={12} /> {d.counts.confirm}</div>
-                <button className="btn btn-primary" style={{ marginTop: 8 }} onClick={() => join(d)}>{t('joinExisting')}</button>
+                <button className="btn btn-primary" style={{ marginTop: 8 }} onClick={() => join(d)}><GitMerge size={16} aria-hidden /> {t('joinExisting')}</button>
               </div>))}
-            <button className="btn" onClick={submit}>{t('postAnyway')}</button>
+            <button className="btn" onClick={submit}><Send size={16} aria-hidden /> {t('postAnyway')}</button>
           </>}
           {err && <div role="alert" className="small" style={{ color: 'var(--danger)' }}>{err}</div>}
         </div>

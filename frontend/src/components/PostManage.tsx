@@ -6,7 +6,7 @@ import { CATS, SEVS, useI18n } from '../lib/i18n'
 import type { Incident } from '../lib/types'
 import { useToast } from './Toast'
 import { useConfirm } from './Confirm'
-import { Pencil, Trash2, X } from 'lucide-react'
+import { Ellipsis, Pencil, Save, Trash2, X } from 'lucide-react'
 
 /** Three dot menu on a post. Only rendered when the viewer owns it or is a moderator/admin (server sets can_manage). */
 export function PostMenu({ i, detail }: { i: Incident; detail?: boolean }) {
@@ -29,7 +29,7 @@ export function PostMenu({ i, detail }: { i: Incident; detail?: boolean }) {
     } catch (e) { toast(errMsg(e)) }
   }
   return <>
-    <div className="kebab" data-testid="post-menu"><button aria-label={t('ui.more')} onClick={() => setOpen((v) => !v)}>⋯</button>
+    <div className="kebab" data-testid="post-menu"><button aria-label={t('ui.more')} onClick={() => setOpen((v) => !v)}><Ellipsis size={18} /></button>
       {open && <div className="card menu fade-in" onMouseLeave={() => setOpen(false)}>
         <button onClick={() => { setOpen(false); setEdit(true) }}><Pencil size={16} /> {t('ui.edit_post')}</button>
         <button className="danger" onClick={trash}><Trash2 size={16} /> {t('ui.move_to_trash')}</button>
@@ -59,7 +59,7 @@ function EditPost({ i, onClose }: { i: Incident; onClose: (saved: boolean) => vo
         <div><b className="small">{t('ui.category')}</b><div className="chips" style={{ marginTop: 6 }}>{Object.keys(CATS).map((c) => <button type="button" key={c} className={'chip' + (f.category === c ? ' on' : '')} onClick={() => setF({ ...f, category: c as any })}>{CATS[c].icon} {CATS[c][lang]}</button>)}</div></div>
         <div><b className="small">{t('ui.severity')}</b><div className="chips" style={{ marginTop: 6 }}>{Object.keys(SEVS).map((s) => <button type="button" key={s} className={'chip' + (f.severity === s ? ' on' : '')} onClick={() => setF({ ...f, severity: s as any })}><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 5, background: `var(--sev-${s})`, marginRight: 6 }} />{SEVS[s][lang]}</button>)}</div></div>
         {err && <div className="field-err">{err}</div>}
-        <div className="confirm-actions"><button className="btn" onClick={() => onClose(false)}>{t('ui.cancel')}</button><button className="btn btn-primary" disabled={busy || bad} onClick={save}>{t('ui.save')}</button></div>
+        <div className="confirm-actions"><button className="btn" onClick={() => onClose(false)}>{t('ui.cancel')}</button><button className="btn btn-primary" disabled={busy || bad} onClick={save}><Save size={16} aria-hidden /> {t('ui.save')}</button></div>
       </div>
     </div>
   </div>

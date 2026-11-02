@@ -8,7 +8,7 @@ import { Avatar } from './Shell'
 import { ListSkeleton } from './Skeleton'
 import { useToast } from './Toast'
 import { useConfirm } from './Confirm'
-import { ThumbsUp, Pencil, Trash2 } from 'lucide-react'
+import { Ellipsis, MessagesSquare, Pencil, Reply, Save, ThumbsUp, Trash2 } from 'lucide-react'
 
 export type Cmt = { id: number; parent_id: number | null; body: string; body_translated?: string; author: string; author_role: string; author_avatar?: string | null; is_mine: boolean; can_manage: boolean; likes: number; liked: boolean; edited_at?: string | null; created_at: string }
 
@@ -67,7 +67,7 @@ export function Comments({ id, preview = false }: { id: string; preview?: boolea
         {editing === c.id ? (
           <form onSubmit={(e) => { e.preventDefault(); if (draft.trim()) save(c) }}>
             <textarea className="input edit-area" value={draft} maxLength={1000} autoFocus onChange={(e) => setDraft(e.target.value)} />
-            <div className="row" style={{ gap: 8, marginTop: 6 }}><button className="btn btn-primary small">{t('ui.save')}</button><button type="button" className="btn small" onClick={() => setEditing(null)}>{t('ui.cancel')}</button></div>
+            <div className="row" style={{ gap: 8, marginTop: 6 }}><button className="btn btn-primary small"><Save size={16} aria-hidden /> {t('ui.save')}</button><button type="button" className="btn small" onClick={() => setEditing(null)}>{t('ui.cancel')}</button></div>
           </form>
         ) : (
           <div className="row" style={{ alignItems: 'flex-start', gap: 4 }}>
@@ -79,14 +79,14 @@ export function Comments({ id, preview = false }: { id: string; preview?: boolea
           <span className="muted" style={{ fontWeight: 400 }}>{timeAgo(c.created_at, lang)}{c.edited_at ? ` · ${t('ui.edited')}` : ''}</span>
           {user && <button className={c.liked ? 'on' : ''} onClick={() => like(c)}>{t('ui.like')}{c.likes ? ` · ${c.likes}` : ''}</button>}
           {!user && c.likes > 0 && <span><ThumbsUp size={12} /> {c.likes}</span>}
-          {user && <button onClick={() => { setReplyTo(c.parent_id ? rows.find((x) => x.id === c.parent_id) ?? c : c); setAll(true) }}>{t('ui.reply')}</button>}
+          {user && <button onClick={() => { setReplyTo(c.parent_id ? rows.find((x) => x.id === c.parent_id) ?? c : c); setAll(true) }}><Reply size={16} aria-hidden /> {t('ui.reply')}</button>}
         </div>
       </div>
     </div>)
   return (
     <div style={{ paddingBottom: 8 }}>
       {q.isLoading ? <ListSkeleton rows={2} /> : <>
-        {!all && (q.data?.total ?? 0) > rows.length && <button className="see-more" style={{ margin: '8px 12px 0' }} onClick={() => setAll(true)}>{t('ui.more_comments')}</button>}
+        {!all && (q.data?.total ?? 0) > rows.length && <button className="see-more" style={{ margin: '8px 12px 0' }} onClick={() => setAll(true)}><MessagesSquare size={16} aria-hidden /> {t('ui.more_comments')}</button>}
         {tops.map((c) => <div key={c.id}>{one(c)}<div className="c-replies">{rows.filter((r) => r.parent_id === c.id).map(one)}</div></div>)}
       </>}
       {user ? (
@@ -104,7 +104,7 @@ export function Comments({ id, preview = false }: { id: string; preview?: boolea
 function CommentMenu({ onEdit, onDelete, canEdit }: { onEdit: () => void; onDelete: () => void; canEdit: boolean }) {
   const { t } = useI18n()
   const [open, setOpen] = useState(false)
-  return <div className="kebab"><button aria-label={t('ui.more')} onClick={() => setOpen((v) => !v)}>⋯</button>
+  return <div className="kebab"><button aria-label={t('ui.more')} onClick={() => setOpen((v) => !v)}><Ellipsis size={18} /></button>
     {open && <div className="card menu fade-in" onMouseLeave={() => setOpen(false)}>
       {canEdit && <button onClick={() => { setOpen(false); onEdit() }}><Pencil size={16} /> {t('ui.edit')}</button>}
       <button className="danger" onClick={() => { setOpen(false); onDelete() }}><Trash2 size={16} /> {t('ui.delete')}</button>

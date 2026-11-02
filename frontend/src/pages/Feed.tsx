@@ -1,3 +1,4 @@
+import { LayoutGrid } from 'lucide-react'
 import { useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
@@ -43,7 +44,7 @@ export default function Feed() {
         <div className="row"><Link to="/report" className="btn btn-ghost grow"><span style={{ color: '#45BD62' }}><ICamera /></span> {t('photo')}</Link><Link to="/map" className="btn btn-ghost grow"><span style={{ color: '#F5533D' }}><IPin /></span> {t('map')}</Link></div>
       </div>
       <div className="chips">
-        <button className={'chip' + (!category ? ' on' : '')} onClick={() => setSp({})}>{t('all')}</button>
+        <button className={'chip' + (!category ? ' on' : '')} onClick={() => setSp({})}><LayoutGrid size={16} aria-hidden /> {t('all')}</button>
         {Object.entries(CATS).map(([k, v]) => <button key={k} className={'chip' + (category === k ? ' on' : '')} onClick={() => setSp({ category: k })}>{v.icon} {v[lang]}</button>)}
       </div>
       {feed.isLoading ? <><PostSkeleton /><PostSkeleton /></> : feed.isError ? <div className="card" style={{ padding: 16 }}>{t('ui.could_not_load_the_feed')}</div>

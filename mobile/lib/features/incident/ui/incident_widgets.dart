@@ -69,7 +69,7 @@ class _PostTileState extends State<PostTile> with SingleTickerProviderStateMixin
           Icon(LucideIcons.messageCircle, size: 16, color: RL.text2), const SizedBox(width: 4),
           Text(tr('comments', {'n': i['counts']?['comments'] ?? 0}), style: meta),
           const Spacer(),
-          if (!widget.inDetail) TextButton(onPressed: open, child: Text(tr('view'))),
+          if (!widget.inDetail) TextButton.icon(onPressed: open, icon: const Icon(LucideIcons.eye, size: 18), label: Text(tr('view'))),
         ]),
         if (!widget.inDetail && ((i['counts']?['comments'] ?? 0) as int) > 0) ...[const Divider(height: 12), CommentsSection(i['id'], preview: true, onOpenAll: open)],
       ])),

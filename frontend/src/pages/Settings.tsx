@@ -10,7 +10,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Incident } from '../lib/types'
-import { Bot, TriangleAlert, Trash2, RotateCcw } from 'lucide-react'
+import { Bot, LocateFixed, RotateCcw, Save, Trash2, TriangleAlert } from 'lucide-react'
 
 const ZONES: string[] = (Intl as any).supportedValuesOf ? (Intl as any).supportedValuesOf('timeZone') : ['Asia/Dhaka', 'UTC']
 
@@ -73,7 +73,7 @@ export function AlertArea() {
         <b>{t('ui.nearby_alerts')}</b>
         <div className="small muted">{user.alert_area_set ? (t('ui.alert_area_is_set')) : (t('ui.no_alert_area_set'))}</div>
         <label className="small">{t('ui.radius')}: {radius} km<input type="range" min={1} max={50} value={radius} onChange={(e) => setRadius(+e.target.value)} style={{ width: '100%' }} /></label>
-        <button className="btn btn-primary" onClick={setArea}>{t('ui.use_my_current_area')}</button>
+        <button className="btn btn-primary" onClick={setArea}><LocateFixed size={16} aria-hidden /> {t('ui.use_my_current_area')}</button>
         <label className="row small"><input type="checkbox" checked={user.ai_consent} onChange={(e) => save({ ai_consent: e.target.checked })} /> {t('ui.ai_analysis_consent')}</label>
       </div>
     </>
@@ -106,7 +106,7 @@ export function TrashCard({ all = false }: { all?: boolean }) {
         : items.map((i) => <div key={i.id} className="setting-row" data-testid="trash-item">
             <div className="grow"><div>{i.title}</div><div className="small muted">{t('ui.trash_deleted_at', { date: new Date((i as any).deleted_at ?? i.created_at).toLocaleString() })}</div></div>
             <button className="btn" onClick={() => restore(i)}><RotateCcw size={16} /> {t('ui.restore')}</button>
-            <button className="btn btn-danger" data-testid="delete-forever" onClick={() => purge(i)}>{t('ui.delete_forever')}</button>
+            <button className="btn btn-danger" data-testid="delete-forever" onClick={() => purge(i)}><Trash2 size={16} aria-hidden /> {t('ui.delete_forever')}</button>
           </div>)}
     </div>
   )
@@ -118,5 +118,5 @@ function AccountForm() {
   const toast = useToast()
   const [name, setName] = useState(user?.name ?? '')
   const save = async () => { try { await api('/auth/me', { method: 'PATCH', body: { name } }); await refresh(); toast(t('ui.saved')) } catch (e) { toast(errMsg(e), undefined, undefined, { kind: 'error' }) } }
-  return <div className="setting-row"><div className="grow"><div>{t('ui.name')}</div><input className="input" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} /></div><button className="btn btn-primary" disabled={!name.trim() || name === user?.name} onClick={save}>{t('ui.save')}</button></div>
+  return <div className="setting-row"><div className="grow"><div>{t('ui.name')}</div><input className="input" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} /></div><button className="btn btn-primary" disabled={!name.trim() || name === user?.name} onClick={save}><Save size={16} aria-hidden /> {t('ui.save')}</button></div>
 }

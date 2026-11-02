@@ -75,7 +75,7 @@ class CommentsSectionState extends State<CommentsSection> {
       Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         if (editing == c['id']) ...[
           TextField(controller: edit, autofocus: true, maxLines: null, maxLength: 1000, decoration: InputDecoration(isDense: true, filled: true, fillColor: bubble, border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none))),
-          Row(children: [TextButton(onPressed: () => setState(() => editing = null), child: Text(tr('cancel'))), FilledButton(onPressed: () => save(c), child: Text(tr('save')))]),
+          Row(children: [TextButton(onPressed: () => setState(() => editing = null), child: Text(tr('cancel'))), FilledButton.icon(onPressed: () => save(c), icon: const Icon(LucideIcons.save, size: 18), label: Text(tr('save')))]),
         ] else Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Flexible(child: Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), decoration: BoxDecoration(color: bubble, borderRadius: BorderRadius.circular(18)),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -102,10 +102,10 @@ class CommentsSectionState extends State<CommentsSection> {
 
   @override
   Widget build(BuildContext context) {
-    if (rows == null) return error ? TextButton(onPressed: load, child: Text(tr('retry'))) : const Padding(padding: EdgeInsets.all(8), child: Shim(child: Sk(h: 36)));
+    if (rows == null) return error ? TextButton.icon(onPressed: load, icon: const Icon(LucideIcons.refreshCw, size: 18), label: Text(tr('retry'))) : const Padding(padding: EdgeInsets.all(8), child: Shim(child: Sk(h: 36)));
     final tops = rows!.where((c) => c['parent_id'] == null).toList();
     final list = <Widget>[
-      if (widget.preview && total > rows!.length) Align(alignment: Alignment.centerLeft, child: TextButton(onPressed: widget.onOpenAll, child: Text(tr('more_comments'), style: TextStyle(color: RL.text2, fontWeight: FontWeight.w700)))),
+      if (widget.preview && total > rows!.length) Align(alignment: Alignment.centerLeft, child: TextButton.icon(onPressed: widget.onOpenAll, icon: const Icon(LucideIcons.messagesSquare, size: 18), label: Text(tr('more_comments'), style: TextStyle(color: RL.text2, fontWeight: FontWeight.w700)))),
       for (final c in tops) ...[tile(c), for (final r in rows!.where((x) => x['parent_id'] == c['id'])) tile(r)],
       if (!widget.preview && rows!.isEmpty) Padding(padding: const EdgeInsets.all(16), child: Text(tr('no_comments'), textAlign: TextAlign.center, style: TextStyle(color: RL.text2))),
     ];
