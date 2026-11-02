@@ -1,3 +1,4 @@
+import i18n from './i18n'
 export const API = (import.meta.env.VITE_API_URL as string) || 'http://127.0.0.1:8000/api/v1'
 export const SHARE_BASE = (import.meta.env.VITE_SHARE_BASE as string) || API.replace(/\/api\/v1\/?$/, '')
 
@@ -34,5 +35,5 @@ export const errMsg = (e: unknown) => {
     if (errs) return Object.values(errs).flat().join(' ')
     return e.message
   }
-  return navigator.onLine ? 'Something went wrong. Please try again.' : 'You are offline.'
+  return i18n.t(navigator.onLine ? 'ui.something_wrong' : 'ui.offline')
 }

@@ -25,10 +25,12 @@ class MetaController extends Controller
         ], $db ? 200 : 503);
     }
 
-    public function resources()
+    public function resources(\Illuminate\Http\Request $r)
     {
-        return ['data' => EmergencyResource::where('is_active', true)->get()->map(fn ($r) => [
-            'id' => $r->id, 'name' => $r->name, 'name_bn' => $r->name_bn, 'category' => $r->category, 'phone' => $r->phone,
+        // Only admin verified entries are public. Nothing is ever invented for a country without verified data.
+        $country = strtoupper(substr((string) $r->query('country', 'BD'), 0, 2));
+        return ['country' => $country, 'data' => EmergencyResource::where('is_active', true)->whereNotNull('verified_at')->where('country_code', $country)->get()->map(fn ($r) => [
+            'id' => $r->id, 'country_code' => $r->country_code, 'name' => $r->name, 'name_bn' => $r->name_bn, 'category' => $r->category, 'phone' => $r->phone,
             'jurisdiction' => $r->jurisdiction, 'source_name' => $r->source_name, 'source_url' => $r->source_url,
             'verified' => $r->verified_at !== null, 'verified_at' => $r->verified_at?->toIso8601String(),
             'last_reviewed_at' => $r->last_reviewed_at?->toIso8601String(),

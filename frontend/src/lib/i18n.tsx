@@ -1,54 +1,97 @@
-import { createContext, useContext, useState, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import i18n from 'i18next'
+import { initReactI18next, useTranslation } from 'react-i18next'
+import LanguageDetector from 'i18next-browser-languagedetector'
+import bn from '../locales/bn.json'
+import en from '../locales/en.json'
 
-const dict = {
-  bn: {
-    feed: 'ফিড', map: 'ম্যাপ', report: 'রিপোর্ট করুন', alerts: 'সতর্কতা', mod: 'মডারেশন', profile: 'প্রোফাইল', login: 'লগ ইন', register: 'নতুন অ্যাকাউন্ট',
-    logout: 'লগ আউট', whatsHappening: 'আশেপাশে কী ঘটছে? ছবি দিয়ে রিপোর্ট করুন', photo: 'ছবি / ক্যামেরা', iSee: 'আমিও দেখছি', notThere: 'ভুল তথ্য',
-    comment: 'মন্তব্য', share: 'শেয়ার', recent: 'সাম্প্রতিক সতর্কতা', nearby: 'আপনার কাছাকাছি', emergency: 'জরুরি প্রয়োজনে কল করুন', notifications: 'নোটিফিকেশন',
-    markRead: 'সব পড়া হয়েছে', noNotif: 'কোনো নোটিফিকেশন নেই', writeComment: 'মন্তব্য লিখুন...', verified: 'মডারেটর যাচাইকৃত', corroborated: 'কমিউনিটি সমর্থিত',
-    reported: 'রিপোর্ট করা', disputed: 'বিতর্কিত', resolved: 'সমাধান হয়েছে', expired: 'পুরনো', stale: 'তথ্য পুরনো হতে পারে', demo: 'ডেমো',
-    aiSuggestion: 'AI পরামর্শ, নিশ্চিত তথ্য নয়', analyze: 'AI দিয়ে বিশ্লেষণ', post: 'পোস্ট করুন', cancel: 'বাতিল', next: 'পরবর্তী', back: 'পেছনে',
-    confirmPost: 'আমি নিশ্চিত করছি তথ্যটি সত্য এবং প্রকাশ্যে দেখানো যাবে (আনুমানিক অবস্থান)', aiConsent: 'ছবিটি AI বিশ্লেষণের জন্য Meta Model API তে পাঠানোর অনুমতি দিচ্ছি',
-    title: 'শিরোনাম', description: 'বিবরণ', category: 'ধরন', severity: 'তীব্রতা', location: 'অবস্থান', useMyLocation: 'আমার অবস্থান ব্যবহার করুন',
-    anonymous: 'নাম গোপন রাখুন', duplicateFound: 'কাছাকাছি একই ধরনের রিপোর্ট আছে', joinExisting: 'এটিতে যোগ দিন', postAnyway: 'তবুও নতুন পোস্ট',
-    offlineSaved: 'অফলাইন: খসড়া সংরক্ষিত, অনলাইন হলে পাঠানো হবে', drafts: 'অফলাইন খসড়া', sendNow: 'এখন পাঠান', loadMore: 'আরও দেখুন',
-    neverSafe: 'RescueLens কোনো রাস্তা নিরাপদ বলে নিশ্চয়তা দেয় না।', all: 'সব', stats: 'পরিসংখ্যান', active: 'সক্রিয়', last24: 'শেষ ২৪ ঘণ্টা',
-  },
-  en: {
-    feed: 'Feed', map: 'Map', report: 'Report', alerts: 'Alerts', mod: 'Moderation', profile: 'Profile', login: 'Log in', register: 'Create account',
-    logout: 'Log out', whatsHappening: "What's happening nearby? Report with a photo", photo: 'Photo / Camera', iSee: 'I see this too', notThere: 'Not accurate',
-    comment: 'Comment', share: 'Share', recent: 'Recent alerts', nearby: 'Near you', emergency: 'In an emergency call', notifications: 'Notifications',
-    markRead: 'Mark all read', noNotif: 'No notifications yet', writeComment: 'Write a comment...', verified: 'Moderator verified', corroborated: 'Community corroborated',
-    reported: 'Reported', disputed: 'Disputed', resolved: 'Resolved', expired: 'Expired', stale: 'May be outdated', demo: 'DEMO',
-    aiSuggestion: 'AI suggestion, not confirmed', analyze: 'Analyze with AI', post: 'Post', cancel: 'Cancel', next: 'Next', back: 'Back',
-    confirmPost: 'I confirm this is accurate and can be shown publicly (approximate location)', aiConsent: 'I allow this photo to be sent to the Meta Model API for AI analysis',
-    title: 'Title', description: 'Description', category: 'Category', severity: 'Severity', location: 'Location', useMyLocation: 'Use my location',
-    anonymous: 'Post anonymously', duplicateFound: 'A similar report already exists nearby', joinExisting: 'Join that report', postAnyway: 'Post new anyway',
-    offlineSaved: 'Offline: draft saved and will be sent when you are back online', drafts: 'Offline drafts', sendNow: 'Send now', loadMore: 'Load more',
-    neverSafe: 'RescueLens never guarantees that any road is safe.', all: 'All', stats: 'Statistics', active: 'Active', last24: 'Last 24 hours',
-  },
-} as const
-export type Key = keyof typeof dict.bn
-export const CATS: Record<string, { bn: string; en: string; icon: string }> = {
-  road_accident: { bn: 'সড়ক দুর্ঘটনা', en: 'Road accident', icon: '🚗' }, flood: { bn: 'জলাবদ্ধতা / বন্যা', en: 'Waterlogging / flood', icon: '🌊' },
-  fire: { bn: 'আগুন', en: 'Fire', icon: '🔥' }, electrical: { bn: 'বিদ্যুৎ ঝুঁকি', en: 'Electrical hazard', icon: '⚡' },
-  building_collapse: { bn: 'ভবন ধস', en: 'Building collapse', icon: '🏚️' }, injury: { bn: 'আহত ব্যক্তি', en: 'Injury', icon: '🩹' }, other: { bn: 'অন্যান্য', en: 'Other', icon: '⚠️' },
+/**
+ * Language registry. To add a language: create src/locales/<code>.json with the same keys as en.json,
+ * import it in RESOURCES and add an entry here. RTL languages (ar, ur, fa, he) set dir automatically.
+ * See docs/INTERNATIONALIZATION.md.
+ */
+export const LANGUAGES: { code: string; native: string; font?: string }[] = [
+  { code: 'bn', native: 'বাংলা', font: 'bn' },
+  { code: 'en', native: 'English' },
+]
+const RESOURCES = { bn: { translation: bn }, en: { translation: en } }
+const RTL = ['ar', 'ur', 'fa', 'he']
+
+i18n.use(LanguageDetector).use(initReactI18next).init({
+  resources: RESOURCES,
+  supportedLngs: LANGUAGES.map((l) => l.code),
+  nonExplicitSupportedLngs: true,
+  fallbackLng: 'en',
+  interpolation: { escapeValue: false },
+  // Order: saved choice, then the browser language. Bangladesh is the launch market but a browser in another language starts in English.
+  detection: { order: ['localStorage', 'navigator'], lookupLocalStorage: 'rl_lang', caches: ['localStorage'] },
+})
+
+export function applyDocumentLang(l: string) {
+  document.documentElement.lang = l
+  document.documentElement.dir = RTL.includes(l.slice(0, 2)) ? 'rtl' : 'ltr'
 }
-export const SEVS: Record<string, { bn: string; en: string }> = { low: { bn: 'কম', en: 'Low' }, moderate: { bn: 'মাঝারি', en: 'Moderate' }, high: { bn: 'উচ্চ', en: 'High' }, critical: { bn: 'গুরুতর', en: 'Critical' } }
+i18n.on('languageChanged', applyDocumentLang)
+applyDocumentLang(i18n.resolvedLanguage || 'en')
 
-type Ctx = { lang: 'bn' | 'en'; setLang: (l: 'bn' | 'en') => void; t: (k: Key) => string }
+const ICONS: Record<string, string> = { road_accident: '🚗', flood: '🌊', fire: '🔥', electrical: '⚡', building_collapse: '🏚️', injury: '🩹', crowd_stampede: '👥', landslide: '⛰️', earthquake: '🌐', wildfire: '🌲', tsunami: '🌊', cyclone_storm: '🌀', snow_ice: '❄️', other: '⚠️' }
+type Label = { icon: string } & Record<string, string>
+// Category and severity labels resolve through i18next for any language: CATS[k][lang] or CATS[k].label.
+const labels = (ns: string, keys: string[], icons?: Record<string, string>) =>
+  Object.fromEntries(keys.map((k) => [k, new Proxy({ icon: icons?.[k] ?? '' } as Label, { get: (o, p) => (p === 'icon' ? o.icon : typeof p === 'string' ? i18n.t(`${ns}.${k}`) : undefined) })]))
+export const CATS: Record<string, Label> = labels('cat', Object.keys(ICONS), ICONS)
+export const SEVS: Record<string, Label> = labels('sev', ['low', 'moderate', 'high', 'critical'])
+export type Key = keyof typeof en
+
+/** Countries using miles on road signs. */
+const MILES = ['US', 'GB', 'LR', 'MM']
+export const COUNTRIES = ['BD', 'IN', 'PK', 'NP', 'LK', 'MM', 'ID', 'PH', 'MY', 'TR', 'SA', 'AE', 'EG', 'NG', 'KE', 'ZA', 'GB', 'US', 'CA', 'MX', 'BR', 'ES', 'FR', 'DE', 'IT', 'JP', 'AU']
+function detectCountry() {
+  const saved = localStorage.getItem('rl_country')
+  if (saved) return saved
+  const region = navigator.language.split('-')[1]?.toUpperCase()
+  return region && /^[A-Z]{2}$/.test(region) ? region : 'BD'
+}
+
+type Ctx = {
+  lang: string; setLang: (l: string) => void; t: (k: string, o?: Record<string, unknown>) => string
+  country: string; setCountry: (c: string) => void; units: 'km' | 'mi'; setUnits: (u: 'km' | 'mi') => void
+  locale: string; timeZone: string
+}
 const I18n = createContext<Ctx>(null!)
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [lang, setL] = useState<'bn' | 'en'>((localStorage.getItem('rl_lang') as any) || 'bn')
-  const setLang = (l: 'bn' | 'en') => { localStorage.setItem('rl_lang', l); document.documentElement.lang = l; setL(l) }
-  return <I18n.Provider value={{ lang, setLang, t: (k) => dict[lang][k] }}>{children}</I18n.Provider>
+  const { t, i18n: inst } = useTranslation()
+  const lang = (inst.resolvedLanguage || 'en').slice(0, 2)
+  const [country, setC] = useState(detectCountry)
+  const [units, setU] = useState<'km' | 'mi'>(() => (localStorage.getItem('rl_units') as 'km' | 'mi') || (MILES.includes(detectCountry()) ? 'mi' : 'km'))
+  useEffect(() => { localStorage.setItem('rl_country', country) }, [country])
+  const value: Ctx = {
+    lang, t: (k, o) => t(k, o) as string,
+    setLang: (l) => { inst.changeLanguage(l) },
+    country, setCountry: setC,
+    units, setUnits: (u) => { localStorage.setItem('rl_units', u); setU(u) },
+    locale: `${lang}-${country}`,
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  }
+  return <I18n.Provider value={value}>{children}</I18n.Provider>
 }
 export const useI18n = () => useContext(I18n)
 
-export function timeAgo(iso: string, lang: 'bn' | 'en') {
-  const s = Math.max(1, Math.round((Date.now() - new Date(iso).getTime()) / 1000))
-  const [v, u] = s < 60 ? [s, 's'] : s < 3600 ? [Math.round(s / 60), 'm'] : s < 86400 ? [Math.round(s / 3600), 'h'] : [Math.round(s / 86400), 'd']
-  if (lang === 'en') return `${v}${u}`
-  const bnU = { s: ' সেকেন্ড', m: ' মিনিট', h: ' ঘণ্টা', d: ' দিন' }[u]
-  return String(v).replace(/\d/g, (d) => '০১২৩৪৫৬৭৮৯'[+d]) + bnU + ' আগে'
+/** Locale aware helpers. Bangla uses Bangla digits through Intl (bn-BD). Times use the browser time zone. */
+export const intlLocale = (lang: string) => (lang === 'bn' ? 'bn-BD' : lang)
+export function fmtNumber(n: number, lang: string) { return new Intl.NumberFormat(intlLocale(lang)).format(n) }
+export function fmtDateTime(iso: string, lang: string) { return new Intl.DateTimeFormat(intlLocale(lang), { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(iso)) }
+export function fmtDistance(meters: number, units: 'km' | 'mi', lang: string) {
+  const v = units === 'mi' ? meters / 1609.344 : meters / 1000
+  return new Intl.NumberFormat(intlLocale(lang), { style: 'unit', unit: units === 'mi' ? 'mile' : 'kilometer', maximumFractionDigits: 1 }).format(v)
 }
+export function countryName(code: string, lang: string) {
+  try { return new Intl.DisplayNames([intlLocale(lang)], { type: 'region' }).of(code) ?? code } catch { return code }
+}
+export function timeAgo(iso: string, lang: string) {
+  const s = Math.round((new Date(iso).getTime() - Date.now()) / 1000)
+  const a = Math.abs(s)
+  const [v, u]: [number, Intl.RelativeTimeFormatUnit] = a < 60 ? [s, 'second'] : a < 3600 ? [Math.round(s / 60), 'minute'] : a < 86400 ? [Math.round(s / 3600), 'hour'] : [Math.round(s / 86400), 'day']
+  return new Intl.RelativeTimeFormat(intlLocale(lang), { numeric: 'auto', style: 'short' }).format(v, u)
+}
+export default i18n

@@ -11,7 +11,7 @@ class Present
 {
     public static function user(User $u): array
     {
-        return ['id' => $u->public_id, 'name' => $u->name, 'email' => $u->email, 'role' => $u->role, 'locale' => $u->locale,
+        return ['id' => $u->public_id, 'name' => $u->name, 'email' => $u->email, 'role' => $u->role, 'locale' => $u->locale, 'country_code' => $u->country_code ?? 'BD', 'distance_unit' => $u->distance_unit ?? 'km', 'timezone' => $u->timezone,
             'ai_consent' => $u->ai_consent, 'alert_radius_km' => $u->alert_radius_km,
             'alert_area_set' => $u->alert_lat !== null, 'is_demo' => $u->is_demo];
     }

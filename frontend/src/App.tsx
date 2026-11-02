@@ -1,3 +1,4 @@
+import i18n from './lib/i18n'
 import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
@@ -41,7 +42,7 @@ function RequireMod({ children }: { children: React.ReactNode }) {
 function OfflineSync() {
   const qc = useQueryClient(); const toast = useToast(); const { user } = useAuth()
   useEffect(() => {
-    const go = () => user && flushDrafts().then((n) => { if (n) { toast(`${n} offline report(s) posted`); qc.invalidateQueries({ queryKey: ['feed'] }) } })
+    const go = () => user && flushDrafts().then((n) => { if (n) { toast(i18n.t('ui.offline_posted', { count: n })); qc.invalidateQueries({ queryKey: ['feed'] }) } })
     go(); window.addEventListener('online', go); return () => window.removeEventListener('online', go)
   }, [user])
   return null

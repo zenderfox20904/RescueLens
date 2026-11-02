@@ -36,7 +36,7 @@ export function shareLinks(i: Incident) {
     // Official Facebook Share Dialog via URL (no SDK, no permissions): https://developers.facebook.com/docs/sharing/reference/share-dialog
     facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
     // WhatsApp click to chat: https://faq.whatsapp.com/5913398998672934
-    whatsapp: `https://wa.me/?text=${encodeURIComponent(`⚠️ ${i.title}\n${i.location.area_name ?? ''}\n${url}\nজরুরি প্রয়োজনে 999`)}`,
+    whatsapp: `https://wa.me/?text=${encodeURIComponent(`⚠️ ${i.title}\n${i.location.area_name ?? ''}\n${url}`)}`,
   }
 }
 
@@ -89,8 +89,8 @@ export function PostCard({ i, detail = false }: { i: Incident; detail?: boolean 
       <div className="post-head">
         <Avatar name={i.reporter.anonymous ? '?' : i.reporter.name} />
         <div className="grow">
-          <b>{i.reporter.name ?? (lang === 'bn' ? 'নাম গোপন' : 'Anonymous')}</b> <span className="muted">· {cat?.icon} {cat?.[lang]}</span>
-          <div className="small muted row" style={{ gap: 4 }}><Link to={`/incidents/${i.id}`} className="muted">{timeAgo(i.created_at, lang)}</Link> · 📍 {i.location.area_name ?? (lang === 'bn' ? 'আনুমানিক অবস্থান' : 'Approximate location')}</div>
+          <b>{i.reporter.name ?? (t('ui.anonymous'))}</b> <span className="muted">· {cat?.icon} {cat?.[lang]}</span>
+          <div className="small muted row" style={{ gap: 4 }}><Link to={`/incidents/${i.id}`} className="muted">{timeAgo(i.created_at, lang)}</Link> · 📍 {i.location.area_name ?? (t('ui.approximate_location'))}</div>
         </div>
         <StatusBadge i={i} />
       </div>
@@ -106,7 +106,7 @@ export function PostCard({ i, detail = false }: { i: Incident; detail?: boolean 
         </div>
       )}
       <div className="post-stats">
-        <span>👁️ {i.counts.confirm} {lang === 'bn' ? 'জন দেখেছেন' : 'confirmed'}{i.counts.dispute ? ` · ${i.counts.dispute} ${lang === 'bn' ? 'ভিন্নমত' : 'disputed'}` : ''}</span>
+        <span>👁️ {i.counts.confirm} {t('ui.confirmed')}{i.counts.dispute ? ` · ${i.counts.dispute} ${t('ui.disputed')}` : ''}</span>
         <button className="btn btn-ghost small" style={{ padding: 0 }} onClick={() => setShowComments((v) => !v)}>{i.counts.comments} {t('comment')}</button>
       </div>
       <div className="post-actions">
@@ -116,9 +116,9 @@ export function PostCard({ i, detail = false }: { i: Incident; detail?: boolean 
           <button className="btn" style={{ width: '100%' }} onClick={() => setShareOpen((v) => !v)}><IShare size={18} /> {t('share')}</button>
           {shareOpen && (
             <div className="card dropdown fade-in" style={{ width: 240, top: 40 }} onMouseLeave={() => setShareOpen(false)}>
-              <a className="notif" href={s.facebook} target="_blank" rel="noopener noreferrer"><IFacebook /> {lang === 'bn' ? 'Facebook এ শেয়ার' : 'Share to Facebook'}</a>
-              <a className="notif" href={s.whatsapp} target="_blank" rel="noopener noreferrer"><IWhatsApp /> {lang === 'bn' ? 'WhatsApp এ পাঠান' : 'Send on WhatsApp'}</a>
-              <button className="notif btn-ghost" style={{ border: 0, width: '100%', background: 'none' }} onClick={() => { navigator.clipboard?.writeText(s.url); toast(lang === 'bn' ? 'লিংক কপি হয়েছে' : 'Link copied'); setShareOpen(false) }}>🔗 {lang === 'bn' ? 'লিংক কপি' : 'Copy link'}</button>
+              <a className="notif" href={s.facebook} target="_blank" rel="noopener noreferrer"><IFacebook /> {t('ui.share_to_facebook')}</a>
+              <a className="notif" href={s.whatsapp} target="_blank" rel="noopener noreferrer"><IWhatsApp /> {t('ui.send_on_whatsapp')}</a>
+              <button className="notif btn-ghost" style={{ border: 0, width: '100%', background: 'none' }} onClick={() => { navigator.clipboard?.writeText(s.url); toast(t('ui.link_copied')); setShareOpen(false) }}>🔗 {t('ui.copy_link')}</button>
             </div>)}
         </div>
         {!i.reporter.is_me && <button className={'btn' + (i.my_reaction === 'dispute' ? ' on' : '')} style={{ flex: 'none' }} title={t('notThere')} onClick={() => act('dispute')}><IFlag size={18} /></button>}

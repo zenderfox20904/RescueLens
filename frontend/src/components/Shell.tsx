@@ -3,10 +3,11 @@ import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
-import { CATS, timeAgo, useI18n } from '../lib/i18n'
+import { CATS, LANGUAGES, timeAgo, useI18n } from '../lib/i18n'
 import type { Notification } from '../lib/types'
 import { LogoMark } from './Logo'
-import { IBell, IHome, IMap, IMoon, IPlus, IShield, ISun, IUser, IGlobe, ILogout, IPhone } from './Icons'
+import { EmergencyBanner, useEmergency } from './Emergency'
+import { IBell, IHome, IMap, IMoon, IPlus, IShield, ISun, IUser, ILogout } from './Icons'
 import { ListSkeleton, Sk } from './Skeleton'
 import { drafts, flushDrafts } from '../lib/offline'
 import { useToast } from './Toast'
@@ -50,21 +51,21 @@ function Bell() {
 
 export function TopNav({ theme }: { theme: ReturnType<typeof useTheme> }) {
   const { user, logout } = useAuth()
-  const { t, lang, setLang } = useI18n()
+  const { t } = useI18n()
   const nav = useNavigate()
   const tab = (to: string, icon: ReactNode, label: string) => <NavLink to={to} className={({ isActive }) => 'navtab' + (isActive ? ' active' : '')} title={label} aria-label={label}>{icon}</NavLink>
   return (
     <header className="topnav">
       <Link to="/feed" className="brand"><LogoMark size={40} /><span className="hide-sm">RescueLens</span></Link>
-      <div className="search" style={{ width: 240 }}><input className="pill-input" placeholder={lang === 'bn' ? 'RescueLens এ খুঁজুন' : 'Search RescueLens'} onKeyDown={(e) => { if (e.key === 'Enter') nav('/feed?q=' + encodeURIComponent((e.target as HTMLInputElement).value)) }} /></div>
+      <div className="search" style={{ width: 240 }}><input className="pill-input" placeholder={t('ui.search_rescuelens')} onKeyDown={(e) => { if (e.key === 'Enter') nav('/feed?q=' + encodeURIComponent((e.target as HTMLInputElement).value)) }} /></div>
       <nav className="center">
         {tab('/feed', <IHome size={26} />, t('feed'))}
         {tab('/map', <IMap size={26} />, t('map'))}
         {tab('/report', <IPlus size={26} />, t('report'))}
         {user && (user.role === 'moderator' || user.role === 'admin') && tab('/moderation', <IShield size={26} />, t('mod'))}
       </nav>
-      <button className="iconbtn" onClick={() => setLang(lang === 'bn' ? 'en' : 'bn')} aria-label="Language" title={lang === 'bn' ? 'English' : 'বাংলা'}><IGlobe size={20} /></button>
-      <button className="iconbtn" onClick={theme.toggle} aria-label="Theme">{theme.theme === 'dark' ? <ISun size={20} /> : <IMoon size={20} />}</button>
+      <LangToggle />
+      <button className="iconbtn" onClick={theme.toggle} aria-label={t('ui.theme')}>{theme.theme === 'dark' ? <ISun size={20} /> : <IMoon size={20} />}</button>
       {user ? <>
         <Bell />
         <Link to="/profile" aria-label={t('profile')}><Avatar name={user.name} size={40} /></Link>
@@ -87,7 +88,7 @@ export function LeftSidebar() {
       {item('/feed', <IHome size={18} />, t('feed'))}
       {item('/map', <IMap size={18} />, t('map'))}
       {item('/report', <IPlus size={18} />, t('report'))}
-      {item('/feed?mine=1', <IUser size={18} />, lang === 'bn' ? 'আমার রিপোর্ট' : 'My reports')}
+      {item('/feed?mine=1', <IUser size={18} />, t('ui.my_reports'))}
       {user && (user.role === 'moderator' || user.role === 'admin') && item('/moderation', <IShield size={18} />, t('mod'))}
       {n > 0 && <div className="card" style={{ padding: 12, marginTop: 8 }}><b>{t('drafts')}: {n}</b><button className="btn btn-primary" style={{ width: '100%', marginTop: 8 }} onClick={async () => toast(`${await flushDrafts()} sent`)}>{t('sendNow')}</button></div>}
       <div className="divider" />
@@ -101,11 +102,11 @@ export function LeftSidebar() {
 export function RightSidebar() {
   const { t, lang } = useI18n()
   const stats = useQuery({ queryKey: ['stats'], queryFn: () => api<{ data: { active: number; verified: number; last_24h: number } }>('/stats'), refetchInterval: 30000 })
-  const res = useQuery({ queryKey: ['resources'], queryFn: () => api<{ data: any[] }>('/emergency-resources'), staleTime: 3600_000 })
+  const res = useEmergency()
   const health = useQuery({ queryKey: ['health'], queryFn: () => api<any>('/health'), staleTime: 60_000 })
   return (
     <aside className="sidebar right">
-      <div className="sos" style={{ marginBottom: 12 }}><IPhone size={22} /><div>{t('emergency')} <a href="tel:999">999</a><div className="small" style={{ opacity: .9 }}>{lang === 'bn' ? 'বাংলাদেশ জাতীয় জরুরি সেবা' : 'Bangladesh National Emergency Service'}</div></div></div>
+      <div style={{ marginBottom: 12 }}><EmergencyBanner /></div>
       <div className="section-title">{t('stats')}</div>
       <div className="card" style={{ padding: 12 }}>
         {stats.isLoading ? <ListSkeleton rows={3} avatar={false} /> : stats.data && (
@@ -115,19 +116,28 @@ export function RightSidebar() {
             <div className="row"><span className="grow">{t('last24')}</span><b>{stats.data.data.last_24h}</b></div>
           </div>)}
       </div>
-      <div className="section-title">{lang === 'bn' ? 'যাচাইকৃত জরুরি নম্বর' : 'Verified emergency contacts'}</div>
+      <div className="section-title">{t('ui.verified_emergency_contacts')}</div>
       <div className="card" style={{ padding: 12 }}>
-        {res.isLoading ? <ListSkeleton rows={1} /> : res.data?.data.map((r) => (
-          <div key={r.id} className="small"><b>{lang === 'bn' ? r.name_bn || r.name : r.name}</b>: <a href={'tel:' + r.phone}>{r.phone}</a><div className="muted">{lang === 'bn' ? 'উৎস' : 'Source'}: <a href={r.source_url} target="_blank" rel="noreferrer">{r.source_name}</a></div></div>
+        {res.isLoading ? <ListSkeleton rows={1} /> : !res.data?.data.length ? <div className="small muted">{t('ui.no_verified_contacts')}</div> : res.data.data.map((r) => (
+          <div key={r.id} className="small"><b>{lang === 'bn' ? r.name_bn || r.name : r.name}</b>: <a href={'tel:' + r.phone}>{r.phone}</a><div className="muted">{t('ui.source')}: <a href={r.source_url} target="_blank" rel="noreferrer">{r.source_name}</a></div></div>
         ))}
       </div>
       <div className="section-title">AI</div>
       <div className="card small" style={{ padding: 12 }}>
         {health.isLoading ? <Sk h={30} /> : health.data?.ai?.mode === 'live'
           ? <>✅ Meta Model API live: {health.data.ai.vision_model} + {health.data.ai.segmentation_model}</>
-          : <><span className="badge badge-demo">DEMO</span> {lang === 'bn' ? 'লাইভ AI কনফিগার করা নেই। ডেমো ফলাফল স্পষ্টভাবে চিহ্নিত।' : 'Live AI not configured. Demo results are clearly labeled.'}</>}
+          : <><span className="badge badge-demo">DEMO</span> {t('ui.live_ai_not_configured_demo')}</>}
       </div>
       <p className="footer-note">{t('neverSafe')}</p>
     </aside>
   )
+}
+
+/** Top bar language switcher. Saves to localStorage and, when signed in, to the profile (PATCH /auth/me). */
+export function LangToggle({ className = 'iconbtn' }: { className?: string }) {
+  const { lang, setLang, t } = useI18n(); const { user } = useAuth()
+  const next = LANGUAGES[(LANGUAGES.findIndex((l) => l.code === lang) + 1) % LANGUAGES.length]
+  return <button className={className} onClick={() => { setLang(next.code); if (user) api('/auth/me', { method: 'PATCH', body: { locale: next.code } }).catch(() => {}) }} aria-label={t('ui.switch_language')} title={next.native}>
+    {className === 'iconbtn' ? <span style={{ fontSize: 13, fontWeight: 700 }}>{next.code === 'bn' ? 'বা' : next.code.toUpperCase()}</span> : next.native}
+  </button>
 }

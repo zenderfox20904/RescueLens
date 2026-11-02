@@ -102,3 +102,7 @@ input, textarea, select { font: inherit; color: var(--text); }
 [data-theme="dark"] .sk::after { background: linear-gradient(90deg, transparent, rgba(255,255,255,.08), transparent); }
 @keyframes shimmer { to { transform: translateX(100%); } }
 .leaflet-container { border-radius: var(--r-card); font-family: var(--font); }
+
+/* Bangla script: Noto Sans Bengali / Hind Siliguri when Bangla is active */
+:lang(bn) body, :lang(bn) input, :lang(bn) textarea, :lang(bn) button { font-family: "Noto Sans Bengali", "Hind Siliguri", "Segoe UI Historic", "Segoe UI", Helvetica, Arial, sans-serif; }
+[dir="rtl"] .post-media { direction: ltr; }

@@ -46,8 +46,8 @@ export default function Feed() {
         <button className={'chip' + (!category ? ' on' : '')} onClick={() => setSp({})}>{t('all')}</button>
         {Object.entries(CATS).map(([k, v]) => <button key={k} className={'chip' + (category === k ? ' on' : '')} onClick={() => setSp({ category: k })}>{v.icon} {v[lang]}</button>)}
       </div>
-      {feed.isLoading ? <><PostSkeleton /><PostSkeleton /></> : feed.isError ? <div className="card" style={{ padding: 16 }}>{lang === 'bn' ? 'ফিড লোড করা যায়নি। সার্ভার চালু আছে কিনা দেখুন।' : 'Could not load the feed. Is the API running?'}</div>
-        : items.length === 0 ? <div className="card muted" style={{ padding: 24, textAlign: 'center' }}>{lang === 'bn' ? 'কোনো রিপোর্ট নেই' : 'No reports yet'}</div>
+      {feed.isLoading ? <><PostSkeleton /><PostSkeleton /></> : feed.isError ? <div className="card" style={{ padding: 16 }}>{t('ui.could_not_load_the_feed')}</div>
+        : items.length === 0 ? <div className="card muted" style={{ padding: 24, textAlign: 'center' }}>{t('ui.no_reports_yet')}</div>
         : items.map((i) => <PostCard key={i.id} i={i} />)}
       {feed.isFetchingNextPage && <PostSkeleton />}
       <div id="feed-end" style={{ height: 1 }} />

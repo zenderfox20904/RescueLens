@@ -57,10 +57,10 @@ Tests: `backend/tests/Feature/RescueLensApiTest.php` (5 tests) and `backend/test
 | Footer "© 2026 RescueLens" web and Flutter | Done (web build passes; Flutter analyze rerun pending) |
 | Facebook precise UI on every screen (signup, login, feed, admin, map, profile, settings, notifications, detail) | Not started (palette done; layout pass pending) |
 | Seeded system admin with local demo credentials | Not started |
-| react-i18next, bn/en, RTL ready, browser language detect, timezone, units | Not started (custom i18n with bn/en exists) |
+| react-i18next, bn/en, RTL ready, browser language detect, timezone, units | Done: i18next with browser detection, RTL dir switch, Intl dates/numbers in viewer time zone, km/mi, country selector in Profile, verified per country emergency directory (only BD 999 seeded). Tests: InternationalizationTest (2). See docs/INTERNATIONALIZATION.md |
 | Flutter ARB localization | Not started |
 | Google Maps web and Flutter | Done (rendered); clustering and side list Not started |
 | Screenshots in docs/screenshots | Not started |
 | Docs set (ARCHITECTURE, THREAT_MODEL, INTERNATIONALIZATION, AI_PIPELINE, etc.) | Not started |
 | CI workflow | Not started |
-| Push to GitHub | Blocked: 403, account lacks write access |
+| Push to GitHub | Done: normal pushes to origin main |

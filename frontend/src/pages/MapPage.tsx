@@ -13,7 +13,7 @@ const LeafletIncidentMap = lazy(() => import('../components/map/LeafletIncidentM
 const GMAPS_KEY = (import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined) || ''
 
 export default function MapPage() {
-  const { lang } = useI18n()
+  const { t, lang } = useI18n()
   const [googleFailed, setGoogleFailed] = useState(false)
   const onError = useCallback(() => setGoogleFailed(true), [])
   const dark = document.documentElement.dataset.theme === 'dark'
@@ -28,10 +28,10 @@ export default function MapPage() {
             {useGoogle ? <MapErrorBoundary fallback={<LeafletIncidentMap points={points} />}><GoogleIncidentMap apiKey={GMAPS_KEY} points={points} dark={dark} onError={onError} /></MapErrorBoundary> : <LeafletIncidentMap points={points} />}
           </Suspense>)}
         <div className="small muted" style={{ padding: 8 }}>
-          {useGoogle ? 'Google Maps' : 'OpenStreetMap'} · {lang === 'bn' ? 'মার্কারগুলো আনুমানিক অবস্থান দেখায়। ম্যাপে কিছু না থাকলেও কোনো রাস্তা নিরাপদ বলে ধরে নেবেন না।' : 'Markers show approximate locations. An empty area does not mean a road is safe.'}
+          {useGoogle ? 'Google Maps' : 'OpenStreetMap'} · {t('ui.markers_show_approximate_locations_an')}
         </div>
       </div>
-      <div className="card" style={{ padding: 8 }} role="list" aria-label={lang === 'bn' ? 'ঘটনার তালিকা' : 'Incident list'}>
+      <div className="card" style={{ padding: 8 }} role="list" aria-label={t('ui.incident_list')}>
         {q.isLoading ? <ListSkeleton rows={5} /> : points.map((p) => (
           <Link role="listitem" key={p.id} to={`/incidents/${p.id}`} className="notif"><div className="sideicon" style={{ flex: 'none' }} aria-hidden>{CATS[p.category]?.icon}</div><div className="grow"><b>{p.title}</b><div className="small muted">{CATS[p.category]?.[lang]} · {p.area_name} · {timeAgo(p.created_at, lang)} · 👁️ {p.confirm}</div></div><StatusBadge i={p} /></Link>
         ))}
