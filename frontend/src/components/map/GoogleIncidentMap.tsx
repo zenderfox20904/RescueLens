@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 import { APIProvider, Map, useMap } from '@vis.gl/react-google-maps'
 import { MarkerClusterer } from '@googlemaps/markerclusterer'
 import { useNavigate } from 'react-router-dom'
-import { CATS } from '../../lib/i18n'
+import { CATS, useI18n } from '../../lib/i18n'
 import type { MapPoint } from '../../lib/types'
 
 const SEV = { low: '#31A24C', moderate: '#F7B928', high: '#F5793B', critical: '#E41E3F' }
@@ -61,9 +61,10 @@ export default function GoogleIncidentMap({ apiKey, points, dark, onError }: { a
     ;(window as any).gm_authFailure = onError
     return () => { delete (window as any).gm_authFailure }
   }, [onError])
+  const { lang, country } = useI18n()
   return (
-    <APIProvider apiKey={apiKey} onError={onError} language="bn" region="BD">
-      <Map style={{ height: 480, borderRadius: 8 }} defaultCenter={{ lat: 23.78, lng: 90.39 }} defaultZoom={12}
+    <APIProvider apiKey={apiKey} onError={onError} language={lang} region={country}>
+      <Map style={{ height: '100%', minHeight: 420, borderRadius: 8 }} defaultCenter={{ lat: 23.78, lng: 90.39 }} defaultZoom={12}
         styles={dark ? FB_DARK : FB_STYLE} gestureHandling="greedy" streetViewControl={false} mapTypeControl={false}>
         <Markers points={points} />
       </Map>

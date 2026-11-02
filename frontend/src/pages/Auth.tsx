@@ -58,11 +58,12 @@ export function Login() {
         <input className="input" type="password" required autoComplete="current-password" placeholder={t('ui.password')} value={password} onChange={(e) => setPassword(e.target.value)} />
         {err && <div className="small" role="alert" style={{ color: 'var(--danger)' }}>{err}</div>}
         <button className="btn btn-primary" style={{ padding: 12, fontSize: 18 }} disabled={busy}>{t('login')}</button>
+        <Link to="/forgot-password" className="small" style={{ textAlign: 'center' }}>{t('ui.forgot_password')}</Link>
         <div className="divider" />
         <SocialButtons />
         <div className="divider" />
         <Link to="/register" className="btn" style={{ background: 'var(--success)', color: '#fff', justifySelf: 'center', padding: '12px 16px' }}>{t('register')}</Link>
-        <div className="small muted" style={{ textAlign: 'center' }}>{t('ui.demo')}: rina@rescuelens.test / moderator@rescuelens.test, password: <code>password</code></div>
+        <div className="small muted" style={{ textAlign: 'center' }}>{t('ui.demo')}: rina@rescuelens.test, <code>password</code></div>
       </form>
     </AuthFrame>
   )
@@ -81,12 +82,14 @@ export function Register() {
   return (
     <AuthFrame>
       <form onSubmit={submit} style={{ display: 'grid', gap: 12 }}>
-        <h2 style={{ margin: 0 }}>{t('register')}</h2>
+        <div><h2 style={{ margin: 0, fontSize: 28 }}>{t('ui.create_account')}</h2><div className="muted">{t('ui.quick_easy')}</div></div>
+        <div className="divider" />
         <input className="input" required maxLength={80} placeholder={t('ui.name')} value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
         <input className="input" type="email" required placeholder={t('ui.email')} value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} />
         <input className="input" type="password" required minLength={8} autoComplete="new-password" placeholder={t('ui.password_8_with_letters_and')} value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} />
         {err && <div className="small" role="alert" style={{ color: 'var(--danger)' }}>{err}</div>}
-        <button className="btn btn-primary" style={{ padding: 12 }} disabled={busy}>{t('register')}</button>
+        <div className="small muted">{t('ui.signup_terms')}</div>
+        <button className="btn" style={{ padding: '12px 40px', background: 'var(--success)', color: '#fff', justifySelf: 'center', fontSize: 18 }} disabled={busy}>{t('register')}</button>
         <SocialButtons />
         <Link to="/login" style={{ textAlign: 'center' }}>{t('login')}</Link>
       </form>

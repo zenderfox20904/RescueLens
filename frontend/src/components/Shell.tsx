@@ -7,7 +7,7 @@ import { CATS, LANGUAGES, timeAgo, useI18n } from '../lib/i18n'
 import type { Notification } from '../lib/types'
 import { LogoMark } from './Logo'
 import { EmergencyBanner, useEmergency } from './Emergency'
-import { IBell, IHome, IMap, IMoon, IPlus, IShield, ISun, IUser, ILogout } from './Icons'
+import { IBell, IHome, IMap, IMoon, IPlus, IShield, ISun, IUser, ILogout, ISettings } from './Icons'
 import { ListSkeleton, Sk } from './Skeleton'
 import { drafts, flushDrafts } from '../lib/offline'
 import { useToast } from './Toast'
@@ -35,7 +35,7 @@ function Bell() {
       <button className="iconbtn" aria-label={t('notifications')} onClick={() => setOpen((o) => !o)}><IBell size={20} />{!!data?.unread && <span className="dot">{data.unread > 9 ? '9+' : data.unread}</span>}</button>
       {open && (
         <div className="card dropdown fade-in">
-          <div className="row" style={{ padding: '4px 8px' }}><b style={{ fontSize: 22 }} className="grow">{t('notifications')}</b><button className="btn btn-ghost small" onClick={readAll}>{t('markRead')}</button></div>
+          <div className="row" style={{ padding: '4px 8px' }}><b style={{ fontSize: 22 }} className="grow">{t('notifications')}</b><button className="btn btn-ghost small" onClick={readAll}>{t('markRead')}</button><Link className="btn btn-ghost small" to="/notifications" onClick={() => setOpen(false)}>{t('ui.see_all')}</Link></div>
           {isLoading ? <ListSkeleton rows={4} /> : !data?.data.length ? <p className="muted" style={{ padding: 8 }}>{t('noNotif')}</p> :
             data.data.map((n) => (
               <a key={n.id} className={'notif' + (n.read ? '' : ' unread')} href="#" onClick={(e) => { e.preventDefault(); setOpen(false); if (n.incident_id) nav('/incidents/' + n.incident_id) }}>
@@ -62,7 +62,7 @@ export function TopNav({ theme }: { theme: ReturnType<typeof useTheme> }) {
         {tab('/feed', <IHome size={26} />, t('feed'))}
         {tab('/map', <IMap size={26} />, t('map'))}
         {tab('/report', <IPlus size={26} />, t('report'))}
-        {user && (user.role === 'moderator' || user.role === 'admin') && tab('/moderation', <IShield size={26} />, t('mod'))}
+        {user && (user.role === 'moderator' || user.role === 'admin') && tab('/admin', <IShield size={26} />, t('ui.admin_panel'))}
       </nav>
       <LangToggle />
       <button className="iconbtn" onClick={theme.toggle} aria-label={t('ui.theme')}>{theme.theme === 'dark' ? <ISun size={20} /> : <IMoon size={20} />}</button>
@@ -89,7 +89,9 @@ export function LeftSidebar() {
       {item('/map', <IMap size={18} />, t('map'))}
       {item('/report', <IPlus size={18} />, t('report'))}
       {item('/feed?mine=1', <IUser size={18} />, t('ui.my_reports'))}
-      {user && (user.role === 'moderator' || user.role === 'admin') && item('/moderation', <IShield size={18} />, t('mod'))}
+      {user && item('/notifications', <IBell size={18} />, t('notifications'))}
+      {user && (user.role === 'moderator' || user.role === 'admin') && item('/admin', <IShield size={18} />, t('ui.admin_panel'))}
+      {user && item('/settings', <ISettings size={18} />, t('ui.settings'))}
       {n > 0 && <div className="card" style={{ padding: 12, marginTop: 8 }}><b>{t('drafts')}: {n}</b><button className="btn btn-primary" style={{ width: '100%', marginTop: 8 }} onClick={async () => toast(`${await flushDrafts()} sent`)}>{t('sendNow')}</button></div>}
       <div className="divider" />
       <div className="section-title">{t('category')}</div>
@@ -137,7 +139,7 @@ export function RightSidebar() {
 export function LangToggle({ className = 'iconbtn' }: { className?: string }) {
   const { lang, setLang, t } = useI18n(); const { user } = useAuth()
   const next = LANGUAGES[(LANGUAGES.findIndex((l) => l.code === lang) + 1) % LANGUAGES.length]
-  return <button className={className} onClick={() => { setLang(next.code); if (user) api('/auth/me', { method: 'PATCH', body: { locale: next.code } }).catch(() => {}) }} aria-label={t('ui.switch_language')} title={next.native}>
+  return <button data-testid="lang-toggle" className={className} onClick={() => { setLang(next.code); if (user) api('/auth/me', { method: 'PATCH', body: { locale: next.code } }).catch(() => {}) }} aria-label={t('ui.switch_language')} title={next.native}>
     {className === 'iconbtn' ? <span style={{ fontSize: 13, fontWeight: 700 }}>{next.code === 'bn' ? 'বা' : next.code.toUpperCase()}</span> : next.native}
   </button>
 }

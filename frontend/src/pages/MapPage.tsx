@@ -1,41 +1,54 @@
-import { lazy, Suspense, useCallback, useState } from 'react'
+import { lazy, Suspense, useCallback, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '../lib/api'
-import { CATS, timeAgo, useI18n } from '../lib/i18n'
+import { CATS, SEVS, timeAgo, useI18n } from '../lib/i18n'
 import type { MapPoint } from '../lib/types'
 import { ListSkeleton, Sk } from '../components/Skeleton'
 import { StatusBadge } from '../components/PostCard'
-import { MapErrorBoundary } from "../components/map/MapErrorBoundary"
+import { MapErrorBoundary } from '../components/map/MapErrorBoundary'
 
 const GoogleIncidentMap = lazy(() => import('../components/map/GoogleIncidentMap'))
 const LeafletIncidentMap = lazy(() => import('../components/map/LeafletIncidentMap'))
 const GMAPS_KEY = (import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined) || ''
+const HOURS = [6, 24, 72, 168]
 
+/** Live map: filter panel, clustered map, and a synced side list. Refreshes every 15 s. */
 export default function MapPage() {
   const { t, lang } = useI18n()
   const [googleFailed, setGoogleFailed] = useState(false)
   const onError = useCallback(() => setGoogleFailed(true), [])
+  const [hours, setHours] = useState(168)
+  const [cats, setCats] = useState<string[]>([])
+  const [sevs, setSevs] = useState<string[]>([])
   const dark = document.documentElement.dataset.theme === 'dark'
-  const q = useQuery({ queryKey: ['map', 168], queryFn: () => api<{ data: MapPoint[] }>('/incidents/map?hours=168'), refetchInterval: 15000 })
-  const points = q.data?.data ?? []
+  const q = useQuery({ queryKey: ['map', hours], queryFn: () => api<{ data: MapPoint[] }>('/incidents/map?hours=' + hours), refetchInterval: 15000 })
+  const points = useMemo(() => (q.data?.data ?? []).filter((p) => (!cats.length || cats.includes(p.category)) && (!sevs.length || sevs.includes(p.severity))), [q.data, cats, sevs])
+  const tog = (arr: string[], set: (v: string[]) => void, v: string) => set(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v])
   const useGoogle = !!GMAPS_KEY && !googleFailed
   return (
-    <div className="main">
-      <div className="card" style={{ padding: 8 }}>
-        {q.isLoading ? <Sk h={480} r={8} /> : (
-          <Suspense fallback={<Sk h={480} r={8} />}>
+    <div className="map-layout">
+      <aside className="card map-filters" aria-label={t('ui.filters')}>
+        <div className="row"><b className="grow" style={{ fontSize: 20 }}>{t('ui.filters')}</b>{(cats.length > 0 || sevs.length > 0) && <button className="btn btn-ghost small" onClick={() => { setCats([]); setSevs([]) }}>{t('ui.clear_filters')}</button>}</div>
+        <div className="section-title">{t('ui.time_window')}</div>
+        <div className="chips">{HOURS.map((h) => <button key={h} className={'chip' + (hours === h ? ' on' : '')} onClick={() => setHours(h)}>{t('ui.last_hours', { count: h })}</button>)}</div>
+        <div className="section-title">{t('ui.severity')}</div>
+        <div className="chips">{Object.keys(SEVS).map((s) => <button key={s} className={'chip sev-chip sev-' + s + (sevs.includes(s) ? ' on' : '')} onClick={() => tog(sevs, setSevs, s)}>{SEVS[s][lang]}</button>)}</div>
+        <div className="section-title">{t('category')}</div>
+        <div className="chips">{Object.entries(CATS).map(([k, v]) => <button key={k} className={'chip' + (cats.includes(k) ? ' on' : '')} onClick={() => tog(cats, setCats, k)}>{v.icon} {v[lang]}</button>)}</div>
+      </aside>
+      <div className="card map-canvas">
+        {q.isLoading ? <Sk h="100%" r={8} /> : (
+          <Suspense fallback={<Sk h="100%" r={8} />}>
             {useGoogle ? <MapErrorBoundary fallback={<LeafletIncidentMap points={points} />}><GoogleIncidentMap apiKey={GMAPS_KEY} points={points} dark={dark} onError={onError} /></MapErrorBoundary> : <LeafletIncidentMap points={points} />}
           </Suspense>)}
-        <div className="small muted" style={{ padding: 8 }}>
-          {useGoogle ? 'Google Maps' : 'OpenStreetMap'} · {t('ui.markers_show_approximate_locations_an')}
-        </div>
+        <div className="small muted map-note"><span className="live-dot" /> {t('ui.live')} · {useGoogle ? 'Google Maps' : 'OpenStreetMap'} · {t('ui.markers_show_approximate_locations_an')}</div>
       </div>
-      <div className="card" style={{ padding: 8 }} role="list" aria-label={t('ui.incident_list')}>
-        {q.isLoading ? <ListSkeleton rows={5} /> : points.map((p) => (
-          <Link role="listitem" key={p.id} to={`/incidents/${p.id}`} className="notif"><div className="sideicon" style={{ flex: 'none' }} aria-hidden>{CATS[p.category]?.icon}</div><div className="grow"><b>{p.title}</b><div className="small muted">{CATS[p.category]?.[lang]} · {p.area_name} · {timeAgo(p.created_at, lang)} · 👁️ {p.confirm}</div></div><StatusBadge i={p} /></Link>
-        ))}
-      </div>
+      <aside className="card map-list" role="list" aria-label={t('ui.incident_list')}>
+        <div className="row" style={{ padding: 8 }}><b className="grow" style={{ fontSize: 20 }}>{t('ui.incident_list')}</b><span className="badge">{points.length}</span></div>
+        {q.isLoading ? <ListSkeleton rows={6} /> : !points.length ? <p className="muted" style={{ padding: 8 }}>{t('ui.empty')}</p> : points.map((p) => (
+          <Link role="listitem" key={p.id} to={`/incidents/${p.id}`} className="notif fade-in"><div className={'sideicon sev-ring sev-' + p.severity} style={{ flex: 'none' }} aria-hidden>{CATS[p.category]?.icon}</div><div className="grow"><b>{p.title}</b><div className="small muted">{p.area_name} · {timeAgo(p.created_at, lang)} · 👁️ {p.confirm}</div></div><StatusBadge i={p} /></Link>))}
+      </aside>
     </div>
   )
 }

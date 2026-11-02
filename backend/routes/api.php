@@ -61,6 +61,11 @@ Route::prefix('v1')->middleware('throttle:api')->group(function () {
             Route::post('users/{user}/role', [ModerationController::class, 'setRole']);
             Route::get('audit-logs', [ModerationController::class, 'audit']);
             Route::post('emergency-resources/{resource}/verify', [ModerationController::class, 'verifyResource']);
+            Route::middleware('role:admin')->prefix('admin')->group(function () {
+                Route::get('overview', [\App\Http\Controllers\Api\AdminController::class, 'overview']);
+                Route::get('emergency-resources', [\App\Http\Controllers\Api\AdminController::class, 'resources']);
+                Route::post('emergency-resources', [\App\Http\Controllers\Api\AdminController::class, 'storeResource']);
+            });
         });
     });
 });

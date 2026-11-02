@@ -64,3 +64,15 @@ Tests: `backend/tests/Feature/RescueLensApiTest.php` (5 tests) and `backend/test
 | Docs set (ARCHITECTURE, THREAT_MODEL, INTERNATIONALIZATION, AI_PIPELINE, etc.) | Not started |
 | CI workflow | Not started |
 | Push to GitHub | Done: normal pushes to origin main |
+
+## Step 2: layout on every screen (Meta design principles, RescueLens own live UI)
+| Requirement | Status |
+|---|---|
+| Signup card, login page, feed 360/590/360 | Done (frontend/src/pages/Auth.tsx, index.css .layout) |
+| System admin panel, business suite structure (overview KPIs, moderation, users, emergency directory, audit log) | Done (pages/Admin.tsx, AdminController) |
+| Live map with filter panel, clustering (Google MarkerClusterer and Leaflet grid clusters), synced side list, 15 s refresh | Done (pages/MapPage.tsx) |
+| Profile, settings (theme, language, country, units, time zone, AI consent), notifications page, incident detail | Done |
+| Animated severity states (critical pulse, ring), live indicator, reduced motion respected | Done (index.css) |
+| Seeded system admin from .env only (SYSTEM_ADMIN_EMAIL, SYSTEM_ADMIN_PASSWORD) | Done (DatabaseSeeder) |
+| Country neutral landing tagline | Done |
+| Screenshots en and bn, language switch proven by clicking the toggle | Done (frontend/scripts/screenshots.mjs, docs/screenshots) |

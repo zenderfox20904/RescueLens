@@ -16,6 +16,9 @@ const MapPage = lazy(() => import('./pages/MapPage'))
 const IncidentDetail = lazy(() => import('./pages/IncidentDetail'))
 const Moderation = lazy(() => import('./pages/Moderation'))
 const Profile = lazy(() => import('./pages/Profile'))
+const Settings = lazy(() => import('./pages/Settings'))
+const Notifications = lazy(() => import('./pages/Notifications'))
+const Admin = lazy(() => import('./pages/Admin'))
 const Auth = { Login: lazy(() => import('./pages/Auth').then((m) => ({ default: m.Login }))), Register: lazy(() => import('./pages/Auth').then((m) => ({ default: m.Register }))), Callback: lazy(() => import('./pages/Auth').then((m) => ({ default: m.AuthCallback }))) }
 
 function Layout() {
@@ -31,6 +34,12 @@ function Layout() {
       <footer className="small muted" style={{ textAlign: 'center', padding: 16 }}>© 2026 RescueLens</footer>
     </>
   )
+}
+
+/** Full width pages (live map, admin panel): top bar only, no side columns. */
+function WideLayout() {
+  const theme = useTheme()
+  return (<><TopNav theme={theme} /><Suspense fallback={<div style={{ padding: 16 }}><PostSkeleton /></div>}><Outlet /></Suspense></>)
 }
 
 function RequireMod({ children }: { children: React.ReactNode }) {
@@ -61,10 +70,15 @@ export default function App() {
           <Route element={<Layout />}>
             <Route path="/feed" element={<Feed />} />
             <Route path="/report" element={<Report />} />
-            <Route path="/map" element={<MapPage />} />
             <Route path="/incidents/:id" element={<IncidentDetail />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/moderation" element={<RequireMod><Moderation /></RequireMod>} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/notifications" element={<Notifications />} />
+          </Route>
+          <Route element={<WideLayout />}>
+            <Route path="/map" element={<MapPage />} />
+            <Route path="/admin" element={<RequireMod><Admin /></RequireMod>} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

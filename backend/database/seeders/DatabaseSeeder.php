@@ -25,6 +25,17 @@ class DatabaseSeeder extends Seeder
             $u->forceFill(['role' => $role, 'is_demo' => true, 'email_verified_at' => now()])->save();
             return $u;
         };
+        // Local demo system admin. Credentials come only from .env (SYSTEM_ADMIN_EMAIL / SYSTEM_ADMIN_PASSWORD).
+        $sysEmail = env('SYSTEM_ADMIN_EMAIL');
+        $sysPass = env('SYSTEM_ADMIN_PASSWORD');
+        if ($sysEmail && $sysPass) {
+            $sys = User::firstOrNew(['email' => $sysEmail]);
+            $sys->fill(['name' => 'System Admin', 'password' => $sysPass, 'locale' => 'en', 'ai_consent' => false]);
+            $sys->forceFill(['role' => 'admin', 'is_demo' => true, 'email_verified_at' => now()])->save();
+            $this->command?->info("System admin (local demo): {$sysEmail} / {$sysPass}");
+        } else {
+            $this->command?->warn('SYSTEM_ADMIN_EMAIL / SYSTEM_ADMIN_PASSWORD not set; skipping system admin.');
+        }
         $admin = $mk('Demo Admin', 'admin@rescuelens.test', 'admin', 23.7806, 90.4070);
         $mod = $mk('Demo Moderator', 'moderator@rescuelens.test', 'moderator', 23.7509, 90.3935);
         $rina = $mk('রিনা (Demo)', 'rina@rescuelens.test', 'citizen', 23.8103, 90.4125);
