@@ -17,6 +17,6 @@ class NotifyNearby implements ShouldQueue
     public function handle(IncidentService $svc): void
     {
         $i = Incident::public()->find($this->incidentId);
-        if ($i) { $svc->notifyNearby($i); app(\App\Services\DispatchService::class)->dispatch($i); }
+        if ($i) { $svc->notifyNearby($i); app(\App\Services\DispatchService::class)->dispatch($i); $svc->notifyModerators($i); }
     }
 }

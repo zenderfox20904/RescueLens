@@ -25,3 +25,4 @@ mobile/.flutter-plugins*
 mobile/android/key.properties
 coverage/
 .phpunit.result.cache
+*.local.txt

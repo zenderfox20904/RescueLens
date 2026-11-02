@@ -72,6 +72,7 @@ class DatabaseSeeder extends Seeder
             ['BD', 'police', 'Demo Police Station Tejgaon', 23.7640, 90.3990, 10, '24/7'],
             ['BD', 'ambulance', 'Demo Ambulance Service Mirpur', 23.8040, 90.3650, 20, '24/7'],
             ['BD', 'help_center', 'Demo Flood Relief Center Mohammadpur', 23.7590, 90.3590, 15, '08:00 to 22:00'],
+            ['BD', 'ngo', 'Demo Relief NGO Dhaka', 23.7700, 90.3800, 20, '08:00 to 20:00'],
             ['BD', 'volunteer', 'Demo Volunteer Rescue Team Savar', 23.8450, 90.2600, 25, 'On call'],
             ['IN', 'hospital', 'Demo General Hospital Connaught Place', 28.6315, 77.2167, 15, '24/7'],
             ['IN', 'fire_service', 'Demo Fire Station Karol Bagh', 28.6519, 77.1909, 12, '24/7'],
@@ -99,6 +100,14 @@ class DatabaseSeeder extends Seeder
         $fire = $mk('Demo Fire Station Lalbagh', 'fire@rescuelens.test', 'citizen', 23.7190, 90.3880);
         $fire->forceFill(['account_type' => 'fire_service'])->save();
         \App\Models\Organization::where('name', 'Demo Fire Station Lalbagh')->update(['user_id' => $fire->id]);
+        // One login per portal so every account type can be demoed (same demo password).
+        foreach ([['ngo@rescuelens.test', 'ngo', 'Demo Relief NGO Dhaka'], ['helpcenter@rescuelens.test', 'help_center', 'Demo Flood Relief Center Mohammadpur'],
+            ['ambulance@rescuelens.test', 'ambulance', 'Demo Ambulance Service Mirpur'], ['hospital@rescuelens.test', 'hospital', 'Demo City Hospital Dhanmondi']] as [$em, $type, $name]) {
+            $o = \App\Models\Organization::where('name', $name)->first();
+            $acct = $mk($name, $em, 'citizen', (float) ($o?->lat ?? 23.77), (float) ($o?->lng ?? 90.38));
+            $acct->forceFill(['account_type' => $type])->save();
+            $o?->update(['user_id' => $acct->id]);
+        }
 
         $rows = [
             [$rina, '[DEMO] Two car collision on Dhaka Aricha Highway', 'Two cars collided near the Hemayetpur stretch. One lane appears blocked. Please drive carefully and follow police instructions.', 'road_accident', 'high', 'verified', 23.7935, 90.2570, 'Savar, Dhaka', 45, 4, $mod],

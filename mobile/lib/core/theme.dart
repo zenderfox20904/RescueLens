@@ -18,7 +18,8 @@ class RL {
   static const gradTo = Color(0xFF0081FB);
   static const gradient = LinearGradient(colors: [gradFrom, gradTo]);
   static const sev = {'low': Color(0xFF31A24C), 'moderate': Color(0xFFF7B928), 'high': Color(0xFFF5793B), 'critical': Color(0xFFE41E3F)};
-  static const catIcon = <String, IconData>{'road_accident': LucideIcons.car, 'flood': LucideIcons.waves, 'fire': LucideIcons.flame, 'electrical': LucideIcons.zap, 'building_collapse': LucideIcons.building, 'injury': LucideIcons.bandage, 'other': LucideIcons.triangleAlert};
+  static const catIcon = <String, IconData>{'road_accident': LucideIcons.car, 'flood': LucideIcons.waves, 'fire': LucideIcons.flame, 'electrical': LucideIcons.zap, 'building_collapse': LucideIcons.building, 'injury': LucideIcons.bandage, 'crowd_stampede': LucideIcons.users, 'landslide': LucideIcons.mountain, 'earthquake': LucideIcons.activity, 'wildfire': LucideIcons.treePine, 'tsunami': LucideIcons.waves, 'cyclone_storm': LucideIcons.wind, 'snow_ice': LucideIcons.snowflake, 'other': LucideIcons.triangleAlert};
+  static const categories = ['road_accident', 'flood', 'fire', 'electrical', 'building_collapse', 'injury', 'crowd_stampede', 'landslide', 'earthquake', 'wildfire', 'tsunami', 'cyclone_storm', 'snow_ice', 'other'];
   static IconData cat(dynamic c) => catIcon[c] ?? LucideIcons.triangleAlert;
 
   static ThemeData theme(Brightness b) {

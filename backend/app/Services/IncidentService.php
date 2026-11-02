@@ -53,6 +53,18 @@ class IncidentService
     }
 
     /** Nearby radius alerts: notify users whose alert area covers the incident. */
+    /** Admins and moderators get every new public report in their review queue, wherever it is. */
+    public function notifyModerators(Incident $i): int
+    {
+        $n = 0;
+        User::whereIn('role', ['moderator', 'admin'])->where('id', '!=', $i->user_id)->each(function ($u) use ($i, &$n) {
+            UserNotification::firstOrCreate(['user_id' => $u->id, 'incident_id' => $i->id, 'type' => 'review'],
+                ['title' => 'Review: '.strtoupper($i->severity ?? 'moderate').' '.$i->title, 'body' => 'New community report waiting for verification.']);
+            $n++;
+        });
+        return $n;
+    }
+
     public function notifyNearby(Incident $i): int
     {
         $n = 0;
