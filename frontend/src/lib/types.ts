@@ -14,6 +14,7 @@ export interface Incident {
   is_demo: boolean; ai_assisted: boolean; source?: string; ai_unverified?: boolean
   location: { lat: number; lng: number; area_name: string | null; precision: string }
   reporter: { name: string | null; anonymous: boolean; is_me: boolean }
+  can_manage?: boolean; is_mine?: boolean; edited_at?: string | null
   counts: { confirm: number; dispute: number; comments: number }
   my_reaction: 'confirm' | 'dispute' | null
   media: Media[]

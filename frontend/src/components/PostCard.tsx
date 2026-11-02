@@ -1,14 +1,15 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api, errMsg, SHARE_BASE } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { CATS, SEVS, timeAgo, useI18n } from '../lib/i18n'
 import { type Incident, type Region, ttl } from '../lib/types'
 import { Avatar } from './Shell'
 import { IChat, IEye, IFlag, IShare, IWhatsApp } from './Icons'
-import { ListSkeleton } from './Skeleton'
 import { useToast } from './Toast'
+import { Comments, SeeMore } from './Comments'
+import { PostMenu } from './PostManage'
 
 export function RegionOverlay({ regions, show = true }: { regions: Region[]; show?: boolean }) {
   return <>{regions.map((r, i) => (
@@ -40,36 +41,11 @@ export function shareLinks(i: Incident) {
 }
 
 /** Shows machine translated user content with a toggle back to the original text. */
-function Translated({ original, translated }: { original: string; translated?: string | null }) {
+export function Translated({ original, translated }: { original: string; translated?: string | null }) {
   const { t } = useI18n()
   const [orig, setOrig] = useState(false)
   if (!translated) return <div>{original}</div>
   return <div>{orig ? original : translated} <button type="button" className="link-btn small" onClick={() => setOrig((v) => !v)}>{orig ? t('ui.see_translation') : t('ui.see_original')}</button></div>
-}
-
-function Comments({ id }: { id: string }) {
-  const { t, lang } = useI18n()
-  const { user } = useAuth()
-  const qc = useQueryClient()
-  const toast = useToast()
-  const [body, setBody] = useState('')
-  const q = useQuery({ queryKey: ['comments', id], queryFn: () => api<{ data: { id: number; body: string; body_translated?: string; author: string; author_role: string; created_at: string }[] }>(`/incidents/${id}/comments`), refetchInterval: 8000 })
-  const m = useMutation({
-    mutationFn: () => api(`/incidents/${id}/comments`, { body: { body } }),
-    onSuccess: () => { setBody(''); qc.invalidateQueries({ queryKey: ['comments', id] }); qc.invalidateQueries({ queryKey: ['feed'] }) },
-    onError: (e) => toast(errMsg(e)),
-  })
-  return (
-    <div style={{ paddingBottom: 8 }}>
-      {q.isLoading ? <ListSkeleton rows={2} /> : q.data?.data.map((c) => (
-        <div key={c.id} className="comment fade-in"><Avatar name={c.author} size={32} /><div><div className="bubble"><b className="small">{c.author}</b>{['moderator', 'admin'].includes(c.author_role) && <span className="badge badge-verified" style={{ marginLeft: 6 }}>{t('mod')}</span>}<Translated original={c.body} translated={c.body_translated} /></div><span className="small muted" style={{ marginLeft: 12 }}>{timeAgo(c.created_at, lang)}</span></div></div>
-      ))}
-      {user ? (
-        <form className="comment" onSubmit={(e) => { e.preventDefault(); if (body.trim()) m.mutate() }}>
-          <Avatar name={user.name} size={32} /><input className="pill-input" value={body} maxLength={1000} onChange={(e) => setBody(e.target.value)} placeholder={t('writeComment')} />
-        </form>) : <Link to="/login" className="small">{t('login')}</Link>}
-    </div>
-  )
 }
 
 export function PostCard({ i, detail = false }: { i: Incident; detail?: boolean }) {
@@ -78,7 +54,7 @@ export function PostCard({ i, detail = false }: { i: Incident; detail?: boolean 
   const nav = useNavigate()
   const qc = useQueryClient()
   const toast = useToast()
-  const [showComments, setShowComments] = useState(detail)
+  const [showComments, setShowComments] = useState(true)
   const [showRegions, setShowRegions] = useState(true)
   const [shareOpen, setShareOpen] = useState(false)
   const [orig, setOrig] = useState(false)
@@ -99,12 +75,13 @@ export function PostCard({ i, detail = false }: { i: Incident; detail?: boolean 
         <Avatar name={i.reporter.anonymous ? '?' : i.reporter.name} />
         <div className="grow">
           <b>{i.reporter.name ?? (t('ui.anonymous'))}</b> <span className="muted">· {cat?.icon} {cat?.[lang]}</span>
-          <div className="small muted row" style={{ gap: 4 }}><Link to={`/incidents/${i.id}`} className="muted">{timeAgo(i.created_at, lang)}</Link> · 📍 {i.location.area_name ?? (t('ui.approximate_location'))}</div>
+          <div className="small muted row" style={{ gap: 4 }}><Link to={`/incidents/${i.id}`} className="muted">{timeAgo(i.created_at, lang)}</Link>{i.edited_at ? ` · ${t('ui.edited')}` : ''} · 📍 {i.location.area_name ?? (t('ui.approximate_location'))}</div>
         </div>
         <StatusBadge i={i} />
+        <PostMenu i={i} detail={detail} />
       </div>
       <Link to={`/incidents/${i.id}`} style={{ color: 'inherit' }}><div className="post-title">{orig ? i.title.replace('[DEMO] ', '') : ttl(i)}</div></Link>
-      {i.description && <div style={{ whiteSpace: 'pre-wrap' }}>{orig ? i.description : i.description_translated || i.description}</div>}
+      {i.description && (detail ? <div style={{ whiteSpace: 'pre-wrap' }}>{orig ? i.description : i.description_translated || i.description}</div> : <SeeMore text={orig ? i.description : i.description_translated || i.description} />)}
       {hasTr && <button type="button" className="link-btn small" onClick={() => setOrig((v) => !v)}>{orig ? t('ui.see_translation') : t('ui.see_original')}</button>}
       {i.analysis && <div className="small muted" style={{ marginTop: 6 }}>✨ {t('aiSuggestion')}{i.analysis.mode === 'demo' ? ' (DEMO)' : ''}: {i.analysis.hazards.map((h) => CATS[h]?.[lang] ?? h).join(', ')}</div>}
       {img && (
@@ -133,7 +110,7 @@ export function PostCard({ i, detail = false }: { i: Incident; detail?: boolean 
         </div>
         {!i.reporter.is_me && <button className={'btn' + (i.my_reaction === 'dispute' ? ' on' : '')} style={{ flex: 'none' }} title={t('notThere')} onClick={() => act('dispute')}><IFlag size={18} /></button>}
       </div>
-      {showComments && <><div className="divider" style={{ margin: 0 }} /><Comments id={i.id} /></>}
+      {showComments && <><div className="divider" style={{ margin: 0 }} /><Comments id={i.id} preview={!detail} /></>}
     </article>
   )
 }

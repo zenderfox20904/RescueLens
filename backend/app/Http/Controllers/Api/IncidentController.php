@@ -241,23 +241,91 @@ class IncidentController extends Controller
         return $this->show($r, $incident->fresh());
     }
 
-    public function comments(Incident $incident)
+    /** Comments with threaded replies. ?limit=2 returns the latest top level comments for feed previews. */
+    public function comments(Request $r, Incident $incident)
     {
         abort_unless(in_array($incident->status, Incident::PUBLIC_STATUSES), 404);
-        $rows = $incident->comments()->with('user')->latest()->limit(100)->get()->reverse()->values()
-            ->map(fn ($c) => ['id' => $c->id, 'body' => $c->body, 'author' => $c->user?->name, 'author_role' => $c->user?->role, 'created_at' => $c->created_at->toIso8601String()])->all();
-        return ['data' => \App\Services\I18n\ContentTranslation::apply($rows, request()->input('lang') ?? request()->user('sanctum')?->locale, 'body')];
+        $viewer = $r->user('sanctum');
+        $limit = min(max((int) $r->input('limit', 100), 1), 100);
+        $top = $incident->comments()->whereNull('parent_id')->with('user')->latest()->limit($limit)->get()->reverse()->values();
+        $replies = IncidentComment::whereIn('parent_id', $top->pluck('id'))->with('user')->oldest()->limit(300)->get();
+        $all = $top->concat($replies);
+        $liked = $viewer ? \Illuminate\Support\Facades\DB::table('comment_likes')->where('user_id', $viewer->id)->whereIn('comment_id', $all->pluck('id'))->pluck('comment_id')->map(fn ($v) => (int) $v)->all() : [];
+        $rows = $all->map(fn ($c) => Present::comment($c, $viewer, $liked))->all();
+        return ['data' => \App\Services\I18n\ContentTranslation::apply($rows, $r->input('lang') ?? $viewer?->locale, 'body'),
+            'total' => $incident->comments()->count()];
     }
 
     public function comment(Request $r, Incident $incident)
     {
         abort_unless(in_array($incident->status, Incident::PUBLIC_STATUSES), 404);
-        $d = $r->validate(['body' => 'required|string|max:1000']);
-        $c = IncidentComment::create(['incident_id' => $incident->id, 'user_id' => $r->user()->id, 'body' => strip_tags($d['body'])]);
-        $incident->increment('comments_count');
-        if ($incident->user_id !== $r->user()->id) {
-            UserNotification::create(['user_id' => $incident->user_id, 'incident_id' => $incident->id, 'type' => 'comment', 'title' => "{$r->user()->name} commented on \"{$incident->title}\""]);
+        $d = $r->validate(['body' => 'required|string|max:1000', 'parent_id' => 'nullable|integer']);
+        $parent = null;
+        if (! empty($d['parent_id'])) {
+            $parent = IncidentComment::where('incident_id', $incident->id)->findOrFail($d['parent_id']);
+            if ($parent->parent_id) { $parent = $parent->parent; } // one level of threading, like most social apps
         }
-        return response()->json(['data' => ['id' => $c->id, 'body' => $c->body, 'author' => $r->user()->name, 'author_role' => $r->user()->role, 'created_at' => $c->created_at->toIso8601String()]], 201);
+        $u = $r->user();
+        $c = IncidentComment::create(['incident_id' => $incident->id, 'user_id' => $u->id, 'parent_id' => $parent?->id, 'body' => strip_tags($d['body'])]);
+        $incident->increment('comments_count');
+        if ($parent && $parent->user_id !== $u->id) {
+            UserNotification::create(['user_id' => $parent->user_id, 'incident_id' => $incident->id, 'type' => 'comment', 'title' => "{$u->name} replied to your comment on \"{$incident->title}\""]);
+        }
+        if ($incident->user_id !== $u->id && $incident->user_id !== $parent?->user_id) {
+            UserNotification::create(['user_id' => $incident->user_id, 'incident_id' => $incident->id, 'type' => 'comment', 'title' => "{$u->name} commented on \"{$incident->title}\""]);
+        }
+        return response()->json(['data' => Present::comment($c->load('user'), $u)], 201);
+    }
+
+    private function ownComment(Request $r, int $id, bool $trashed = false): IncidentComment
+    {
+        $c = ($trashed ? IncidentComment::onlyTrashed() : IncidentComment::query())->findOrFail($id);
+        abort_unless($c->user_id === $r->user()->id || $r->user()->isModerator(), 403);
+        return $c;
+    }
+
+    public function updateComment(Request $r, int $id)
+    {
+        $c = $this->ownComment($r, $id);
+        $d = $r->validate(['body' => 'required|string|max:1000']);
+        $c->update(['body' => strip_tags($d['body']), 'edited_at' => now()]);
+        AuditLog::record('comment.update', $c);
+        return ['data' => Present::comment($c->load('user'), $r->user())];
+    }
+
+    public function deleteComment(Request $r, int $id)
+    {
+        $c = $this->ownComment($r, $id);
+        $n = 1 + IncidentComment::where('parent_id', $c->id)->count();
+        IncidentComment::where('parent_id', $c->id)->delete();
+        $c->delete();
+        Incident::whereKey($c->incident_id)->where('comments_count', '>=', $n)->decrement('comments_count', $n);
+        AuditLog::record('comment.trash', $c);
+        return response()->json(['data' => ['id' => $c->id, 'deleted' => true]]);
+    }
+
+    public function restoreComment(Request $r, int $id)
+    {
+        $c = $this->ownComment($r, $id, true);
+        $c->restore();
+        $n = 1 + IncidentComment::onlyTrashed()->where('parent_id', $c->id)->where('deleted_at', '>=', $c->updated_at->subSeconds(5))->restore();
+        Incident::whereKey($c->incident_id)->increment('comments_count', $n);
+        AuditLog::record('comment.restore', $c);
+        return ['data' => Present::comment($c->load('user'), $r->user())];
+    }
+
+    public function likeComment(Request $r, int $id)
+    {
+        $c = IncidentComment::findOrFail($id);
+        $t = \Illuminate\Support\Facades\DB::table('comment_likes');
+        $exists = (clone $t)->where(['comment_id' => $c->id, 'user_id' => $r->user()->id])->exists();
+        if ($exists) {
+            (clone $t)->where(['comment_id' => $c->id, 'user_id' => $r->user()->id])->delete();
+            $c->decrement('likes_count');
+        } else {
+            $t->insert(['comment_id' => $c->id, 'user_id' => $r->user()->id, 'created_at' => now(), 'updated_at' => now()]);
+            $c->increment('likes_count');
+        }
+        return ['data' => ['liked' => ! $exists, 'likes' => (int) $c->fresh()->likes_count]];
     }
 }

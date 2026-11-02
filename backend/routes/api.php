@@ -56,6 +56,10 @@ Route::prefix('v1')->middleware('throttle:api')->group(function () {
             Route::delete('incidents/{incident}', [IncidentController::class, 'destroy']);
             Route::post('incidents/{id}/restore', [IncidentController::class, 'restore']);
             Route::get('me/trash', [IncidentController::class, 'trash']);
+            Route::patch('comments/{id}', [IncidentController::class, 'updateComment'])->whereNumber('id');
+            Route::delete('comments/{id}', [IncidentController::class, 'deleteComment'])->whereNumber('id');
+            Route::post('comments/{id}/restore', [IncidentController::class, 'restoreComment'])->whereNumber('id');
+            Route::post('comments/{id}/like', [IncidentController::class, 'likeComment'])->whereNumber('id');
             Route::post('incidents/{incident}/withdraw', [IncidentController::class, 'withdraw']);
             Route::post('incidents/{incident}/reactions', [IncidentController::class, 'react']);
             Route::post('incidents/{incident}/comments', [IncidentController::class, 'comment']);

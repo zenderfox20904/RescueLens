@@ -89,4 +89,18 @@ class Present
         }
         return $out;
     }
+
+    public static function avatar(?User $u): ?string
+    {
+        return $u?->avatar_path ? \Illuminate\Support\Facades\URL::temporarySignedRoute('avatar.file', now()->addHours(6), ['user' => $u->id]) : null;
+    }
+
+    public static function comment(\App\Models\IncidentComment $c, ?User $viewer, array $liked = []): array
+    {
+        $mine = $viewer && $viewer->id === $c->user_id;
+        return ['id' => $c->id, 'parent_id' => $c->parent_id, 'body' => $c->body, 'author' => $c->user?->name, 'author_role' => $c->user?->role,
+            'author_avatar' => self::avatar($c->user), 'is_mine' => $mine, 'can_manage' => $mine || ($viewer?->isModerator() ?? false),
+            'likes' => (int) $c->likes_count, 'liked' => in_array($c->id, $liked, true),
+            'edited_at' => $c->edited_at?->toIso8601String(), 'created_at' => $c->created_at->toIso8601String()];
+    }
 }

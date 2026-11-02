@@ -50,4 +50,27 @@ class PostTrashTest extends TestCase
         $this->getJson('/api/v1/me/trash?all=1')->assertJsonPath('data.0.id', $id);
         $this->postJson("/api/v1/incidents/$id/restore")->assertOk();
     }
+
+    public function test_threaded_comments_edit_delete_restore_like(): void
+    {
+        $owner = User::factory()->create();
+        $id = $this->report($owner);
+        \App\Models\Incident::where('public_id', $id)->update(['status' => 'verified', 'feed_eligible' => true]);
+        $a = User::factory()->create();
+        Sanctum::actingAs($a);
+        $c = $this->postJson("/api/v1/incidents/$id/comments", ['body' => 'Road blocked here'])->assertCreated()->json('data.id');
+        $b = User::factory()->create();
+        Sanctum::actingAs($b);
+        $reply = $this->postJson("/api/v1/incidents/$id/comments", ['body' => 'Confirmed', 'parent_id' => $c])->assertCreated()->assertJsonPath('data.parent_id', $c)->json('data.id');
+        $this->postJson("/api/v1/comments/$c/like")->assertOk()->assertJsonPath('data.liked', true);
+        $this->patchJson("/api/v1/comments/$c", ['body' => 'hijack'])->assertForbidden();
+        $this->deleteJson("/api/v1/comments/$c")->assertForbidden();
+        $this->patchJson("/api/v1/comments/$reply", ['body' => 'Confirmed, still blocked'])->assertOk()->assertJsonPath('data.body', 'Confirmed, still blocked');
+        $this->getJson("/api/v1/incidents/$id/comments")->assertJsonCount(2, 'data')->assertJsonPath('data.0.liked', true);
+        Sanctum::actingAs($a);
+        $this->deleteJson("/api/v1/comments/$c")->assertOk();
+        $this->getJson("/api/v1/incidents/$id/comments")->assertJsonCount(0, 'data');
+        $this->postJson("/api/v1/comments/$c/restore")->assertOk();
+        $this->getJson("/api/v1/incidents/$id/comments")->assertJsonCount(2, 'data');
+    }
 }

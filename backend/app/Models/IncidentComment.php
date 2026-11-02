@@ -13,4 +13,6 @@ class IncidentComment extends Model
     protected $guarded = ['id'];
     public function incident() { return $this->belongsTo(Incident::class); }
     public function user() { return $this->belongsTo(User::class); }
+    public function parent() { return $this->belongsTo(self::class, 'parent_id'); }
+    protected function casts(): array { return ['edited_at' => 'datetime']; }
 }
