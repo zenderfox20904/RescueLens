@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:rescuelens/core/api.dart';
 import 'package:rescuelens/core/i18n.dart';
+import 'package:rescuelens/features/incident/ui/media_view.dart';
+import 'package:rescuelens/core/theme.dart';
 import 'package:rescuelens/core/widgets.dart';
 
 /// Cached signed in user for header and profile surfaces.
 class Me {
-  static Map? user;
+  /// Listenable so the avatar and name update live everywhere the moment they change.
+  static final notifier = ValueNotifier<Map?>(null);
+  static Map? get user => notifier.value;
+  static set user(Map? u) => notifier.value = u == null ? null : Map.of(u);
   static Future<Map?> load({bool force = false}) async {
     if (Api.token == null) return user = null;
     if (user != null && !force) return user;
@@ -16,8 +21,8 @@ class Me {
 
 /// Curved solid header (white in light, dark surface in dark) with soft shadow, that collapses into a compact bar on scroll.
 class HomeHeader extends StatefulWidget {
-  final VoidCallback? onAlerts;
-  const HomeHeader({super.key, this.onAlerts});
+  final VoidCallback? onAlerts, onProfile;
+  const HomeHeader({super.key, this.onAlerts, this.onProfile});
   @override
   State<HomeHeader> createState() => _HomeHeaderState();
 }
@@ -25,7 +30,10 @@ class HomeHeader extends StatefulWidget {
 class _HomeHeaderState extends State<HomeHeader> {
   Map? me;
   @override
-  void initState() { super.initState(); Me.load().then((u) { if (mounted) setState(() => me = u); }); }
+  void initState() { super.initState(); Me.notifier.addListener(_sync); Me.load().then((u) { if (mounted) setState(() => me = u); }); }
+  void _sync() { if (mounted) setState(() => me = Me.user); }
+  @override
+  void dispose() { Me.notifier.removeListener(_sync); super.dispose(); }
 
   String greeting() {
     final h = DateTime.now().hour;
@@ -49,6 +57,7 @@ class _HomeHeaderState extends State<HomeHeader> {
         onSelected: (l) => L10n.i.set(l),
         itemBuilder: (_) => [for (final e in L10n.langs.entries) CheckedPopupMenuItem(value: e.key, checked: L10n.i.lang == e.key, child: Text(e.value))]),
       IconButton(tooltip: tr('alerts'), onPressed: widget.onAlerts, icon: IconTheme(data: IconThemeData(color: white), child: AlertBadge(color: white))),
+      if (Api.token != null) Padding(padding: const EdgeInsets.only(left: 4), child: MyAvatar(radius: 17, onTap: widget.onProfile)),
     ]);
     return SliverAppBar(
       pinned: true, expandedHeight: 172, toolbarHeight: 64, backgroundColor: Colors.transparent, surfaceTintColor: Colors.transparent, elevation: 0,
@@ -77,4 +86,19 @@ class _HomeHeaderState extends State<HomeHeader> {
       }),
     );
   }
+}
+
+/// Current user's avatar that rebuilds instantly when the profile photo changes.
+class MyAvatar extends StatelessWidget {
+  final double radius; final VoidCallback? onTap;
+  const MyAvatar({super.key, this.radius = 18, this.onTap});
+  @override
+  Widget build(BuildContext context) => ValueListenableBuilder<Map?>(valueListenable: Me.notifier, builder: (_, u, _) {
+    final url = u?['avatar_url'];
+    final name = '${u?['name'] ?? ''}'.trim();
+    return GestureDetector(onTap: onTap, child: CircleAvatar(radius: radius, backgroundColor: RL.primary.withValues(alpha: .18),
+      child: url != null ? ClipOval(child: SizedBox.expand(child: NetImage('$url', fit: BoxFit.cover)))
+        : name.isNotEmpty ? Text(name[0].toUpperCase(), style: TextStyle(color: RL.primary, fontWeight: FontWeight.w800, fontSize: radius * .8))
+        : Icon(Icons.person_rounded, color: RL.primary, size: radius)));
+  });
 }

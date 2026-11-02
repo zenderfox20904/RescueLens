@@ -20,7 +20,7 @@ class Incident extends Model
     protected function casts(): array
     {
         return [
-            'is_anonymous' => 'boolean',
+            'is_anonymous' => 'boolean', 'edited_at' => 'datetime',
             'ai_unverified' => 'boolean',
             'feed_eligible' => 'boolean',
             'is_demo' => 'boolean',

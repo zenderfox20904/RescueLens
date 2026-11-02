@@ -10,8 +10,8 @@ import 'package:rescuelens/features/feed/ui/home_header.dart';
 
 /// Live feed with polling, pull to refresh, staggered entrance and shimmer skeletons.
 class FeedScreen extends StatefulWidget {
-  final VoidCallback? onAlerts;
-  const FeedScreen({super.key, this.onAlerts});
+  final VoidCallback? onAlerts, onProfile;
+  const FeedScreen({super.key, this.onAlerts, this.onProfile});
   @override
   State<FeedScreen> createState() => _FeedState();
 }
@@ -30,7 +30,7 @@ class _FeedState extends State<FeedScreen> {
   }
   @override
   Widget build(BuildContext context) => RefreshIndicator(onRefresh: load, edgeOffset: 160, child: CustomScrollView(slivers: [
-    HomeHeader(onAlerts: widget.onAlerts),
+    HomeHeader(onAlerts: widget.onAlerts, onProfile: widget.onProfile),
     SliverPadding(padding: const EdgeInsets.fromLTRB(12, 12, 12, 120), sliver: SliverList.list(children: [
       const Entrance(child: SosBanner()),
       Padding(padding: const EdgeInsets.fromLTRB(4, 10, 4, 4), child: Row(children: [
@@ -40,7 +40,7 @@ class _FeedState extends State<FeedScreen> {
       if (error && items == null) ErrorCard(onRetry: () { setState(() => error = false); load(); }),
       if (items == null && !error) ...[const PostSkeleton(), const PostSkeleton()],
       if (items != null && items!.isEmpty) Padding(padding: const EdgeInsets.all(32), child: Text(tr('nothing_yet'), textAlign: TextAlign.center, style: const TextStyle(color: RL.text2))),
-      for (final (n, i) in (items ?? []).indexed) Entrance(key: ValueKey(i['id']), index: n, child: PostTile(i)),
+      for (final (n, i) in (items ?? []).indexed) Entrance(key: ValueKey(i['id']), index: n, child: PostTile(i, onUpdated: (u) => setState(() => items![items!.indexWhere((x) => x['id'] == u['id'])] = u), onRemoved: () => setState(() => items!.removeWhere((x) => x['id'] == i['id'])), onRestored: load)),
     ])),
   ]));
 }

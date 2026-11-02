@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rescuelens/features/incident/ui/media_view.dart';
+import 'package:rescuelens/features/incident/ui/post_actions.dart';
 import 'package:rescuelens/core/api.dart';
 import 'package:rescuelens/core/format.dart';
 import 'package:rescuelens/core/i18n.dart';
@@ -12,8 +13,8 @@ void openDetail(BuildContext c, String id) => Navigator.push(c, MaterialPageRout
 
 /// Feed card. Tap opens details, double tap marks "I see it too" with a burst animation.
 class PostTile extends StatefulWidget {
-  final Map i; final bool inDetail;
-  const PostTile(this.i, {super.key, this.inDetail = false});
+  final Map i; final bool inDetail; final ValueChanged<Map>? onUpdated; final VoidCallback? onRemoved, onRestored;
+  const PostTile(this.i, {super.key, this.inDetail = false, this.onUpdated, this.onRemoved, this.onRestored});
   @override
   State<PostTile> createState() => _PostTileState();
 }
@@ -46,13 +47,14 @@ class _PostTileState extends State<PostTile> with SingleTickerProviderStateMixin
           const SizedBox(width: 8),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(maxLines: 1, overflow: TextOverflow.ellipsis, i['reporter']?['name'] ?? tr('anonymous'), style: const TextStyle(fontWeight: FontWeight.w600)),
-            Text('${ago(i['created_at'])} · ${i['location']?['area_name'] ?? ''}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: RL.text2, fontSize: 12)),
+            Text('${ago(i['created_at'])}${i['edited_at'] != null ? ' · ${tr('edited')}' : ''} · ${i['location']?['area_name'] ?? ''}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: RL.text2, fontSize: 12)),
           ])),
           StatusChip(i),
+          PostMenu(i, onUpdated: widget.onUpdated, onRemoved: widget.onRemoved, onRestored: widget.onRestored),
         ]),
         const SizedBox(height: 8),
         Text(title(i), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
-        if (i['description'] != null) Padding(padding: const EdgeInsets.only(top: 4), child: Text('${i['description_translated'] ?? i['description']}', maxLines: widget.inDetail ? null : 3, overflow: widget.inDetail ? null : TextOverflow.ellipsis)),
+        if (i['description'] != null) Padding(padding: const EdgeInsets.only(top: 4), child: widget.inDetail ? Text('${i['description_translated'] ?? i['description']}') : ExpandableText('${i['description_translated'] ?? i['description']}')),
         if (media.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 8), child: MediaStrip(media)),
         const SizedBox(height: 8),
         Row(children: [
@@ -93,7 +95,7 @@ class _DetailState extends State<DetailScreen> {
   Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: Text(tr('report'))),
     body: i == null ? (error ? Padding(padding: const EdgeInsets.all(12), child: ErrorCard(onRetry: load)) : const Padding(padding: EdgeInsets.all(8), child: PostSkeleton()))
       : ListView(padding: const EdgeInsets.all(8), children: [
-          PostTile(i!, inDetail: true),
+          PostTile(i!, inDetail: true, onUpdated: (n) => setState(() => i = n), onRemoved: () => Navigator.pop(context)),
           FilledButton.icon(onPressed: Api.token == null ? null : react, icon: const Icon(Icons.visibility), label: Text(tr('i_see_it'))),
           const SizedBox(height: 8),
           Text(tr('community_note'), style: const TextStyle(color: RL.text2, fontSize: 12)),

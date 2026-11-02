@@ -32,6 +32,17 @@ class L10n extends ChangeNotifier {
 
   static const _s = <String, Map<String, String>>{
     'en': {
+      'more': "More",
+      'edit_post': "Edit report",
+      'move_to_trash': "Move to Trash",
+      'delete_post_q': "Move this report to Trash?",
+      'delete_post_body': "It will be hidden from everyone. You can restore it from Trash.",
+      'post_trashed': "Report moved to Trash",
+      'v_title': "Enter at least 3 characters",
+      'edit_note': "Edits are recorded in the report history and the report shows an edited label.",
+      'see_more': "See more",
+      'see_less': "See less",
+      'edited': "Edited",
       'camera_unavailable': 'Camera is not available',
       'photo_updated': 'Photo updated',
       'acct_citizen': 'Regular user',

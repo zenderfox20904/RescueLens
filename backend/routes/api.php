@@ -53,6 +53,9 @@ Route::prefix('v1')->middleware('throttle:api')->group(function () {
             Route::get('incident-duplicates', [IncidentController::class, 'duplicates']);
             Route::post('incidents', [IncidentController::class, 'store']);
             Route::patch('incidents/{incident}', [IncidentController::class, 'update']);
+            Route::delete('incidents/{incident}', [IncidentController::class, 'destroy']);
+            Route::post('incidents/{id}/restore', [IncidentController::class, 'restore']);
+            Route::get('me/trash', [IncidentController::class, 'trash']);
             Route::post('incidents/{incident}/withdraw', [IncidentController::class, 'withdraw']);
             Route::post('incidents/{incident}/reactions', [IncidentController::class, 'react']);
             Route::post('incidents/{incident}/comments', [IncidentController::class, 'comment']);

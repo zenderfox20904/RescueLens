@@ -75,6 +75,8 @@ class Present
                 'evidence_regions' => $analysis->regions->map(fn ($r) => ['label' => $r->label, 'source' => $r->source, 'box' => [$r->x1, $r->y1, $r->x2, $r->y2], 'image_width' => $r->image_width, 'image_height' => $r->image_height])->values(),
             ] : null,
             'occurred_at' => $i->occurred_at?->toIso8601String(), 'created_at' => $i->created_at?->toIso8601String(),
+            'is_mine' => $mine, 'can_manage' => $mine || ($viewer?->isModerator() ?? false), 'edited_at' => $i->edited_at?->toIso8601String(),
+            'deleted_at' => $i->deleted_at?->toIso8601String(),
             'updated_at' => $i->updated_at?->toIso8601String(), 'verified_at' => $i->verified_at?->toIso8601String(),
         ];
         if ($detail) {

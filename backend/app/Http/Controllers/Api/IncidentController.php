@@ -159,13 +159,53 @@ class IncidentController extends Controller
 
     public function update(Request $r, Incident $incident)
     {
-        abort_unless($incident->user_id === $r->user()->id, 403);
-        abort_if(in_array($incident->status, ['removed', 'withdrawn']), 409, 'Report can no longer be edited');
-        $d = $r->validate(['title' => 'sometimes|string|max:160', 'description' => 'nullable|string|max:2000', 'severity' => ['sometimes', Rule::in(Incident::SEVERITIES)]]);
-        $incident->update(array_map(fn ($v) => is_string($v) ? strip_tags($v) : $v, $d));
-        $incident->history()->create(['actor_id' => $r->user()->id, 'from_status' => $incident->status, 'to_status' => $incident->status, 'note' => 'Edited by reporter: '.implode(', ', array_keys($d))]);
+        $u = $r->user();
+        abort_unless($incident->user_id === $u->id || $u->isModerator(), 403);
+        abort_if(in_array($incident->status, ['removed', 'withdrawn']) && ! $u->isModerator(), 409, 'Report can no longer be edited');
+        $d = $r->validate(['title' => 'sometimes|string|min:3|max:160', 'description' => 'nullable|string|max:2000',
+            'severity' => ['sometimes', Rule::in(Incident::SEVERITIES)], 'category' => ['sometimes', Rule::in(Incident::CATEGORIES)],
+            'area_name' => 'nullable|string|max:120']);
+        $incident->fill(array_map(fn ($v) => is_string($v) ? strip_tags($v) : $v, $d));
+        $incident->edited_at = now();
+        $incident->save();
+        $who = $incident->user_id === $u->id ? 'reporter' : $u->role;
+        $incident->history()->create(['actor_id' => $u->id, 'from_status' => $incident->status, 'to_status' => $incident->status, 'note' => "Edited by {$who}: ".implode(', ', array_keys($d))]);
         AuditLog::record('incident.update', $incident, ['fields' => array_keys($d)]);
         return $this->show($r, $incident);
+    }
+
+    /** Soft delete to Trash (owner, moderator or admin). Restorable from /me/trash. */
+    public function destroy(Request $r, Incident $incident)
+    {
+        $u = $r->user();
+        abort_unless($incident->user_id === $u->id || $u->isModerator(), 403);
+        $incident->deleted_by = $u->id;
+        $incident->save();
+        $incident->delete();
+        AuditLog::record('incident.trash', $incident);
+        return response()->json(['data' => ['id' => $incident->public_id, 'deleted' => true]]);
+    }
+
+    public function restore(Request $r, string $id)
+    {
+        $u = $r->user();
+        $incident = Incident::onlyTrashed()->where('public_id', $id)->firstOrFail();
+        abort_unless($incident->user_id === $u->id || $u->isModerator(), 403);
+        $incident->restore();
+        $incident->forceFill(['deleted_by' => null])->save();
+        AuditLog::record('incident.restore', $incident);
+        return $this->show($r, $incident);
+    }
+
+    /** Trash: own deleted reports; moderators may pass all=1 to see every deleted report. */
+    public function trash(Request $r)
+    {
+        $u = $r->user();
+        $q = Incident::onlyTrashed()->with(['user', 'media'])->latest('deleted_at');
+        if (! ($u->isModerator() && $r->boolean('all'))) {
+            $q->where('user_id', $u->id);
+        }
+        return ['data' => $q->limit(100)->get()->map(fn ($i) => Present::incident($i, $u))];
     }
 
     public function withdraw(Request $r, Incident $incident)
