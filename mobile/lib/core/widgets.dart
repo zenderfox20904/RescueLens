@@ -91,7 +91,8 @@ class ErrorCard extends StatelessWidget {
 
 /// Bell icon with a live unread count, polled every 15 seconds.
 class AlertBadge extends StatefulWidget {
-  const AlertBadge({super.key});
+  final Color? color;
+  const AlertBadge({super.key, this.color});
   @override
   State<AlertBadge> createState() => _AlertBadgeState();
 }
@@ -107,5 +108,5 @@ class _AlertBadgeState extends State<AlertBadge> {
     try { final r = await Api.get('/notifications'); if (mounted) setState(() => n = (r['unread'] as num?)?.toInt() ?? 0); } catch (_) {}
   }
   @override
-  Widget build(BuildContext context) => Badge(isLabelVisible: n > 0, label: Text(n > 99 ? '99+' : '$n'), child: const Icon(Icons.notifications_none_rounded, color: RL.text2, size: 24));
+  Widget build(BuildContext context) => Badge(isLabelVisible: n > 0, label: Text(n > 99 ? '99+' : '$n'), child: Icon(Icons.notifications_none_rounded, color: widget.color ?? RL.text2, size: 24));
 }

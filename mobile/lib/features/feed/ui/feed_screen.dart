@@ -6,10 +6,12 @@ import 'package:rescuelens/core/i18n.dart';
 import 'package:rescuelens/core/theme.dart';
 import 'package:rescuelens/core/widgets.dart';
 import 'package:rescuelens/features/incident/ui/incident_widgets.dart';
+import 'package:rescuelens/features/feed/ui/home_header.dart';
 
 /// Live feed with polling, pull to refresh, staggered entrance and shimmer skeletons.
 class FeedScreen extends StatefulWidget {
-  const FeedScreen({super.key});
+  final VoidCallback? onAlerts;
+  const FeedScreen({super.key, this.onAlerts});
   @override
   State<FeedScreen> createState() => _FeedState();
 }
@@ -27,16 +29,19 @@ class _FeedState extends State<FeedScreen> {
     } catch (_) { if (mounted) setState(() => error = true); }
   }
   @override
-  Widget build(BuildContext context) => RefreshIndicator(onRefresh: load, child: ListView(padding: const EdgeInsets.fromLTRB(12, 8, 12, 120), children: [
-    const Entrance(child: SosBanner()),
-    Padding(padding: const EdgeInsets.fromLTRB(4, 10, 4, 4), child: Row(children: [
-      Expanded(child: Text(tr('latest_near_you'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800))),
-      const LiveDot(), const SizedBox(width: 6), Text(tr('live_updates'), style: const TextStyle(color: RL.text2, fontSize: 12)),
+  Widget build(BuildContext context) => RefreshIndicator(onRefresh: load, edgeOffset: 160, child: CustomScrollView(slivers: [
+    HomeHeader(onAlerts: widget.onAlerts),
+    SliverPadding(padding: const EdgeInsets.fromLTRB(12, 12, 12, 120), sliver: SliverList.list(children: [
+      const Entrance(child: SosBanner()),
+      Padding(padding: const EdgeInsets.fromLTRB(4, 10, 4, 4), child: Row(children: [
+        Expanded(child: Text(tr('latest_near_you'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800))),
+        const LiveDot(), const SizedBox(width: 6), Text(tr('live_updates'), style: const TextStyle(color: RL.text2, fontSize: 12)),
+      ])),
+      if (error && items == null) ErrorCard(onRetry: () { setState(() => error = false); load(); }),
+      if (items == null && !error) ...[const PostSkeleton(), const PostSkeleton()],
+      if (items != null && items!.isEmpty) Padding(padding: const EdgeInsets.all(32), child: Text(tr('nothing_yet'), textAlign: TextAlign.center, style: const TextStyle(color: RL.text2))),
+      for (final (n, i) in (items ?? []).indexed) Entrance(key: ValueKey(i['id']), index: n, child: PostTile(i)),
     ])),
-    if (error && items == null) ErrorCard(onRetry: () { setState(() => error = false); load(); }),
-    if (items == null && !error) ...[const PostSkeleton(), const PostSkeleton()],
-    if (items != null && items!.isEmpty) Padding(padding: const EdgeInsets.all(32), child: Text(tr('nothing_yet'), textAlign: TextAlign.center, style: const TextStyle(color: RL.text2))),
-    for (final (n, i) in (items ?? []).indexed) Entrance(key: ValueKey(i['id']), index: n, child: PostTile(i)),
   ]));
 }
 

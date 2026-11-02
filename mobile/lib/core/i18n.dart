@@ -25,6 +25,11 @@ class L10n extends ChangeNotifier {
 
   static const _s = <String, Map<String, String>>{
     'en': {
+      'set_alert_area': 'Worldwide feed',
+      'your_alert_area': 'Your alert area',
+      'good_evening': 'Good evening',
+      'good_afternoon': 'Good afternoon',
+      'good_morning': 'Good morning',
       'severity': 'Severity',
       'category': 'Category',
       'ai_applied': 'Applied to the form. You can change anything.',
@@ -65,6 +70,11 @@ class L10n extends ChangeNotifier {
       'no_alerts': 'No alerts yet', 'low': 'Low', 'moderate': 'Moderate', 'high': 'High', 'critical': 'Critical', 'nothing_yet': 'Nothing reported yet',
     },
     'bn': {
+      'set_alert_area': 'বিশ্বজুড়ে ফিড',
+      'your_alert_area': 'আপনার সতর্কতা এলাকা',
+      'good_evening': 'শুভ সন্ধ্যা',
+      'good_afternoon': 'শুভ অপরাহ্ন',
+      'good_morning': 'শুভ সকাল',
       'severity': 'তীব্রতা',
       'category': 'বিভাগ',
       'ai_applied': 'ফর্মে বসানো হয়েছে। যেকোনো কিছু বদলাতে পারেন।',
@@ -105,6 +115,11 @@ class L10n extends ChangeNotifier {
       'no_alerts': 'এখনো কোনো সতর্কতা নেই', 'low': 'কম', 'moderate': 'মাঝারি', 'high': 'উচ্চ', 'critical': 'সংকটপূর্ণ', 'nothing_yet': 'এখনো কিছু রিপোর্ট হয়নি',
     },
     'hi': {
+      'set_alert_area': 'विश्वव्यापी फ़ीड',
+      'your_alert_area': 'आपका अलर्ट क्षेत्र',
+      'good_evening': 'शुभ संध्या',
+      'good_afternoon': 'नमस्कार',
+      'good_morning': 'सुप्रभात',
       'severity': 'गंभीरता',
       'category': 'श्रेणी',
       'ai_applied': 'फॉर्म में भरा गया। आप कुछ भी बदल सकते हैं।',
@@ -144,6 +159,11 @@ class L10n extends ChangeNotifier {
       'no_alerts': 'अभी कोई अलर्ट नहीं', 'low': 'कम', 'moderate': 'मध्यम', 'high': 'उच्च', 'critical': 'गंभीर', 'nothing_yet': 'अभी कुछ रिपोर्ट नहीं हुआ',
     },
     'es': {
+      'set_alert_area': 'Feed mundial',
+      'your_alert_area': 'Tu zona de alertas',
+      'good_evening': 'Buenas noches',
+      'good_afternoon': 'Buenas tardes',
+      'good_morning': 'Buenos días',
       'severity': 'Gravedad',
       'category': 'Categoría',
       'ai_applied': 'Aplicado al formulario. Puedes cambiar lo que quieras.',
@@ -183,6 +203,11 @@ class L10n extends ChangeNotifier {
       'no_alerts': 'Aún no hay alertas', 'low': 'Baja', 'moderate': 'Moderada', 'high': 'Alta', 'critical': 'Crítica', 'nothing_yet': 'Aún no hay reportes',
     },
     'ar': {
+      'set_alert_area': 'موجز عالمي',
+      'your_alert_area': 'منطقة تنبيهاتك',
+      'good_evening': 'مساء الخير',
+      'good_afternoon': 'مساء الخير',
+      'good_morning': 'صباح الخير',
       'severity': 'الخطورة',
       'category': 'الفئة',
       'ai_applied': 'طُبّق على النموذج. يمكنك تغيير أي شيء.',

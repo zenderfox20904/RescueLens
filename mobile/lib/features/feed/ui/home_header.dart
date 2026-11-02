@@ -1,0 +1,80 @@
+import 'package:flutter/material.dart';
+import 'package:rescuelens/core/api.dart';
+import 'package:rescuelens/core/i18n.dart';
+import 'package:rescuelens/core/widgets.dart';
+
+/// Cached signed in user for header and profile surfaces.
+class Me {
+  static Map? user;
+  static Future<Map?> load({bool force = false}) async {
+    if (Api.token == null) return user = null;
+    if (user != null && !force) return user;
+    try { user = (await Api.get('/auth/me'))['user']; } catch (_) {}
+    return user;
+  }
+}
+
+/// Curved solid header (white in light, dark surface in dark) with soft shadow, that collapses into a compact bar on scroll.
+class HomeHeader extends StatefulWidget {
+  final VoidCallback? onAlerts;
+  const HomeHeader({super.key, this.onAlerts});
+  @override
+  State<HomeHeader> createState() => _HomeHeaderState();
+}
+
+class _HomeHeaderState extends State<HomeHeader> {
+  Map? me;
+  @override
+  void initState() { super.initState(); Me.load().then((u) { if (mounted) setState(() => me = u); }); }
+
+  String greeting() {
+    final h = DateTime.now().hour;
+    return tr(h < 12 ? 'good_morning' : h < 17 ? 'good_afternoon' : 'good_evening');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final th = Theme.of(context);
+    final bg = dark ? (th.appBarTheme.backgroundColor ?? th.colorScheme.surface) : Colors.white;
+    final fg = th.colorScheme.onSurface;
+    final top = MediaQuery.paddingOf(context).top;
+    final name = '${me?['name'] ?? ''}'.split(' ').first;
+    final radius = me?['alert_radius_km'] ?? 5;
+    final unit = me?['distance_unit'] ?? 'km';
+    final area = me?['alert_area_set'] == true ? tr('your_alert_area') : tr('set_alert_area');
+    final white = fg;
+    final actions = Row(mainAxisSize: MainAxisSize.min, children: [
+      PopupMenuButton<String>(tooltip: tr('language'), icon: Icon(Icons.translate_rounded, color: white),
+        onSelected: (l) => L10n.i.set(l),
+        itemBuilder: (_) => [for (final e in L10n.langs.entries) CheckedPopupMenuItem(value: e.key, checked: L10n.i.lang == e.key, child: Text(e.value))]),
+      IconButton(tooltip: tr('alerts'), onPressed: widget.onAlerts, icon: IconTheme(data: IconThemeData(color: white), child: AlertBadge(color: white))),
+    ]);
+    return SliverAppBar(
+      pinned: true, expandedHeight: 168, toolbarHeight: 60, backgroundColor: Colors.transparent, surfaceTintColor: Colors.transparent, elevation: 0,
+      automaticallyImplyLeading: false, titleSpacing: 16,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(bottom: Radius.circular(28))),
+      
+      title: Row(mainAxisSize: MainAxisSize.min, children: [const LogoMark(size: 28), const SizedBox(width: 8), Text('RescueLens', style: TextStyle(color: white, fontWeight: FontWeight.w800, fontSize: 20))]),
+      actions: [actions, const SizedBox(width: 4)],
+      flexibleSpace: LayoutBuilder(builder: (_, c) {
+        final t = ((c.maxHeight - 60 - top) / (168 - 60)).clamp(0.0, 1.0);
+        return DecoratedBox(
+          decoration: BoxDecoration(color: bg, borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
+            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: dark ? .45 : .08), blurRadius: 18, offset: const Offset(0, 6))]),
+          child: Stack(children: [
+            Positioned(left: 16, right: 16, bottom: 16, child: Opacity(opacity: t, child: Transform.translate(offset: Offset(0, 12 * (1 - t)), child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
+              Text(name.isEmpty ? greeting() : '${greeting()}, $name', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: white, fontSize: 22, fontWeight: FontWeight.w800)),
+              const SizedBox(height: 8),
+              Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6), decoration: BoxDecoration(color: const Color(0xFF0866FF).withValues(alpha: .12), borderRadius: BorderRadius.circular(20)),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  const Icon(Icons.my_location_rounded, color: Color(0xFF0866FF), size: 16), const SizedBox(width: 6),
+                  Flexible(child: Text('$area · $radius $unit', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Color(0xFF0866FF), fontWeight: FontWeight.w600, fontSize: 13))),
+                ])),
+            ])))),
+          ]),
+        );
+      }),
+    );
+  }
+}

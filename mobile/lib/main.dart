@@ -45,7 +45,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     final authed = Api.token != null;
     void refresh() => setState(() {});
-    final pages = [const FeedScreen(), const MapScreen(), authed ? const ReportScreen() : LoginScreen(onDone: refresh),
+    final pages = [FeedScreen(onAlerts: () => go(3)), const MapScreen(), authed ? const ReportScreen() : LoginScreen(onDone: refresh),
       authed ? const AlertsScreen() : LoginScreen(onDone: refresh), ProfileScreen(onChanged: refresh)];
     final wide = MediaQuery.sizeOf(context).width >= 700;
     final body = AnimatedSwitcher(duration: const Duration(milliseconds: 250), child: KeyedSubtree(key: ValueKey('$tab$authed'), child: pages[tab]));
@@ -58,7 +58,7 @@ class _HomeState extends State<Home> {
         Expanded(child: body),
       ])));
     }
-    return Scaffold(extendBody: true, appBar: appBar, body: body, bottomNavigationBar: FloatingNav(index: tab, onTap: go));
+    return Scaffold(extendBody: true, appBar: tab == 0 ? null : appBar, body: body, bottomNavigationBar: FloatingNav(index: tab, onTap: go));
   }
 }
 
