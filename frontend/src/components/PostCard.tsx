@@ -10,7 +10,7 @@ import { IChat, IEye, IFlag, IShare, IWhatsApp } from './Icons'
 import { useToast } from './Toast'
 import { Comments, SeeMore } from './Comments'
 import { PostMenu } from './PostManage'
-import { Sparkles, Check, Clock, MapPin, Eye, Link2 } from 'lucide-react'
+import { Sparkles, Check, Clock, MapPin, Eye, Link2, Languages, MessageCircle } from 'lucide-react'
 
 export function RegionOverlay({ regions, show = true }: { regions: Region[]; show?: boolean }) {
   return <>{regions.map((r, i) => (
@@ -46,7 +46,7 @@ export function Translated({ original, translated }: { original: string; transla
   const { t } = useI18n()
   const [orig, setOrig] = useState(false)
   if (!translated) return <div>{original}</div>
-  return <div>{orig ? original : translated} <button type="button" className="link-btn small" onClick={() => setOrig((v) => !v)}>{orig ? t('ui.see_translation') : t('ui.see_original')}</button></div>
+  return <div>{orig ? original : translated} <button type="button" className="link-btn small" onClick={() => setOrig((v) => !v)}><Languages size={13} aria-hidden style={{ verticalAlign: -2 }} /> {orig ? t('ui.see_translation') : t('ui.see_original')}</button></div>
 }
 
 export function PostCard({ i, detail = false }: { i: Incident; detail?: boolean }) {
@@ -84,7 +84,7 @@ export function PostCard({ i, detail = false }: { i: Incident; detail?: boolean 
       </div>
       <Link to={`/incidents/${i.id}`} style={{ color: 'inherit' }}><div className="post-title">{orig ? i.title.replace('[DEMO] ', '') : ttl(i)}</div></Link>
       {i.description && (detail ? <div style={{ whiteSpace: 'pre-wrap' }}>{orig ? i.description : i.description_translated || i.description}</div> : <SeeMore text={orig ? i.description : i.description_translated || i.description} />)}
-      {hasTr && <button type="button" className="link-btn small" onClick={() => setOrig((v) => !v)}>{orig ? t('ui.see_translation') : t('ui.see_original')}</button>}
+      {hasTr && <button type="button" className="link-btn small" onClick={() => setOrig((v) => !v)}><Languages size={13} aria-hidden style={{ verticalAlign: -2 }} /> {orig ? t('ui.see_translation') : t('ui.see_original')}</button>}
       {i.analysis && <div className="small muted" style={{ marginTop: 6 }}><Sparkles size={12} /> {t('aiSuggestion')}{i.analysis.mode === 'demo' ? ' (DEMO)' : ''}: {i.analysis.hazards.map((h) => CATS[h]?.[lang] ?? h).join(', ')}</div>}
       {img && (
         <div className="post-media" onClick={() => setShowRegions((v) => !v)}>
@@ -97,7 +97,7 @@ export function PostCard({ i, detail = false }: { i: Incident; detail?: boolean 
       )}
       <div className="post-stats">
         <span><Eye size={14} /> {i.counts.confirm} {t('ui.confirmed')}{i.counts.dispute ? ` · ${i.counts.dispute} ${t('ui.disputed')}` : ''}</span>
-        <button className="btn btn-ghost small" style={{ padding: 0 }} onClick={() => setShowComments((v) => !v)}>{i.counts.comments} {t('comment')}</button>
+        <button className="btn btn-ghost small" style={{ padding: 0 }} onClick={() => setShowComments((v) => !v)}><MessageCircle size={14} aria-hidden style={{ verticalAlign: -2 }} /> {i.counts.comments} {t('comment')}</button>
       </div>
       <div className="post-actions">
         <button className={'btn' + (i.my_reaction === 'confirm' ? ' on' : '')} onClick={() => act('confirm')} disabled={react.isPending || i.reporter.is_me}><IEye size={18} /> {t('iSee')}</button>

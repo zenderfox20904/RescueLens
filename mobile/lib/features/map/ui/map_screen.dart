@@ -9,6 +9,7 @@ import 'package:rescuelens/core/i18n.dart';
 import 'package:rescuelens/core/theme.dart';
 import 'package:rescuelens/core/widgets.dart';
 import 'package:rescuelens/features/incident/ui/incident_widgets.dart';
+import 'package:rescuelens/features/map/ui/map_pins.dart';
 
 /// Google map of incidents (approximate public points) with a list fallback for accessibility.
 class MapScreen extends StatefulWidget {
@@ -55,9 +56,12 @@ class _MapState extends State<MapScreen> {
     if (!mounted) return; setState(() {});
     ctl?.animateCamera(cam);
   }
+  bool? pinsDark;
+  void warmPins(bool dark) { if (pinsDark == dark) return; pinsDark = dark; MapPins.warm(dark).then((_) { if (mounted) setState(() {}); }); }
   double hue(String s) => {'low': BitmapDescriptor.hueGreen, 'moderate': BitmapDescriptor.hueYellow, 'high': BitmapDescriptor.hueOrange}[s] ?? BitmapDescriptor.hueRed;
   @override
-  Widget build(BuildContext context) => SafeArea(bottom: false, child: Column(children: [
+  Widget build(BuildContext context) { warmPins(Theme.of(context).brightness == Brightness.dark); return _body(context); }
+  Widget _body(BuildContext context) => SafeArea(bottom: false, child: Column(children: [
     SizedBox(height: 44, child: ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 8), children: [
       for (final v in const [('nearby', LucideIcons.locateFixed), ('country', LucideIcons.flag), ('world', LucideIcons.globe)])
         Padding(padding: const EdgeInsets.only(right: 6), child: ChoiceChip(avatar: Icon(v.$2, size: 16), label: Text(tr('map_${v.$1}')), selected: scope == v.$1, onSelected: (_) => setScope(v.$1))),
@@ -68,7 +72,7 @@ class _MapState extends State<MapScreen> {
       style: Theme.of(context).brightness == Brightness.dark ? darkMapStyle : null,
       initialCameraPosition: const CameraPosition(target: LatLng(20, 40), zoom: 1.3), onMapCreated: (c) { ctl = c; c.moveCamera(cam); },
       markers: {for (final p in shown) Marker(markerId: MarkerId(p['id']), position: LatLng((p['lat'] as num).toDouble(), (p['lng'] as num).toDouble()),
-        icon: BitmapDescriptor.defaultMarkerWithHue(hue(p['severity'])), infoWindow: InfoWindow(title: title(p), snippet: p['area_name'], onTap: () => openDetail(context, p['id'])))},
+        icon: MapPins.get('${p['category']}', pinsDark ?? false) ?? MapPins.get('other', pinsDark ?? false) ?? BitmapDescriptor.defaultMarkerWithHue(hue(p['severity'])), anchor: const Offset(.5, 1), infoWindow: InfoWindow(title: title(p), snippet: p['area_name'], onTap: () => openDetail(context, p['id'])))},
     )),
     Padding(padding: const EdgeInsets.all(8), child: Text(tr('map_note'), style: TextStyle(color: RL.text2, fontSize: 12))),
     Expanded(child: pts == null ? ListView(children: const [PostSkeleton()]) : ListView(padding: const EdgeInsets.only(bottom: 120), children: [

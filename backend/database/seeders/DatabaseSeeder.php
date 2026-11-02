@@ -12,7 +12,7 @@ use Illuminate\Database\Seeder;
 
 /**
  * DEMO DATA ONLY. Every user and incident created here has is_demo = true and the
- * titles are prefixed with [DEMO]. None of it describes a real event.
+ * posts stay labeled demo until `php artisan rescuelens:analyze-seeded` attaches a photo and a live AI analysis. None of it describes a real event.
  * Demo password for all accounts: password
  */
 class DatabaseSeeder extends Seeder
@@ -110,18 +110,18 @@ class DatabaseSeeder extends Seeder
         }
 
         $rows = [
-            [$rina, '[DEMO] Two car collision on Dhaka Aricha Highway', 'Two cars collided near the Hemayetpur stretch. One lane appears blocked. Please drive carefully and follow police instructions.', 'road_accident', 'high', 'verified', 23.7935, 90.2570, 'Savar, Dhaka', 45, 4, $mod],
-            [$karim, '[DEMO] Knee deep water at Mirpur 10', 'Waterlogging on the main road, about knee deep. Rickshaws are moving slowly.', 'flood', 'moderate', 'corroborated', 23.8069, 90.3687, 'Mirpur 10, Dhaka', 90, 3, null],
-            [$tanvir, '[DEMO] Smoke from a building in Old Dhaka', 'Smoke seen from upper floor of a mixed use building. People are moving out. Call 999 if you are nearby and in danger.', 'fire', 'critical', 'reported', 23.7104, 90.4074, 'Chawkbazar, Old Dhaka', 20, 1, null],
-            [$rina, '[DEMO] Fallen electric wire on footpath', 'A live looking electric wire is lying on a wet footpath. Keep distance. Do not touch.', 'electrical', 'high', 'reported', 23.7461, 90.3742, 'Dhanmondi 27, Dhaka', 35, 2, null],
-            [$karim, '[DEMO] Part of an old building collapsed', 'Part of an old wall and balcony collapsed after heavy rain. Area cordoned by locals.', 'building_collapse', 'critical', 'verified', 23.7230, 90.4160, 'Sutrapur, Dhaka', 180, 5, $mod],
-            [$tanvir, '[DEMO] Waterlogging under Minto Bridge', 'Heavy rain has flooded the underpass. Cars are stalling. Use an alternate route.', 'flood', 'high', 'corroborated', 28.6328, 77.2280, 'Minto Road, New Delhi', 60, 3, null],
-            [$rina, '[DEMO] Market fire near Balogun', 'Thick smoke from a row of shops. Traders are moving goods out. Keep the road clear for fire trucks.', 'fire', 'critical', 'reported', 6.4560, 3.3880, 'Lagos Island, Lagos', 25, 2, null],
-            [$karim, '[DEMO] Cyclist injured at junction', 'A cyclist was hit at a busy junction and is being helped by passers by. Ambulance requested.', 'road_accident', 'high', 'verified', 51.5155, -0.0720, 'Aldgate, London', 40, 3, $mod],
-            [$tanvir, '[DEMO] Ice on sidewalk causing falls', 'Several people have slipped on an icy stretch of sidewalk. Walk carefully.', 'snow_ice', 'moderate', 'reported', 40.7580, -73.9855, 'Times Square, New York', 70, 2, null],
-            [$rina, '[DEMO] River overflow in Kampung Melayu', 'The Ciliwung river has overflowed into nearby lanes. Water is rising slowly. Move valuables up.', 'flood', 'high', 'corroborated', -6.2240, 106.8660, 'Kampung Melayu, Jakarta', 110, 4, null],
+            [$rina, 'Two car collision on Dhaka Aricha Highway', 'Two cars collided near the Hemayetpur stretch. One lane appears blocked. Please drive carefully and follow police instructions.', 'road_accident', 'high', 'verified', 23.7935, 90.2570, 'Savar, Dhaka', 45, 4, $mod],
+            [$karim, 'Knee deep water at Mirpur 10', 'Waterlogging on the main road, about knee deep. Rickshaws are moving slowly.', 'flood', 'moderate', 'corroborated', 23.8069, 90.3687, 'Mirpur 10, Dhaka', 90, 3, null],
+            [$tanvir, 'Smoke from a building in Old Dhaka', 'Smoke seen from upper floor of a mixed use building. People are moving out. Call 999 if you are nearby and in danger.', 'fire', 'critical', 'reported', 23.7104, 90.4074, 'Chawkbazar, Old Dhaka', 20, 1, null],
+            [$rina, 'Fallen electric wire on footpath', 'A live looking electric wire is lying on a wet footpath. Keep distance. Do not touch.', 'electrical', 'high', 'reported', 23.7461, 90.3742, 'Dhanmondi 27, Dhaka', 35, 2, null],
+            [$karim, 'Part of an old building collapsed', 'Part of an old wall and balcony collapsed after heavy rain. Area cordoned by locals.', 'building_collapse', 'critical', 'verified', 23.7230, 90.4160, 'Sutrapur, Dhaka', 180, 5, $mod],
+            [$tanvir, 'Waterlogging under Minto Bridge', 'Heavy rain has flooded the underpass. Cars are stalling. Use an alternate route.', 'flood', 'high', 'corroborated', 28.6328, 77.2280, 'Minto Road, New Delhi', 60, 3, null],
+            [$rina, 'Market fire near Balogun', 'Thick smoke from a row of shops. Traders are moving goods out. Keep the road clear for fire trucks.', 'fire', 'critical', 'reported', 6.4560, 3.3880, 'Lagos Island, Lagos', 25, 2, null],
+            [$karim, 'Cyclist injured at junction', 'A cyclist was hit at a busy junction and is being helped by passers by. Ambulance requested.', 'road_accident', 'high', 'verified', 51.5155, -0.0720, 'Aldgate, London', 40, 3, $mod],
+            [$tanvir, 'Ice on sidewalk causing falls', 'Several people have slipped on an icy stretch of sidewalk. Walk carefully.', 'snow_ice', 'moderate', 'reported', 40.7580, -73.9855, 'Times Square, New York', 70, 2, null],
+            [$rina, 'River overflow in Kampung Melayu', 'The Ciliwung river has overflowed into nearby lanes. Water is rising slowly. Move valuables up.', 'flood', 'high', 'corroborated', -6.2240, 106.8660, 'Kampung Melayu, Jakarta', 110, 4, null],
         ];
-        $rows = array_values(array_filter($rows, fn ($r) => ! Incident::withTrashed()->where('title', $r[1])->exists()));
+        $rows = array_values(array_filter($rows, fn ($r) => ! Incident::withTrashed()->whereIn('title', [$r[1], '[DEMO] '.$r[1]])->exists()));
         $people = [$admin, $mod, $rina, $karim, $tanvir];
         foreach ($rows as [$u, $title, $desc, $cat, $sev, $status, $lat, $lng, $area, $mins, $conf, $verifier]) {
             $i = Incident::create([
@@ -140,7 +140,7 @@ class DatabaseSeeder extends Seeder
                 IncidentConfirmation::create(['incident_id' => $i->id, 'user_id' => $p->id, 'type' => 'confirm']);
                 $n++;
             }
-            IncidentComment::create(['incident_id' => $i->id, 'user_id' => $people[($i->id) % 5]->id === $u->id ? $mod->id : $people[($i->id) % 5]->id, 'body' => 'I saw this too, please be careful. (demo comment)']);
+            IncidentComment::create(['incident_id' => $i->id, 'user_id' => $people[($i->id) % 5]->id === $u->id ? $mod->id : $people[($i->id) % 5]->id, 'body' => 'I saw this too, please be careful.']);
             $i->forceFill(['confirmations_count' => $n, 'comments_count' => 1])->save();
         }
     }

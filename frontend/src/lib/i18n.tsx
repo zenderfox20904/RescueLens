@@ -58,11 +58,9 @@ export type Key = keyof typeof en
 /** Countries using miles on road signs. */
 const MILES = ['US', 'GB', 'LR', 'MM']
 export const COUNTRIES = ['BD', 'IN', 'PK', 'NP', 'LK', 'MM', 'ID', 'PH', 'MY', 'TR', 'SA', 'AE', 'EG', 'NG', 'KE', 'ZA', 'GB', 'US', 'CA', 'MX', 'BR', 'ES', 'FR', 'DE', 'IT', 'JP', 'AU']
+/** Starting value only. The real active country comes from device location, then profile, then IP (see I18nProvider). Never the browser language region. */
 function detectCountry() {
-  const saved = localStorage.getItem('rl_country')
-  if (saved) return saved
-  const region = navigator.language.split('-')[1]?.toUpperCase()
-  return region && /^[A-Z]{2}$/.test(region) ? region : 'BD'
+  return localStorage.getItem('rl_country') || 'BD'
 }
 
 type Ctx = {
@@ -77,10 +75,27 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const [country, setC] = useState(detectCountry)
   const [units, setU] = useState<'km' | 'mi'>(() => (localStorage.getItem('rl_units') as 'km' | 'mi') || (MILES.includes(detectCountry()) ? 'mi' : 'km'))
   useEffect(() => { localStorage.setItem('rl_country', country) }, [country])
+  // Active country follows the device location, then the profile country, then the IP country, unless the user picked one in Settings.
+  useEffect(() => {
+    if (localStorage.getItem('rl_country_manual')) return
+    let done = false
+    const fallback = async () => {
+      if (done) return
+      const { api } = await import('./api')
+      try { const me = await api<{ user?: { country_code?: string } }>('/auth/me'); const c = me.user?.country_code; if (c && !done) { done = true; setC(c.toUpperCase()); return } } catch { /* signed out */ }
+      try { const ip = await api<{ country_code: string | null }>('/geo/ip'); if (ip.country_code && !done) { done = true; setC(ip.country_code) } } catch { /* offline */ }
+    }
+    if (!navigator.geolocation) { void fallback(); return }
+    navigator.geolocation.getCurrentPosition(async (p) => {
+      const { countryAt } = await import('./countryCenter')
+      const c = countryAt(p.coords.latitude, p.coords.longitude)
+      if (c) { done = true; setC(c) } else void fallback()
+    }, () => void fallback(), { maximumAge: 600000, timeout: 8000 })
+  }, [])
   const value: Ctx = {
     lang, t: (k, o) => t(k, o) as string,
     setLang: (l) => { chooseLanguage(l) },
-    country, setCountry: setC,
+    country, setCountry: (c) => { localStorage.setItem('rl_country_manual', '1'); setC(c) },
     units, setUnits: (u) => { localStorage.setItem('rl_units', u); setU(u) },
     locale: `${lang}-${country}`,
     timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,

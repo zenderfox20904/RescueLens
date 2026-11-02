@@ -7,7 +7,8 @@ import { type Incident, ttl } from '../lib/types'
 import { StatusBadge } from '../components/PostCard'
 import { ListSkeleton } from '../components/Skeleton'
 import { useToast } from '../components/Toast'
-import { ShieldCheck, Eye, Flag } from 'lucide-react'
+import { ShieldCheck, Eye, Flag, BadgeCheck, CircleHelp, CircleCheck, Clock, Trash2, Megaphone, Users, type LucideIcon } from 'lucide-react'
+const ST_ICON: Record<string, LucideIcon> = { reported: Megaphone, corroborated: Users, disputed: CircleHelp, verified: BadgeCheck, resolved: CircleCheck, expired: Clock, removed: Trash2 }
 
 export function ModActions({ i }: { i: Incident }) {
   const { t } = useI18n()
@@ -28,7 +29,7 @@ export function ModActions({ i }: { i: Incident }) {
       <input className="input" placeholder={t('ui.note_optional')} value={note} maxLength={500} onChange={(e) => setNote(e.target.value)} />
       <div className="chips">
         {[['verified', 'Verify', 'btn-primary'], ['disputed', 'Dispute', ''], ['resolved', 'Resolve', ''], ['expired', 'Expire', ''], ['removed', 'Remove', 'btn-danger']].map(([s, l, c]) => (
-          <button key={s} className={'btn ' + c} disabled={m.isPending || i.status === s} onClick={() => m.mutate(s)}>{l}</button>))}
+          <button key={s} className={'btn ' + c} disabled={m.isPending || i.status === s} onClick={() => m.mutate(s)}>{(() => { const I = ST_ICON[s]; return <I size={16} aria-hidden /> })()} {l}</button>))}
       </div>
       <div className="row"><input className="input" placeholder={t('ui.merge_into_report_id')} value={into} onChange={(e) => setInto(e.target.value)} /><button className="btn" disabled={into.length !== 26} onClick={merge}>{t('ui.merge')}</button></div>
     </div>
@@ -43,7 +44,7 @@ export default function Moderation() {
     <div className="main">
       <div className="card" style={{ padding: 12 }}>
         <h2 style={{ margin: '0 0 8px' }}><ShieldCheck size={20} style={{ verticalAlign: -3 }} /> {t('ui.moderation_queue')}</h2>
-        <div className="chips">{['reported', 'corroborated', 'disputed', 'verified', 'resolved', 'removed'].map((s) => <button key={s} className={'chip' + (status === s ? ' on' : '')} onClick={() => setStatus(s)}>{s}</button>)}</div>
+        <div className="chips">{['reported', 'corroborated', 'disputed', 'verified', 'resolved', 'removed'].map((s) => <button key={s} className={'chip' + (status === s ? ' on' : '')} onClick={() => setStatus(s)}>{(() => { const I = ST_ICON[s]; return <I size={14} aria-hidden /> })()} {s}</button>)}</div>
       </div>
       {q.isLoading ? <div className="card" style={{ padding: 12 }}><ListSkeleton rows={6} /></div> : q.data?.data.length === 0 ? <div className="card muted" style={{ padding: 16 }}>{t('ui.empty')}</div> : q.data?.data.map((i) => (
         <div key={i.id} className="card" style={{ padding: 12 }}>

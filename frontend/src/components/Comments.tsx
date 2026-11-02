@@ -77,7 +77,7 @@ export function Comments({ id, preview = false }: { id: string; preview?: boolea
         )}
         <div className="c-actions">
           <span className="muted" style={{ fontWeight: 400 }}>{timeAgo(c.created_at, lang)}{c.edited_at ? ` · ${t('ui.edited')}` : ''}</span>
-          {user && <button className={c.liked ? 'on' : ''} onClick={() => like(c)}>{t('ui.like')}{c.likes ? ` · ${c.likes}` : ''}</button>}
+          {user && <button className={c.liked ? 'on' : ''} onClick={() => like(c)}><ThumbsUp size={13} aria-hidden style={{ verticalAlign: -2 }} /> {t('ui.like')}{c.likes ? ` · ${c.likes}` : ''}</button>}
           {!user && c.likes > 0 && <span><ThumbsUp size={12} /> {c.likes}</span>}
           {user && <button onClick={() => { setReplyTo(c.parent_id ? rows.find((x) => x.id === c.parent_id) ?? c : c); setAll(true) }}><Reply size={16} aria-hidden /> {t('ui.reply')}</button>}
         </div>

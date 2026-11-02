@@ -131,7 +131,7 @@ export function RightSidebar() {
       <div className="section-title">AI</div>
       <div className="card small" style={{ padding: 12 }}>
         {health.isLoading ? <Sk h={30} /> : health.data?.ai?.mode === 'live'
-          ? <>Meta Model API live: {health.data.ai.vision_model} + {health.data.ai.segmentation_model}</>
+          ? <><span className="badge">Meta AI</span> {t('ui.meta_ai_live')}</>
           : <><span className="badge badge-demo">DEMO</span> {t('ui.live_ai_not_configured_demo')}</>}
       </div>
       <p className="footer-note">{t('neverSafe')}</p>

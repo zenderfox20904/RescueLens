@@ -1,6 +1,6 @@
 # RescueLens Demo Script (2:55)
 
-Promo style voiceover for an Indian male voice: warm, confident, medium pace (about 150 words per minute). Narration always says "Meta AI". Record with the local setup (AI_PROVIDER=ollama) so no DEMO labels appear; before recording, hide or skip any seeded post whose title starts with [DEMO].
+Promo style voiceover for an Indian male voice: warm, confident, medium pace (about 150 words per minute). Narration always says "Meta AI". Record with the local setup (AI_PROVIDER=ollama) so no DEMO labels appear. Seeded posts carry real Meta AI analyses (run `php artisan rescuelens:analyze-seeded` once after seeding). The sidebar shows only "Meta AI", the emergency banner follows the viewer's location (999 with its source in Bangladesh), and app map pins are Meta blue incident type icons that follow the theme.
 
 Screens: web at http://localhost:5173 (dark mode, 1280 by 860), app on the iPhone simulator (dark theme). Subtitles are burned in, white on a 60 percent black bar, bottom center, max two lines.
 

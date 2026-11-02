@@ -380,7 +380,8 @@
     "map_location_off": "Location is off, so all reports are shown. Allow location to see reports near you.",
     "map_country": "My country",
     "feed_top": "Top",
-    "feed_latest": "Latest"
+    "feed_latest": "Latest",
+    "meta_ai_live": "Meta AI is live."
   },
   "cat": {
     "road_accident": "Road accident",

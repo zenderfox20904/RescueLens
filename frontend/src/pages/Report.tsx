@@ -165,7 +165,7 @@ export default function Report() {
                 {!!analysis.result.recommended_precautions.length && <div className="small"><b>{t('ui.precautions')}:</b> {analysis.result.recommended_precautions.join(' • ')}</div>}
                 {!!analysis.result.uncertainties.length && <div className="small muted"><b>{t('ui.uncertain')}:</b> {analysis.result.uncertainties.join(' • ')}</div>}
               </>}
-              <div className="small muted" style={{ marginTop: 6 }}>{analysis.vision_model}{analysis.segmentation_model ? ' + ' + analysis.segmentation_model : ''}{analysis.latency_ms ? ` · ${analysis.latency_ms} ms` : ''}</div>
+              <div className="small muted" style={{ marginTop: 6 }}>Meta AI{analysis.latency_ms ? ` · ${analysis.latency_ms} ms` : ''}</div>
             </div>
           )}
 
