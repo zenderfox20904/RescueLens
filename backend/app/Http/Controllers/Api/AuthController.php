@@ -56,13 +56,50 @@ class AuthController extends Controller
 
     public function me(Request $r)
     {
-        return ['user' => Present::user($r->user())];
+        $u = $r->user();
+        $stats = [
+            'reports' => \App\Models\Incident::where('user_id', $u->id)->count(),
+            'verified' => \App\Models\Incident::where('user_id', $u->id)->where('status', 'verified')->count(),
+            'confirmations' => \App\Models\IncidentConfirmation::where('user_id', $u->id)->count(),
+        ];
+        return ['user' => Present::user($u), 'stats' => $stats];
+    }
+
+    /** Avatar upload: re-encoded server side so EXIF (including GPS) is stripped. */
+    public function avatar(Request $r, \App\Services\ImageProcessor $img)
+    {
+        $r->validate(['image' => 'required|file|max:'.config('rescuelens.upload_max_kb').'|mimes:jpg,jpeg,png,webp']);
+        $meta = $img->store($r->file('image'));
+        $u = $r->user();
+        if ($u->avatar_path) \Illuminate\Support\Facades\Storage::disk('local')->delete($u->avatar_path);
+        $u->forceFill(['avatar_path' => $meta['path']])->save();
+        \App\Models\AuditLog::record('profile.avatar', $u);
+        return ['user' => Present::user($u->fresh())];
+    }
+
+    public function avatarFile(string $user)
+    {
+        $u = \App\Models\User::where('public_id', $user)->whereNotNull('avatar_path')->firstOrFail();
+        return response(\Illuminate\Support\Facades\Storage::disk('local')->get($u->avatar_path), 200, ['Content-Type' => 'image/jpeg', 'Cache-Control' => 'private, max-age=600', 'X-Content-Type-Options' => 'nosniff']);
+    }
+
+    public function changePassword(Request $r)
+    {
+        $d = $r->validate(['current_password' => 'required|string', 'password' => ['required', 'confirmed', Password::min(8)->letters()->numbers()]]);
+        $u = $r->user();
+        if ($u->password && ! \Illuminate\Support\Facades\Hash::check($d['current_password'], $u->password)) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['current_password' => 'Current password is incorrect.']);
+        }
+        $u->forceFill(['password' => \Illuminate\Support\Facades\Hash::make($d['password'])])->save();
+        $u->tokens()->where('id', '!=', $u->currentAccessToken()?->id)->delete();
+        \App\Models\AuditLog::record('profile.password_changed', $u);
+        return response()->noContent();
     }
 
     public function updateMe(Request $r)
     {
         $d = $r->validate([
-            'name' => 'sometimes|string|max:80', 'locale' => ['sometimes', 'regex:/^[a-z]{2,3}$/'], 'country_code' => 'sometimes|string|size:2|alpha', 'distance_unit' => 'sometimes|in:km,mi', 'timezone' => 'sometimes|nullable|timezone', 'ai_consent' => 'sometimes|boolean', 'auto_post_enabled' => 'sometimes|boolean', 'auto_post_consent' => 'accepted_if:auto_post_enabled,true,1',
+            'name' => 'sometimes|string|min:2|max:80', 'phone' => ['sometimes', 'nullable', 'regex:/^\+?[0-9 ()]{6,20}$/'], 'bio' => 'sometimes|nullable|string|max:200', 'locale' => ['sometimes', 'regex:/^[a-z]{2,3}$/'], 'country_code' => 'sometimes|string|size:2|alpha', 'distance_unit' => 'sometimes|in:km,mi', 'timezone' => 'sometimes|nullable|timezone', 'ai_consent' => 'sometimes|boolean', 'auto_post_enabled' => 'sometimes|boolean', 'auto_post_consent' => 'accepted_if:auto_post_enabled,true,1',
             'alert_lat' => 'nullable|numeric|between:-90,90', 'alert_lng' => 'nullable|numeric|between:-180,180',
             'alert_radius_km' => 'sometimes|integer|between:1,50', 'theme' => 'sometimes|in:light,dark,system',
             'notify_prefs' => 'sometimes|array', 'notify_prefs.push' => 'sometimes|boolean', 'notify_prefs.categories' => 'sometimes|array',

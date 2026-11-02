@@ -20,6 +20,8 @@ Route::prefix('v1')->middleware('throttle:api')->group(function () {
     Route::middleware('throttle:auth')->group(function () {
         Route::post('auth/register', [AuthController::class, 'register']);
         Route::post('auth/login', [AuthController::class, 'login']);
+        Route::post('auth/forgot', [\App\Http\Controllers\Api\PasswordResetController::class, 'forgot']);
+        Route::post('auth/reset', [\App\Http\Controllers\Api\PasswordResetController::class, 'reset']);
         Route::post('auth/social/exchange', [SocialAuthController::class, 'exchange']);
     });
     Route::get('auth/{provider}/redirect', [SocialAuthController::class, 'redirect'])->whereIn('provider', ['facebook', 'google']);
@@ -27,6 +29,7 @@ Route::prefix('v1')->middleware('throttle:api')->group(function () {
 
     Route::get('media/{media}/file', [MediaController::class, 'show'])->middleware('signed')->name('media.file');
 
+    Route::get('avatars/{user}', [AuthController::class, 'avatarFile'])->middleware('signed')->name('avatar.file');
     Route::get('incidents', [IncidentController::class, 'index']);
     Route::get('incidents/map', [IncidentController::class, 'map']);
     Route::get('incidents/{incident}', [IncidentController::class, 'show']);
@@ -38,6 +41,8 @@ Route::prefix('v1')->middleware('throttle:api')->group(function () {
         Route::get('auth/me', [AuthController::class, 'me']);
         Route::patch('auth/me', [AuthController::class, 'updateMe']);
         Route::delete('auth/me', [AuthController::class, 'destroyMe']);
+        Route::post('auth/me/avatar', [AuthController::class, 'avatar'])->middleware('throttle:uploads');
+        Route::post('auth/password', [AuthController::class, 'changePassword'])->middleware('throttle:auth');
         Route::post('auth/logout', [AuthController::class, 'logout']);
 
         Route::post('media', [MediaController::class, 'store'])->middleware('throttle:uploads');
