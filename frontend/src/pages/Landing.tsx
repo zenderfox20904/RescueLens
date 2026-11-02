@@ -32,7 +32,7 @@ export default function Landing() {
         </div>
         <p className="small muted" style={{ marginTop: 16 }}>{bn ? 'AI ফলাফল শুধু প্রস্তাবনা। RescueLens কোনো রাস্তা নিরাপদ বলে দাবি করে না এবং জরুরি সেবার বিকল্প নয়।' : 'AI output is a suggestion only. RescueLens never claims a road is safe and is not a replacement for emergency services.'}</p>
       </div>
-      <footer className="small muted" style={{ textAlign: 'center', padding: 24 }}>Built with Meta Muse & SAM 3.1 · © 2026 Arifuzzaman Raihan</footer>
+      <footer className="small muted" style={{ textAlign: 'center', padding: 24 }}>© 2026 RescueLens</footer>
     </div>
   )
 }

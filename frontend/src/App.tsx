@@ -27,7 +27,7 @@ function Layout() {
         <Suspense fallback={<div className="main"><PostSkeleton /></div>}><Outlet /></Suspense>
         <RightSidebar />
       </div>
-      <footer className="small muted" style={{ textAlign: 'center', padding: 16 }}>Built with Meta Muse & SAM 3.1</footer>
+      <footer className="small muted" style={{ textAlign: 'center', padding: 16 }}>© 2026 RescueLens</footer>
     </>
   )
 }

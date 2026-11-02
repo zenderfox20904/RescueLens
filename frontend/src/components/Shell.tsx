@@ -93,7 +93,7 @@ export function LeftSidebar() {
       <div className="divider" />
       <div className="section-title">{t('category')}</div>
       {Object.entries(CATS).map(([k, v]) => <Link key={k} to={'/feed?category=' + k} className="sideitem"><span className="sideicon">{v.icon}</span>{v[lang]}</Link>)}
-      <p className="footer-note">Built with Meta Muse &amp; SAM 3.1<br />© 2026 RescueLens</p>
+      <p className="footer-note">© 2026 RescueLens</p>
     </aside>
   )
 }

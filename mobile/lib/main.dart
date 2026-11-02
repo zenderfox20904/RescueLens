@@ -37,10 +37,13 @@ class _HomeState extends State<Home> {
         if (authed) IconButton(icon: const Icon(Icons.logout), onPressed: () async { await Api.setToken(null); setState(() {}); }),
       ]),
       body: pages[tab],
-      bottomNavigationBar: NavigationBar(selectedIndex: tab, onDestinationSelected: (i) => setState(() => tab = i), destinations: const [
+      bottomNavigationBar: Column(mainAxisSize: MainAxisSize.min, children: [
+        const Padding(padding: EdgeInsets.symmetric(vertical: 4), child: Text("© 2026 RescueLens", style: TextStyle(fontSize: 11, color: RL.text2))),
+        NavigationBar(selectedIndex: tab, onDestinationSelected: (i) => setState(() => tab = i), destinations: const [
         NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'ফিড'),
         NavigationDestination(icon: Icon(Icons.map_outlined), selectedIcon: Icon(Icons.map), label: 'ম্যাপ'),
         NavigationDestination(icon: Icon(Icons.add_a_photo_outlined), label: 'রিপোর্ট'),
+      ]),
       ]),
     );
   }
