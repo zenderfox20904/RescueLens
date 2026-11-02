@@ -57,6 +57,8 @@ Route::prefix('v1')->middleware('throttle:api')->group(function () {
             Route::delete('incidents/{incident}', [IncidentController::class, 'destroy']);
             Route::post('incidents/{id}/restore', [IncidentController::class, 'restore']);
             Route::get('me/trash', [IncidentController::class, 'trash']);
+            Route::delete('me/trash', [IncidentController::class, 'emptyTrash'])->middleware('throttle:write');
+            Route::delete('incidents/{id}/force', [IncidentController::class, 'forceDelete'])->middleware('throttle:write');
             Route::patch('comments/{id}', [IncidentController::class, 'updateComment'])->whereNumber('id');
             Route::delete('comments/{id}', [IncidentController::class, 'deleteComment'])->whereNumber('id');
             Route::post('comments/{id}/restore', [IncidentController::class, 'restoreComment'])->whereNumber('id');

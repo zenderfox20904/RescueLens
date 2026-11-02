@@ -361,7 +361,19 @@
     "your_reports": "Your reports",
     "no_reports_profile": "No reports yet",
     "no_reports_profile_me": "When you report an incident it will appear here, where you can edit or move it to Trash.",
-    "no_reports_profile_other": "This person has not shared any public reports."
+    "no_reports_profile_other": "This person has not shared any public reports.",
+    "tab_posts": "Posts",
+    "tab_about": "About",
+    "member": "Member",
+    "responder": "Responder",
+    "account": "Account",
+    "back_to_profile": "Back to profile",
+    "trash_deleted_at": "Deleted {{date}}",
+    "delete_forever_body": "The report, its photos and comments will be erased. This cannot be undone.",
+    "empty_trash": "Empty Trash",
+    "empty_trash_q": "Empty Trash?",
+    "empty_trash_body": "All {{count}} reports in Trash will be erased with their photos. This cannot be undone.",
+    "trash_emptied": "Trash emptied"
   },
   "cat": {
     "road_accident": "Road accident",

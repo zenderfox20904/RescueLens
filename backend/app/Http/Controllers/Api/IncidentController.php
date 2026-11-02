@@ -204,6 +204,37 @@ class IncidentController extends Controller
         return $this->show($r, $incident);
     }
 
+    /** Permanently delete one trashed report with its media files. Owner only; moderators may purge any. Cannot be undone. */
+    public function forceDelete(Request $r, string $id)
+    {
+        $u = $r->user();
+        $incident = Incident::onlyTrashed()->where('public_id', $id)->firstOrFail();
+        abort_unless($incident->user_id === $u->id || $u->isModerator(), 403);
+        $this->purge($incident);
+        return response()->json(['data' => ['deleted' => 1]]);
+    }
+
+    /** Empty Trash: purges the caller's trashed reports; moderators with all=1 purge every trashed report. */
+    public function emptyTrash(Request $r)
+    {
+        $u = $r->user();
+        $q = Incident::onlyTrashed();
+        if (! ($u->isModerator() && $r->boolean('all'))) $q->where('user_id', $u->id);
+        $n = 0;
+        $q->chunkById(50, function ($rows) use (&$n) { foreach ($rows as $i) { $this->purge($i); $n++; } });
+        return response()->json(['data' => ['deleted' => $n]]);
+    }
+
+    private function purge(Incident $incident): void
+    {
+        foreach (\App\Models\IncidentMedia::where('incident_id', $incident->id)->get() as $m) {
+            if ($m->path) \Illuminate\Support\Facades\Storage::disk($m->disk ?: config('filesystems.default'))->delete($m->path);
+            $m->delete();
+        }
+        AuditLog::record('incident.force_delete', $incident);
+        $incident->forceDelete();
+    }
+
     /** Trash: own deleted reports; moderators may pass all=1 to see every deleted report. */
     /** Public profile header: no email, phone or location. */
     public function profile(Request $r, \App\Models\User $user)

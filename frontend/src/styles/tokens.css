@@ -8,9 +8,11 @@
   --r-card: 8px; --r-btn: 6px; --shadow: 0 1px 2px rgba(0,0,0,.2);
   --font: "Segoe UI Historic", "Segoe UI", Helvetica, Arial, "Noto Sans Bengali", sans-serif;
   --primary-soft: #E7F3FF;
+  --on-danger: #C0392B; --on-warning: #8A6100; --on-success: #1E7A37; --on-ai: #C25E00; --chip: #F2F2F2;
 }
 [data-theme="dark"] {
   --primary: #2D88FF; --primary-hover: #4599FF; --bg: #18191A; --card: #242526; --text: #E4E6EB;
   --text-2: #B0B3B8; --divider: #3A3B3C; --hover: #3A3B3C; --input: #3A3B3C; --primary-soft: #263951;
+  --on-danger: #FF8A8A; --on-warning: #FFD27A; --on-success: #8FE0A8; --on-ai: #FFB37A; --chip: #3A3B3C; --text-2: #C2C5CA;
   --shadow: 0 1px 2px rgba(0,0,0,.4);
 }

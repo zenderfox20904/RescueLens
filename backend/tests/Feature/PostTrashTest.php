@@ -91,4 +91,22 @@ class PostTrashTest extends TestCase
         $p = $this->getJson('/api/v1/users/'.$a->public_id.'/profile')->assertOk()->json('data');
         $this->assertArrayNotHasKey('email', $p);
     }
+
+    public function test_force_delete_and_empty_trash_owner_only(): void
+    {
+        $owner = User::factory()->create();
+        $a = $this->report($owner); $b = $this->report($owner);
+        $this->deleteJson("/api/v1/incidents/$a")->assertOk();
+        $this->deleteJson("/api/v1/incidents/$b")->assertOk();
+        $other = User::factory()->create();
+        Sanctum::actingAs($other);
+        $this->deleteJson("/api/v1/incidents/$a/force")->assertForbidden();
+        $this->deleteJson('/api/v1/me/trash')->assertOk()->assertJsonPath('data.deleted', 0);
+        Sanctum::actingAs($owner);
+        $this->deleteJson("/api/v1/incidents/$a/force")->assertOk();
+        $this->assertDatabaseMissing('incidents', ['public_id' => $a]);
+        $this->postJson("/api/v1/incidents/$a/restore")->assertNotFound();
+        $this->deleteJson('/api/v1/me/trash')->assertOk()->assertJsonPath('data.deleted', 1);
+        $this->getJson('/api/v1/me/trash')->assertJsonCount(0, 'data');
+    }
 }

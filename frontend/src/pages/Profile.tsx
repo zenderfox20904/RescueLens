@@ -5,11 +5,10 @@ import { PostCard } from '../components/PostCard'
 import { PostSkeleton } from '../components/Skeleton'
 import type { Incident } from '../lib/types'
 import { useAuth } from '../lib/auth'
-import { api, errMsg } from '../lib/api'
+import { api } from '../lib/api'
 import { useI18n } from '../lib/i18n'
 import { Avatar } from '../components/Shell'
 import { Sk } from '../components/Skeleton'
-import { useToast } from '../components/Toast'
 
 type Pub = { id: string; name: string; role: string; avatar_url: string | null; joined_at: string | null; reports: number; is_me: boolean }
 
@@ -18,6 +17,7 @@ export default function Profile() {
   const { id } = useParams()
   const { user, loading } = useAuth()
   const { t, lang } = useI18n()
+  const [tab, setTab] = useState<'posts' | 'about'>('posts')
   const uid = id ?? (user ? String(user.id) : '')
   const head = useQuery({ queryKey: ['profile', uid], enabled: !!uid, queryFn: () => api<{ data: Pub }>(`/users/${uid}/profile`) })
   const feed = useInfiniteQuery({
@@ -44,37 +44,28 @@ export default function Profile() {
             <h1 style={{ margin: '0 0 2px' }}>{p.name}</h1>
             <div className="muted small">{t('ui.reports_count', { count: p.reports })}{p.joined_at ? ` · ${t('ui.joined', { date: new Date(p.joined_at).toLocaleDateString(lang, { month: 'long', year: 'numeric' }) })}` : ''}{['moderator', 'admin'].includes(p.role) ? ` · ${t('mod')}` : ''}</div>
           </div>
-          {p.is_me && <div className="row" style={{ gap: 8 }}><Link className="btn btn-primary" to="/report">+ {t('ui.new_report')}</Link><Link className="btn" to="/settings">{t('ui.edit_profile')}</Link></div>}
+          {p.is_me && <div className="row" style={{ gap: 8 }}><Link className="btn btn-primary" to="/report">+ {t('ui.new_report')}</Link><Link className="btn" to="/settings#account">✏️ {t('ui.edit_profile')}</Link><Link className="btn" to="/settings" aria-label={t('ui.settings')} title={t('ui.settings')} data-testid="profile-gear">⚙️</Link></div>}
+        </div>
+        <div className="row" style={{ gap: 18, padding: '0 16px 12px' }}>
+          <div><b>{p.reports}</b> <span className="muted small">{t('ui.reports')}</span></div>
+          <div className="muted small">{['moderator', 'admin'].includes(p.role) ? t('mod') : p.role === 'responder' ? t('ui.responder') : t('ui.member')}</div>
+        </div>
+        <div className="tabs" role="tablist" style={{ borderTop: '1px solid var(--divider)', padding: '0 8px' }}>
+          {(['posts', 'about'] as const).map((k) => <button key={k} role="tab" aria-selected={tab === k} className={'tab' + (tab === k ? ' active' : '')} onClick={() => setTab(k)}>{t('ui.tab_' + k)}</button>)}
         </div>
       </div>
-      {p.is_me && <AlertArea />}
-      <h3 style={{ margin: '8px 4px 0' }}>{p.is_me ? t('ui.your_reports') : t('ui.reports')}</h3>
+      {tab === 'about' ? <div className="card" style={{ padding: 16, display: 'grid', gap: 10 }} data-testid="profile-about">
+        <div>👤 {['moderator', 'admin'].includes(p.role) ? t('mod') : p.role === 'responder' ? t('ui.responder') : t('ui.member')}</div>
+        {p.joined_at && <div>📅 {t('ui.joined', { date: new Date(p.joined_at).toLocaleDateString(lang, { month: 'long', year: 'numeric' }) })}</div>}
+        <div>📝 {t('ui.reports_count', { count: p.reports })}</div>
+      </div> : <>
       {feed.isLoading ? <><PostSkeleton /><PostSkeleton /></>
         : items.length === 0 ? <div className="card" style={{ padding: 32, textAlign: 'center' }} data-testid="profile-empty"><div style={{ fontSize: 40 }}>📝</div><b>{t('ui.no_reports_profile')}</b><div className="muted small" style={{ margin: '6px 0 14px' }}>{p.is_me ? t('ui.no_reports_profile_me') : t('ui.no_reports_profile_other')}</div>{p.is_me && <Link className="btn btn-primary" to="/report">{t('ui.new_report')}</Link>}</div>
         : items.map((i) => <PostCard key={i.id} i={i} />)}
       {feed.isFetchingNextPage && <PostSkeleton />}
       <div id="profile-end" style={{ height: 1 }} />
+      </>}
     </div>
   )
 }
 
-function AlertArea() {
-  const { user, refresh } = useAuth()
-  const { t } = useI18n()
-  const toast = useToast()
-  const [radius, setRadius] = useState(user?.alert_radius_km ?? 5)
-  if (!user) return null
-  const save = async (body: any) => { try { await api('/auth/me', { method: 'PATCH', body }); await refresh(); toast(t('ui.saved')) } catch (e) { toast(errMsg(e)) } }
-  const setArea = () => navigator.geolocation?.getCurrentPosition((p) => save({ alert_lat: +p.coords.latitude.toFixed(4), alert_lng: +p.coords.longitude.toFixed(4), alert_radius_km: radius }), () => toast(t('ui.location_unavailable')))
-  return (
-    <>
-      <div className="card" style={{ padding: 16, display: 'grid', gap: 12 }}>
-        <b>{t('ui.nearby_alerts')}</b>
-        <div className="small muted">{user.alert_area_set ? (t('ui.alert_area_is_set')) : (t('ui.no_alert_area_set'))}</div>
-        <label className="small">{t('ui.radius')}: {radius} km<input type="range" min={1} max={50} value={radius} onChange={(e) => setRadius(+e.target.value)} style={{ width: '100%' }} /></label>
-        <button className="btn btn-primary" onClick={setArea}>{t('ui.use_my_current_area')}</button>
-        <label className="row small"><input type="checkbox" checked={user.ai_consent} onChange={(e) => save({ ai_consent: e.target.checked })} /> {t('ui.ai_analysis_consent')}</label>
-      </div>
-    </>
-  )
-}
