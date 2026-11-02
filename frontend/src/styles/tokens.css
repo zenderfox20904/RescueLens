@@ -1,0 +1,16 @@
+/* Generated from design/tokens.json. Keep in sync with mobile/lib/theme/tokens.dart */
+:root {
+  --primary: #1877F2; --primary-hover: #166FE5; --bg: #F0F2F5; --card: #FFFFFF; --text: #050505;
+  --text-2: #65676B; --divider: #CED0D4; --hover: #F2F2F2; --input: #F0F2F5;
+  --grad-from: #0064E0; --grad-to: #0081FB;
+  --danger: #E41E3F; --warning: #F7B928; --success: #31A24C;
+  --sev-low: #31A24C; --sev-moderate: #F7B928; --sev-high: #F5793B; --sev-critical: #E41E3F;
+  --r-card: 8px; --r-btn: 6px; --shadow: 0 1px 2px rgba(0,0,0,.2);
+  --font: "Segoe UI Historic", "Segoe UI", Helvetica, Arial, "Noto Sans Bengali", sans-serif;
+  --primary-soft: #E7F3FF;
+}
+[data-theme="dark"] {
+  --primary: #2D88FF; --primary-hover: #4599FF; --bg: #18191A; --card: #242526; --text: #E4E6EB;
+  --text-2: #B0B3B8; --divider: #3A3B3C; --hover: #3A3B3C; --input: #3A3B3C; --primary-soft: #263951;
+  --shadow: 0 1px 2px rgba(0,0,0,.4);
+}
