@@ -65,7 +65,7 @@ class Present
             'category' => $i->category, 'severity' => $i->severity, 'status' => $i->status, 'is_stale' => $i->isStale(),
             'is_demo' => $i->is_demo, 'ai_assisted' => $i->ai_assisted, 'source' => $i->source ?? 'user', 'ai_unverified' => (bool) $i->ai_unverified,
             'location' => ['lat' => $i->public_lat, 'lng' => $i->public_lng, 'area_name' => $i->area_name, 'precision' => 'approximate'],
-            'reporter' => ['name' => $i->is_anonymous && ! $mine ? null : $i->user?->name, 'anonymous' => $i->is_anonymous, 'is_me' => $mine],
+            'reporter' => ['id' => $i->is_anonymous && ! $mine ? null : $i->user?->public_id, 'avatar' => $i->is_anonymous && ! $mine ? null : self::avatar($i->user), 'name' => $i->is_anonymous && ! $mine ? null : $i->user?->name, 'anonymous' => $i->is_anonymous, 'is_me' => $mine],
             'counts' => ['confirm' => $i->confirmations_count, 'dispute' => $i->disputes_count, 'comments' => $i->comments_count],
             'my_reaction' => $viewer ? $i->confirmations->firstWhere('user_id', $viewer->id)?->type : null,
             'media' => $i->media->map(fn ($m) => ['id' => $m->public_id, 'url' => $m->signedUrl(), 'mime' => $m->mime, 'width' => $m->width, 'height' => $m->height])->values(),

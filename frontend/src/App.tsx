@@ -81,6 +81,7 @@ export default function App() {
             <Route path="/report" element={<Report />} />
             <Route path="/incidents/:id" element={<IncidentDetail />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/u/:id" element={<Profile />} />
             <Route path="/moderation" element={<RequireMod><Moderation /></RequireMod>} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/notifications" element={<Notifications />} />

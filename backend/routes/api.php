@@ -31,6 +31,7 @@ Route::prefix('v1')->middleware('throttle:api')->group(function () {
 
     Route::get('avatars/{user}', [AuthController::class, 'avatarFile'])->middleware('signed')->name('avatar.file');
     Route::get('incidents', [IncidentController::class, 'index']);
+    Route::get('users/{user:public_id}/profile', [IncidentController::class, 'profile']);
     Route::get('incidents/map', [IncidentController::class, 'map']);
     Route::get('incidents/{incident}', [IncidentController::class, 'show']);
     Route::get('nearby-help', [\App\Http\Controllers\Api\OrganizationController::class, 'nearby']);

@@ -72,9 +72,9 @@ export function PostCard({ i, detail = false }: { i: Incident; detail?: boolean 
   return (
     <article className="card post fade-in">
       <div className="post-head">
-        <Avatar name={i.reporter.anonymous ? '?' : i.reporter.name} />
+        {i.reporter.avatar ? <img src={i.reporter.avatar} alt="" width={40} height={40} style={{ borderRadius: '50%', objectFit: 'cover' }} /> : <Avatar name={i.reporter.anonymous ? '?' : i.reporter.name} />}
         <div className="grow">
-          <b>{i.reporter.name ?? (t('ui.anonymous'))}</b> <span className="muted">· {cat?.icon} {cat?.[lang]}</span>
+          {i.reporter.id ? <Link to={`/u/${i.reporter.id}`} style={{ color: 'inherit' }}><b>{i.reporter.name}</b></Link> : <b>{i.reporter.name ?? (t('ui.anonymous'))}</b>} <span className="muted">· {cat?.icon} {cat?.[lang]}</span>
           <div className="small muted row" style={{ gap: 4 }}><Link to={`/incidents/${i.id}`} className="muted">{timeAgo(i.created_at, lang)}</Link>{i.edited_at ? ` · ${t('ui.edited')}` : ''} · 📍 {i.location.area_name ?? (t('ui.approximate_location'))}</div>
         </div>
         <StatusBadge i={i} />

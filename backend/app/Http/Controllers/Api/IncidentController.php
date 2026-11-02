@@ -32,12 +32,19 @@ class IncidentController extends Controller
             'category' => ['nullable', Rule::in(Incident::CATEGORIES)], 'status' => ['nullable', Rule::in(Incident::PUBLIC_STATUSES)],
             'severity' => ['nullable', Rule::in(Incident::SEVERITIES)],
             'lat' => 'nullable|numeric|between:-90,90', 'lng' => 'nullable|numeric|between:-180,180', 'radius_km' => 'nullable|numeric|between:1,100',
-            'hours' => 'nullable|integer|between:1,720', 'mine' => 'nullable|boolean', 'per_page' => 'nullable|integer|between:1,50', 'cursor' => 'nullable|string|max:200',
+            'hours' => 'nullable|integer|between:1,720', 'mine' => 'nullable|boolean', 'user' => 'nullable|string|max:40', 'per_page' => 'nullable|integer|between:1,50', 'cursor' => 'nullable|string|max:200',
         ]);
         $user = $r->user('sanctum');
         $q = ($d['mine'] ?? false) && $user
             ? Incident::where('user_id', $user->id)->with(['user', 'media', 'analyses.regions', 'confirmations'])
             : $this->base();
+        if (! empty($d['user'])) {
+            $d['user'] = \App\Models\User::where('public_id', $d['user'])->value('id') ?? 0;
+            // Profile timeline: own profile shows everything incl. anonymous; others see only public, named posts.
+            $q = $user && $user->id === $d['user']
+                ? Incident::where('user_id', $user->id)->with(['user', 'media', 'analyses.regions', 'confirmations'])
+                : $this->base()->where('user_id', $d['user'])->where('is_anonymous', false);
+        }
         $q->when($d['category'] ?? null, fn ($q, $v) => $q->where('category', $v))
             ->when($d['status'] ?? null, fn ($q, $v) => $q->where('status', $v))
             ->when($d['severity'] ?? null, fn ($q, $v) => $q->where('severity', $v))
@@ -198,6 +205,16 @@ class IncidentController extends Controller
     }
 
     /** Trash: own deleted reports; moderators may pass all=1 to see every deleted report. */
+    /** Public profile header: no email, phone or location. */
+    public function profile(Request $r, \App\Models\User $user)
+    {
+        $viewer = $r->user('sanctum');
+        $mine = $viewer?->id === $user->id;
+        $count = Incident::where('user_id', $user->id)->when(! $mine, fn ($q) => $q->where('is_anonymous', false))->count();
+        return ['data' => ['id' => $user->public_id, 'name' => $user->name, 'role' => $user->role, 'avatar_url' => Present::avatar($user),
+            'joined_at' => $user->created_at?->toIso8601String(), 'reports' => $count, 'is_me' => $mine]];
+    }
+
     public function trash(Request $r)
     {
         $u = $r->user();

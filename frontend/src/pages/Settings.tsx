@@ -5,6 +5,7 @@ import { LanguagePicker } from '../components/LanguagePicker'
 import { useTheme } from '../components/Shell'
 import { useToast } from '../components/Toast'
 import { Sk } from '../components/Skeleton'
+import { useConfirm } from '../components/Confirm'
 
 const ZONES: string[] = (Intl as any).supportedValuesOf ? (Intl as any).supportedValuesOf('timeZone') : ['Asia/Dhaka', 'UTC']
 
@@ -12,6 +13,7 @@ const ZONES: string[] = (Intl as any).supportedValuesOf ? (Intl as any).supporte
 export default function Settings() {
   const { user, refresh } = useAuth()
   const { t, lang, country, setCountry, units, setUnits, timeZone } = useI18n()
+  const confirm = useConfirm()
   const theme = useTheme()
   const toast = useToast()
   const save = async (body: Record<string, unknown>) => { if (!user) return; try { await api('/auth/me', { method: 'PATCH', body }); await refresh(); toast(t('ui.saved')) } catch (e) { toast(errMsg(e)) } }
@@ -35,9 +37,10 @@ export default function Settings() {
       <div className="card settings-card">
         <div className="settings-head">{t('ui.privacy_ai')}</div>
         {row(t('ui.ai_analysis_consent'), <label className="switch"><input type="checkbox" checked={user.ai_consent} onChange={(e) => save({ ai_consent: e.target.checked })} /><span /></label>, t('ui.ai_consent_hint'))}
-        {row(t('ui.auto_post'), <label className="switch"><input type="checkbox" data-testid="auto-post" checked={!!user.auto_post_enabled} onChange={(e) => {
-          if (e.target.checked && !window.confirm(t('ui.auto_post_consent'))) return
-          save({ auto_post_enabled: e.target.checked, ...(e.target.checked ? { auto_post_consent: true } : {}) })
+        {row(t('ui.auto_post'), <label className="switch"><input type="checkbox" data-testid="auto-post" checked={!!user.auto_post_enabled} onChange={async (e) => {
+          const on = e.target.checked
+          if (on && !(await confirm({ title: t('ui.auto_post'), body: t('ui.auto_post_consent'), confirm: t('ui.enable'), danger: false, icon: '🤖' }))) return
+          save({ auto_post_enabled: on, ...(on ? { auto_post_consent: true } : {}) })
         }} /><span /></label>, t('ui.auto_post_hint'))}
       </div>
     </div>

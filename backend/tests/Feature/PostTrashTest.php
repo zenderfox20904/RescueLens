@@ -73,4 +73,22 @@ class PostTrashTest extends TestCase
         $this->postJson("/api/v1/comments/$c/restore")->assertOk();
         $this->getJson("/api/v1/incidents/$id/comments")->assertJsonCount(2, 'data');
     }
+
+    public function test_profile_timeline_hides_anonymous_from_others(): void
+    {
+        $a = \App\Models\User::factory()->create(['role' => 'citizen']);
+        $b = \App\Models\User::factory()->create(['role' => 'citizen']);
+        $base = ['category' => 'flood', 'severity' => 'low', 'lat' => 23.78, 'lng' => 90.41, 'consent_public' => true];
+        $this->actingAs($a, 'sanctum')->postJson('/api/v1/incidents', $base + ['title' => 'Named post'])->assertCreated();
+        $this->actingAs($a, 'sanctum')->postJson('/api/v1/incidents', $base + ['title' => 'Secret post', 'is_anonymous' => true])->assertCreated();
+        $own = $this->actingAs($a, 'sanctum')->getJson('/api/v1/incidents?user='.$a->public_id)->assertOk()->json('data');
+        $this->assertCount(2, $own);
+        $this->assertTrue($own[0]['can_manage']);
+        $other = $this->actingAs($b, 'sanctum')->getJson('/api/v1/incidents?user='.$a->public_id)->assertOk()->json('data');
+        $titles = collect($other)->pluck('title')->implode('|');
+        $this->assertStringNotContainsString('Secret', $titles);
+        $this->assertFalse($other[0]['can_manage'] ?? true);
+        $p = $this->getJson('/api/v1/users/'.$a->public_id.'/profile')->assertOk()->json('data');
+        $this->assertArrayNotHasKey('email', $p);
+    }
 }

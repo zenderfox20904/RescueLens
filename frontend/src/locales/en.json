@@ -351,7 +351,17 @@
     "comment_deleted": "Comment deleted",
     "title": "Title",
     "category": "Category",
-    "more": "More"
+    "more": "More",
+    "enable": "Enable",
+    "profile_not_found": "Profile not found",
+    "reports_count": "{{count}} reports",
+    "joined": "Joined {{date}}",
+    "new_report": "New report",
+    "edit_profile": "Edit profile",
+    "your_reports": "Your reports",
+    "no_reports_profile": "No reports yet",
+    "no_reports_profile_me": "When you report an incident it will appear here, where you can edit or move it to Trash.",
+    "no_reports_profile_other": "This person has not shared any public reports."
   },
   "cat": {
     "road_accident": "Road accident",
