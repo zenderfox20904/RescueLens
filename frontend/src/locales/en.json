@@ -35,7 +35,7 @@
   "next": "Next",
   "back": "Back",
   "confirmPost": "I confirm this is accurate and can be shown publicly (approximate location)",
-  "aiConsent": "I allow this photo to be sent to the Meta Model API for AI analysis",
+  "aiConsent": "I allow this photo to be sent to Meta AI for analysis",
   "title": "Title",
   "description": "Description",
   "category": "Category",
@@ -381,7 +381,14 @@
     "map_country": "My country",
     "feed_top": "Top",
     "feed_latest": "Latest",
-    "meta_ai_live": "Meta AI is live."
+    "meta_ai_live": "Meta AI is live.",
+    "translating": "Translating with Meta AI…",
+    "translation_failed": "Translation is unavailable right now.",
+    "meta_ai_analysis": "Meta AI analysis",
+    "translated_by_meta_ai": "Translated by Meta AI",
+    "heatmap": "Heatmap",
+    "hot_areas": "Hot areas",
+    "heat_note": "Glow shows where reports cluster, weighted by severity. An empty area never means a road is safe."
   },
   "cat": {
     "road_accident": "Road accident",

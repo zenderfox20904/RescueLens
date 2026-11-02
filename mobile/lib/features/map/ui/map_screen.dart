@@ -56,6 +56,25 @@ class _MapState extends State<MapScreen> {
     if (!mounted) return; setState(() {});
     ctl?.animateCamera(cam);
   }
+  bool heat = debugOpen == 'map:heat';
+  double zoom = 5;
+  // Meters per screen point at the current zoom, so the glow keeps a steady on screen size.
+  double mpp(double lat) => 156543.03 * math.cos(lat * math.pi / 180) / math.pow(2, zoom);
+  static const _sevW = {'low': 1, 'moderate': 2, 'high': 3, 'critical': 4};
+  /// Hot area layer: soft layered circles weighted by severity, themed for light and dark. An empty area never means a road is safe.
+  Set<Circle> heatCircles(bool dark) {
+    if (!heat) return {};
+    final cols = dark ? const [Color(0xFFFFB020), Color(0xFFFF6A3D), Color(0xFFFF2D55)] : const [Color(0xFFF7B928), Color(0xFFF5793B), Color(0xFFE41E3F)];
+    final out = <Circle>{};
+    for (final p in shown) {
+      final w = 0.7 + (_sevW[p['severity']] ?? 1) * 0.15;
+      for (var k = 0; k < 3; k++) {
+        out.add(Circle(circleId: CircleId('${p['id']}:$k'), center: LatLng((p['lat'] as num).toDouble(), (p['lng'] as num).toDouble()), radius: const [55.0, 34.0, 18.0][k] * w * mpp((p['lat'] as num).toDouble()),
+          strokeWidth: 0, fillColor: cols[k].withValues(alpha: dark ? 0.18 : 0.14), consumeTapEvents: false));
+      }
+    }
+    return out;
+  }
   bool? pinsDark;
   void warmPins(bool dark) { if (pinsDark == dark) return; pinsDark = dark; MapPins.warm(dark).then((_) { if (mounted) setState(() {}); }); }
   double hue(String s) => {'low': BitmapDescriptor.hueGreen, 'moderate': BitmapDescriptor.hueYellow, 'high': BitmapDescriptor.hueOrange}[s] ?? BitmapDescriptor.hueRed;
@@ -65,16 +84,19 @@ class _MapState extends State<MapScreen> {
     SizedBox(height: 44, child: ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 8), children: [
       for (final v in const [('nearby', LucideIcons.locateFixed), ('country', LucideIcons.flag), ('world', LucideIcons.globe)])
         Padding(padding: const EdgeInsets.only(right: 6), child: ChoiceChip(avatar: Icon(v.$2, size: 16), label: Text(tr('map_${v.$1}')), selected: scope == v.$1, onSelected: (_) => setScope(v.$1))),
+      Padding(padding: const EdgeInsets.only(right: 6), child: FilterChip(avatar: const Icon(LucideIcons.flame, size: 16), label: Text(tr('hot_areas')), selected: heat, onSelected: (v) => setState(() => heat = v))),
       const SizedBox(width: 6),
       for (final c in RL.categories) Padding(padding: const EdgeInsets.only(right: 6), child: FilterChip(avatar: Icon(RL.cat(c), size: 16), label: Text(tr('c_$c')), selected: cats.contains(c), onSelected: (v) => setState(() => v ? cats.add(c) : cats.remove(c)))),
     ])),
     SizedBox(height: 320, child: pts == null || maps == null ? const Shim(child: Sk(h: 320, r: 0)) : maps == false ? const MapUnavailable() : GoogleMap(
       style: Theme.of(context).brightness == Brightness.dark ? darkMapStyle : null,
       initialCameraPosition: const CameraPosition(target: LatLng(20, 40), zoom: 1.3), onMapCreated: (c) { ctl = c; c.moveCamera(cam); },
+      onCameraIdle: () async { final z = await ctl?.getZoomLevel(); if (z != null && (z - zoom).abs() > 0.2) setState(() => zoom = z); },
+      circles: heatCircles(Theme.of(context).brightness == Brightness.dark),
       markers: {for (final p in shown) Marker(markerId: MarkerId(p['id']), position: LatLng((p['lat'] as num).toDouble(), (p['lng'] as num).toDouble()),
         icon: MapPins.get('${p['category']}', pinsDark ?? false) ?? MapPins.get('other', pinsDark ?? false) ?? BitmapDescriptor.defaultMarkerWithHue(hue(p['severity'])), anchor: const Offset(.5, 1), infoWindow: InfoWindow(title: title(p), snippet: p['area_name'], onTap: () => openDetail(context, p['id'])))},
     )),
-    Padding(padding: const EdgeInsets.all(8), child: Text(tr('map_note'), style: TextStyle(color: RL.text2, fontSize: 12))),
+    Padding(padding: const EdgeInsets.all(8), child: Text(heat ? tr('heat_note') : tr('map_note'), style: TextStyle(color: RL.text2, fontSize: 12))),
     Expanded(child: pts == null ? ListView(children: const [PostSkeleton()]) : ListView(padding: const EdgeInsets.only(bottom: 120), children: [
       for (final p in shown) ListTile(leading: Icon(RL.cat(p['category']), size: 24, color: RL.primary), title: Text(title(p)), subtitle: Text('${p['area_name'] ?? ''} · ${ago(p['created_at'])}'), onTap: () => openDetail(context, p['id'])),
     ])),

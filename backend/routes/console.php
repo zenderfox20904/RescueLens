@@ -25,7 +25,7 @@ Artisan::command('rescuelens:analyze-seeded {--force : Re-run even if a post alr
         'Two car collision on Dhaka Aricha Highway' => ['01', 'BD'], 'Knee deep water at Mirpur 10' => ['02', 'BD'],
         'Smoke from a building in Old Dhaka' => ['03', 'BD'], 'Fallen electric wire on footpath' => ['04', 'BD'],
         'Part of an old building collapsed' => ['05', 'BD'], 'Waterlogging under Minto Bridge' => ['06', 'IN'],
-        'Market fire near Balogun' => ['07', 'NG'], 'Cyclist injured at junction' => ['08', 'GB'],
+        'Shops on fire at Balogun Market' => ['07', 'NG'], 'Car crushed in junction crash' => ['08', 'GB'],
         'Ice on sidewalk causing falls' => ['09', 'US'], 'River overflow in Kampung Melayu' => ['10', 'ID'],
     ];
     foreach ($map as $title => [$file, $cc]) {

@@ -6,8 +6,8 @@ import { MarkerClusterer } from '@googlemaps/markerclusterer'
 import { useNavigate } from 'react-router-dom'
 import { useI18n } from '../../lib/i18n'
 import { type MapPoint, ttl } from '../../lib/types'
+import { pinSvg, heatSvg } from '../../lib/mapPin'
 
-const SEV = { low: '#31A24C', moderate: '#F7B928', high: '#F5793B', critical: '#E41E3F' }
 
 // Facebook themed map style: muted land, blue water, less POI noise so incidents stand out.
 const FB_STYLE: google.maps.MapTypeStyle[] = [
@@ -31,13 +31,24 @@ const FB_DARK: google.maps.MapTypeStyle[] = [
   { featureType: "water", elementType: "geometry", stylers: [{ color: "#18191A" }] },
 ]
 
-/** Marker icon: severity colored circle with the white center dot, as an inline SVG. */
-function icon(p: MapPoint): google.maps.Icon {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><circle cx="20" cy="20" r="17" fill="${SEV[p.severity]}" fill-opacity="${p.is_stale ? 0.5 : 1}" stroke="#fff" stroke-width="3"/><circle cx="20" cy="20" r="5" fill="#fff"/></svg>`
-  return { url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg), scaledSize: new google.maps.Size(40, 40), anchor: new google.maps.Point(20, 20) }
+/** Marker icon: Meta blue pin with the Lucide incident type icon (same design as the app). */
+function icon(p: MapPoint, dark: boolean): google.maps.Icon {
+  return { url: pinSvg(p.category, dark, p.is_stale), scaledSize: new google.maps.Size(40, 48), anchor: new google.maps.Point(20, 46) }
 }
 
-function Markers({ points, focus }: { points: MapPoint[]; focus: MapFocus }) {
+/** Hot area layer: screen sized glows weighted by severity, drawn under the pins and clusters. An empty area never means a road is safe. */
+function Heat({ points, dark }: { points: MapPoint[]; dark: boolean }) {
+  const map = useMap()
+  useEffect(() => {
+    if (!map) return
+    const circles = points.map((p) => { const h = heatSvg(dark, p.severity); return new google.maps.Marker({ map, position: { lat: p.lat, lng: p.lng }, clickable: false, zIndex: 0,
+      icon: { url: h.url, scaledSize: new google.maps.Size(h.size, h.size), anchor: new google.maps.Point(h.size / 2, h.size / 2) } }) })
+    return () => circles.forEach((c) => c.setMap(null))
+  }, [map, points, dark])
+  return null
+}
+
+function Markers({ points, focus, dark }: { points: MapPoint[]; focus: MapFocus; dark: boolean }) {
   const map = useMap()
   const nav = useNavigate()
   useEffect(() => {
@@ -45,13 +56,13 @@ function Markers({ points, focus }: { points: MapPoint[]; focus: MapFocus }) {
     const markers = points.map((p) => {
       // Points are already approximate (rounded server side); precise reporter location never reaches the client.
       const m = new google.maps.Marker( // classic Marker keeps JSON styling working (AdvancedMarker needs a cloud Map ID)
-        { position: { lat: p.lat, lng: p.lng }, icon: icon(p), title: ttl(p) })
+        { position: { lat: p.lat, lng: p.lng }, icon: icon(p, dark), title: ttl(p) })
       m.addListener('click', () => nav(`/incidents/${p.id}`))
       return m
     })
     const c = new MarkerClusterer({ map, markers })
     return () => { c.clearMarkers(); markers.forEach((m) => m.setMap(null)) }
-  }, [map, points])
+  }, [map, points, dark])
   // Camera: a focus (nearby or the active country) wins; otherwise fit every point (world view).
   useEffect(() => {
     if (!map) return
@@ -61,7 +72,7 @@ function Markers({ points, focus }: { points: MapPoint[]; focus: MapFocus }) {
   return null
 }
 
-export default function GoogleIncidentMap({ apiKey, points, dark, onError, focus = null }: { apiKey: string; points: MapPoint[]; dark: boolean; onError: () => void; focus?: MapFocus }) {
+export default function GoogleIncidentMap({ apiKey, points, dark, onError, focus = null, heat = false }: { apiKey: string; points: MapPoint[]; dark: boolean; onError: () => void; focus?: MapFocus; heat?: boolean }) {
   useEffect(() => {
     // Google calls this global when the key is rejected (billing, referrer or API restrictions).
     ;(window as any).gm_authFailure = onError
@@ -72,7 +83,8 @@ export default function GoogleIncidentMap({ apiKey, points, dark, onError, focus
     <APIProvider apiKey={apiKey} onError={onError} language={lang} region={country}>
       <Map style={{ height: '100%', minHeight: 420, borderRadius: 8 }} defaultCenter={{ lat: 23.78, lng: 90.39 }} defaultZoom={12}
         styles={dark ? FB_DARK : FB_STYLE} gestureHandling="greedy" streetViewControl={false} mapTypeControl={false}>
-        <Markers points={points} focus={focus} />
+        {heat && <Heat points={points} dark={dark} />}
+        <Markers points={points} focus={focus} dark={dark} />
       </Map>
     </APIProvider>
   )

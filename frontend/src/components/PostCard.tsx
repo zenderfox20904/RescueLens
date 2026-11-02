@@ -10,6 +10,7 @@ import { IChat, IEye, IFlag, IShare, IWhatsApp } from './Icons'
 import { useToast } from './Toast'
 import { Comments, SeeMore } from './Comments'
 import { PostMenu } from './PostManage'
+import { usePostTr, togglePostTr } from '../lib/postTranslation'
 import { Sparkles, Check, Clock, MapPin, Eye, Link2, Languages, MessageCircle } from 'lucide-react'
 
 export function RegionOverlay({ regions, show = true }: { regions: Region[]; show?: boolean }) {
@@ -58,8 +59,8 @@ export function PostCard({ i, detail = false }: { i: Incident; detail?: boolean 
   const [showComments, setShowComments] = useState(true)
   const [showRegions, setShowRegions] = useState(true)
   const [shareOpen, setShareOpen] = useState(false)
-  const [orig, setOrig] = useState(false)
-  const hasTr = !!(i.title_translated || i.description_translated)
+  const tr = usePostTr(i.id)
+  const trOn = tr?.status === 'on' && tr.data?.lang === lang ? tr.data : null
   const react = useMutation({
     mutationFn: (type: 'confirm' | 'dispute' | 'none') => api(`/incidents/${i.id}/reactions`, { body: { type } }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['feed'] }); qc.invalidateQueries({ queryKey: ['incident', i.id] }) },
@@ -82,9 +83,11 @@ export function PostCard({ i, detail = false }: { i: Incident; detail?: boolean 
         <StatusBadge i={i} />
         <PostMenu i={i} detail={detail} />
       </div>
-      <Link to={`/incidents/${i.id}`} style={{ color: 'inherit' }}><div className="post-title">{orig ? i.title.replace('[DEMO] ', '') : ttl(i)}</div></Link>
-      {i.description && (detail ? <div style={{ whiteSpace: 'pre-wrap' }}>{orig ? i.description : i.description_translated || i.description}</div> : <SeeMore text={orig ? i.description : i.description_translated || i.description} />)}
-      {hasTr && <button type="button" className="link-btn small" onClick={() => setOrig((v) => !v)}><Languages size={13} aria-hidden style={{ verticalAlign: -2 }} /> {orig ? t('ui.see_translation') : t('ui.see_original')}</button>}
+      <Link to={`/incidents/${i.id}`} style={{ color: 'inherit' }}><div className="post-title">{trOn ? trOn.title : i.title}</div></Link>
+      {i.description && (detail ? <div style={{ whiteSpace: 'pre-wrap' }}>{trOn?.description ?? i.description}</div> : <SeeMore text={trOn?.description ?? i.description} />)}
+      <button type="button" className="link-btn small" disabled={tr?.status === 'loading'} onClick={() => togglePostTr(i.id, lang)}><Languages size={13} aria-hidden style={{ verticalAlign: -2 }} /> {tr?.status === 'loading' ? t('ui.translating') : trOn ? t('ui.see_original') : t('ui.see_translation')}</button>
+      {tr?.status === 'error' && <span className="small muted"> {t('ui.translation_failed')}</span>}
+      {trOn?.analysis?.summary && <div className="card small" style={{ marginTop: 6, padding: 10 }}><b><Sparkles size={12} /> {t('ui.meta_ai_analysis')}</b><div>{trOn.analysis.summary}</div>{!!trOn.analysis.reasons.length && <ul style={{ margin: '4px 0 0', paddingInlineStart: 18 }}>{trOn.analysis.reasons.map((r, k) => <li key={k}>{r}</li>)}</ul>}{!!trOn.analysis.precautions.length && <div><b>{t('ui.precautions')}:</b> {trOn.analysis.precautions.join(' • ')}</div>}<div className="muted">{t('ui.translated_by_meta_ai')}</div></div>}
       {i.analysis && <div className="small muted" style={{ marginTop: 6 }}><Sparkles size={12} /> {t('aiSuggestion')}{i.analysis.mode === 'demo' ? ' (DEMO)' : ''}: {i.analysis.hazards.map((h) => CATS[h]?.[lang] ?? h).join(', ')}</div>}
       {img && (
         <div className="post-media" onClick={() => setShowRegions((v) => !v)}>

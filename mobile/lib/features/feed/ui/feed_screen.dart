@@ -1,3 +1,4 @@
+import 'package:url_launcher/url_launcher.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -62,9 +63,36 @@ class _LiveDotState extends State<LiveDot> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) => FadeTransition(opacity: Tween(begin: .35, end: 1.0).animate(c), child: Container(width: 8, height: 8, decoration: const BoxDecoration(color: Color(0xFF31A24C), shape: BoxShape.circle)));
 }
 
-class SosBanner extends StatelessWidget {
+/// Verified emergency number for the active country (device location, profile, then IP), with its source. Nothing unverified is shown.
+class SosBanner extends StatefulWidget {
   const SosBanner({super.key});
   @override
-  Widget build(BuildContext context) => Container(margin: const EdgeInsets.only(bottom: 6), padding: const EdgeInsets.all(14), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFFE41E3F), Color(0xFFF5533D)]), borderRadius: BorderRadius.circular(16)),
-    child: Row(children: [const Icon(LucideIcons.phoneCall, color: Colors.white), const SizedBox(width: 10), Expanded(child: Text(tr('sos'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)))]));
+  State<SosBanner> createState() => _SosBannerState();
+}
+
+class _SosBannerState extends State<SosBanner> {
+  static Map? _cache;
+  Map? res = _cache;
+  @override
+  void initState() {
+    super.initState();
+    if (res == null) { () async {
+      String? cc;
+      try { cc = (await Me.load())?['country_code']; } catch (_) {}
+      if (cc == null) { try { cc = (await Api.get('/geo/ip'))['country_code']; } catch (_) {} }
+      if (cc == null) return;
+      try { final r = await Api.get('/emergency-resources?country=$cc'); final l = r['data'] as List; if (l.isNotEmpty && mounted) setState(() => res = _cache = l.first); } catch (_) {}
+    }(); }
+  }
+  @override
+  Widget build(BuildContext context) {
+    final r = res;
+    final name = r == null ? null : (curLang == 'bn' ? (r['name_bn'] ?? r['name']) : r['name']);
+    return InkWell(borderRadius: BorderRadius.circular(16), onTap: r == null ? null : () => launchUrl(Uri.parse('tel:${r['phone']}')),
+      child: Container(margin: const EdgeInsets.only(bottom: 6), padding: const EdgeInsets.all(14), decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFFE41E3F), Color(0xFFF5533D)]), borderRadius: BorderRadius.circular(16)),
+        child: Row(children: [const Icon(LucideIcons.phoneCall, color: Colors.white), const SizedBox(width: 10), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(r == null ? tr('sos') : tr('sos_call', {'phone': r['phone']}), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+          if (r != null) Text('$name · ${tr('source_is', {'s': r['source_name']})}', maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: 12)),
+        ]))])));
+  }
 }

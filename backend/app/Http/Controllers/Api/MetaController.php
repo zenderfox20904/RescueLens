@@ -25,7 +25,7 @@ class MetaController extends Controller
                     'message' => 'Meta AI is available.']
                 : ['mode' => $live ? 'live' : 'demo', 'configured' => $live,
                 'vision_model' => config('rescuelens.meta.vision_model'), 'segmentation_model' => config('rescuelens.meta.segmentation_model'),
-                'message' => $live ? 'Meta Model API key configured.' : 'Live AI analysis is unavailable: META_MODEL_API_KEY is not set. Results are clearly labeled DEMO samples.']),
+                'message' => $live ? 'Meta AI is configured.' : 'Live AI analysis is unavailable: META_MODEL_API_KEY is not set. Results are clearly labeled DEMO samples.']),
             'social' => ['facebook' => filled(config('services.facebook.client_id')), 'google' => filled(config('services.google.client_id'))],
             'time' => now()->toIso8601String(),
         ], $db ? 200 : 503);

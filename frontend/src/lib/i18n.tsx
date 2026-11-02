@@ -4,6 +4,9 @@ import { initReactI18next, useTranslation } from 'react-i18next'
 import HttpBackend from 'i18next-http-backend'
 import bn from '../locales/bn.json'
 import en from '../locales/en.json'
+import hi from '../locales/hi.json'
+import es from '../locales/es.json'
+import ar from '../locales/ar.json'
 
 /**
  * Worldwide languages. The list comes from GET /languages (admin managed). en and bn are hand translated and bundled;
@@ -15,14 +18,18 @@ export type Language = { code: string; native_name: string; english_name: string
 export const BUNDLED: Language[] = [
   { code: 'en', native_name: 'English', english_name: 'English', rtl: false, hand_translated: true },
   { code: 'bn', native_name: 'বাংলা', english_name: 'Bengali', rtl: false, hand_translated: true },
+  // Machine translated by Meta AI and bundled so the demo languages load instantly and offline.
+  { code: 'hi', native_name: 'हिन्दी', english_name: 'Hindi', rtl: false },
+  { code: 'es', native_name: 'Español', english_name: 'Spanish', rtl: false },
+  { code: 'ar', native_name: 'العربية', english_name: 'Arabic', rtl: true },
 ]
-/** Kept for older imports: the two bundled languages. */
+/** Kept for older imports: the bundled languages. */
 export const LANGUAGES = BUNDLED.map((l) => ({ code: l.code, native: l.native_name }))
 const RTL = ['ar', 'ur', 'fa', 'he', 'ps', 'sd', 'yi', 'ckb']
 const API_BASE = (import.meta.env.VITE_API_URL as string) || 'http://127.0.0.1:8000/api/v1'
 
 i18n.use(HttpBackend).use(initReactI18next).init({
-  resources: { en: { translation: en }, bn: { translation: bn } },
+  resources: { en: { translation: en }, bn: { translation: bn }, hi: { translation: hi }, es: { translation: es }, ar: { translation: ar } },
   partialBundledLanguages: true,
   backend: { loadPath: `${API_BASE}/i18n/{{lng}}`, requestOptions: { cache: 'default' } },
   fallbackLng: 'en',

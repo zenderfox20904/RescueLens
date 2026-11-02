@@ -40,6 +40,7 @@ Route::prefix('v1')->middleware('throttle:api')->group(function () {
     Route::get('nearby-help', [\App\Http\Controllers\Api\OrganizationController::class, 'nearby']);
     Route::get('incidents/{incident}/dispatches', [\App\Http\Controllers\Api\OrganizationController::class, 'forIncident']);
     Route::get('incidents/{incident}/comments', [IncidentController::class, 'comments']);
+    Route::get('incidents/{incident}/translation', [IncidentController::class, 'translation'])->middleware('throttle:30,1');
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('auth/me', [AuthController::class, 'me']);

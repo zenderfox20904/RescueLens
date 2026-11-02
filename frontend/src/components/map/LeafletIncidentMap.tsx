@@ -1,19 +1,21 @@
 import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import type { MapFocus } from '../../lib/countryCenter'
-import { MapContainer, TileLayer, CircleMarker, Popup, Tooltip, useMapEvents, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, CircleMarker, Marker, Popup, Tooltip, useMapEvents, useMap } from 'react-leaflet'
+import L from 'leaflet'
+import { pinSvg, heatSvg } from '../../lib/mapPin'
 import 'leaflet/dist/leaflet.css'
 import { timeAgo, useI18n } from '../../lib/i18n'
 import { type MapPoint, ttl } from '../../lib/types'
 
-const SEV = { low: '#31A24C', moderate: '#F7B928', high: '#F5793B', critical: '#E41E3F' }
 /** OpenStreetMap fallback used when no Google Maps key is configured or the key fails. */
 function Focus({ focus, points }: { focus: MapFocus; points: MapPoint[] }) {
   const m = useMap()
   useEffect(() => { if (focus) m.setView([focus.lat, focus.lng], focus.zoom); else if (points.length) m.fitBounds(points.map((p) => [p.lat, p.lng] as [number, number]), { padding: [40, 40] }) }, [focus, points.length]) // eslint-disable-line react-hooks/exhaustive-deps
   return null
 }
-export default function LeafletIncidentMap({ points, focus = null, dark = true }: { points: MapPoint[]; focus?: MapFocus; dark?: boolean }) {
+const lIcon = (p: MapPoint, dark: boolean) => L.icon({ iconUrl: pinSvg(p.category, dark, p.is_stale), iconSize: [40, 48], iconAnchor: [20, 46], popupAnchor: [0, -40] })
+export default function LeafletIncidentMap({ points, focus = null, dark = true, heat = false }: { points: MapPoint[]; focus?: MapFocus; dark?: boolean; heat?: boolean }) {
   const { t, lang } = useI18n()
   const [zoom, setZoom] = useState(12)
   const { singles, clusters } = cluster(points, zoom)
@@ -23,16 +25,17 @@ export default function LeafletIncidentMap({ points, focus = null, dark = true }
       <Focus focus={focus} points={points} />
       <ZoomWatch onZoom={setZoom} />
       {clusters.map((c) => (
-        <CircleMarker key={c.key} center={[c.lat, c.lng]} radius={14 + Math.min(16, c.n * 2)} pathOptions={{ color: '#fff', weight: 3, fillColor: SEV[c.worst], fillOpacity: 0.85 }}>
+        <CircleMarker key={c.key} center={[c.lat, c.lng]} radius={14 + Math.min(16, c.n * 2)} pathOptions={{ color: '#fff', weight: 3, fillColor: dark ? '#2D88FF' : '#0866FF', fillOpacity: 0.9 }}>
           <Tooltip permanent direction="center" className="cluster-label">{c.n}</Tooltip>
         </CircleMarker>))}
       {dark
         ? <TileLayer key="dark" attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>' url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
         : <TileLayer key="light" attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" />}
+      {heat && points.map((p) => { const h = heatSvg(dark, p.severity); return <Marker key={p.id + ':h'} position={[p.lat, p.lng]} interactive={false} zIndexOffset={-1000} icon={L.icon({ iconUrl: h.url, iconSize: [h.size, h.size], iconAnchor: [h.size / 2, h.size / 2] })} /> })}
       {singles.map((p) => (
-        <CircleMarker key={p.id} center={[p.lat, p.lng]} radius={p.severity === 'critical' ? 14 : 10} className={p.severity === 'critical' ? 'pulse' : undefined} pathOptions={{ color: '#fff', weight: 2, fillColor: SEV[p.severity], fillOpacity: p.is_stale ? 0.4 : 0.9 }}>
+        <Marker key={p.id} position={[p.lat, p.lng]} icon={lIcon(p, dark)} title={ttl(p)}>
           <Popup><b>{ttl(p)}</b><br />{p.area_name} · {timeAgo(p.created_at, lang)}<br /><Link to={`/incidents/${p.id}`}>{t('ui.details')}</Link></Popup>
-        </CircleMarker>))}
+        </Marker>))}
     </MapContainer>
   )
 }

@@ -13,6 +13,7 @@ import 'package:rescuelens/core/format.dart';
 import 'package:rescuelens/core/i18n.dart';
 import 'package:rescuelens/core/theme.dart';
 import 'package:rescuelens/core/widgets.dart';
+import 'package:rescuelens/core/post_tr.dart';
 
 void openDetail(BuildContext c, String id) => Navigator.push(c, MaterialPageRoute(builder: (_) => DetailScreen(id: id)));
 
@@ -28,7 +29,10 @@ class _PostTileState extends State<PostTile> with SingleTickerProviderStateMixin
   late final AnimationController burst = AnimationController(vsync: this, duration: const Duration(milliseconds: 700));
   int? seen; bool mine = false;
   @override
-  void dispose() { burst.dispose(); super.dispose(); }
+  void initState() { super.initState(); PostTr.notifier.addListener(_tr); }
+  void _tr() { if (mounted) setState(() {}); }
+  @override
+  void dispose() { PostTr.notifier.removeListener(_tr); burst.dispose(); super.dispose(); }
   Map get i => widget.i;
   void open() { if (!widget.inDetail) openDetail(context, i['id']); }
   Future<void> verify() async {
@@ -44,6 +48,7 @@ class _PostTileState extends State<PostTile> with SingleTickerProviderStateMixin
   Widget build(BuildContext context) {
     final media = (i['media'] as List?) ?? [];
     final n = seen ?? i['counts']?['confirm'] ?? 0;
+    final trd = PostTr.data(i['id']);
     final meta = TextStyle(color: RL.text2, fontSize: 13);
     return Card(clipBehavior: Clip.antiAlias, child: InkWell(onTap: open, onDoubleTap: verify, child: Stack(children: [
       Padding(padding: const EdgeInsets.all(12), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -59,8 +64,9 @@ class _PostTileState extends State<PostTile> with SingleTickerProviderStateMixin
           PostMenu(i, onUpdated: widget.onUpdated, onRemoved: widget.onRemoved, onRestored: widget.onRestored),
         ]),
         const SizedBox(height: 8),
-        Text(title(i), style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
-        if (i['description'] != null) Padding(padding: const EdgeInsets.only(top: 4), child: widget.inDetail ? Text('${i['description_translated'] ?? i['description']}') : ExpandableText('${i['description_translated'] ?? i['description']}')),
+        Text('${trd?['title'] ?? i['title']}', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+        if (i['description'] != null) Padding(padding: const EdgeInsets.only(top: 4), child: widget.inDetail ? Text('${trd?['description'] ?? i['description']}') : ExpandableText('${trd?['description'] ?? i['description']}')),
+        PostTranslateBar(i['id'], data: trd),
         if (media.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 8), child: MediaStrip(media)),
         const SizedBox(height: 8),
         Row(children: [
@@ -216,4 +222,31 @@ void showResponder(BuildContext context, Map d, Map incident) {
       icon: const Icon(LucideIcons.phone), label: Text(tr('call_org', {'phone': '${o['phone']}'})))),
     Padding(padding: const EdgeInsets.only(top: 8), child: Text(tr('responder_source'), style: TextStyle(color: RL.text2, fontSize: 11))),
   ]))));
+}
+
+/// One "See translation" action for the whole post. When on, also shows the Meta AI analysis in the reader's language.
+class PostTranslateBar extends StatelessWidget {
+  final String id; final Map? data;
+  const PostTranslateBar(this.id, {super.key, this.data});
+  @override
+  Widget build(BuildContext context) {
+    final st = PostTr.of(id)?['status'];
+    final a = data?['analysis'] as Map?;
+    final muted = TextStyle(color: RL.text2, fontSize: 12);
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      TextButton.icon(style: TextButton.styleFrom(padding: EdgeInsets.zero, visualDensity: VisualDensity.compact), onPressed: st == 'loading' ? null : () => PostTr.toggle(id),
+        icon: st == 'loading' ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(LucideIcons.languages, size: 16),
+        label: Text(st == 'loading' ? tr('translating') : data != null ? tr('see_original') : tr('see_translation'))),
+      if (st == 'error') Text(tr('translation_failed'), style: muted),
+      if (a?['summary'] != null) Container(width: double.infinity, margin: const EdgeInsets.only(top: 2), padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(color: RL.primary.withValues(alpha: .08), borderRadius: BorderRadius.circular(12)),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [Icon(LucideIcons.sparkles, size: 14, color: RL.primary), const SizedBox(width: 6), Text(tr('meta_ai_analysis'), style: const TextStyle(fontWeight: FontWeight.w600))]),
+          const SizedBox(height: 4), Text('${a!['summary']}'),
+          for (final r in (a['reasons'] as List? ?? [])) Text('• $r', style: const TextStyle(fontSize: 13)),
+          if ((a['precautions'] as List? ?? []).isNotEmpty) Padding(padding: const EdgeInsets.only(top: 4), child: Text((a['precautions'] as List).join(' • '), style: const TextStyle(fontSize: 13))),
+          const SizedBox(height: 4), Text(tr('translated_by_meta_ai'), style: muted),
+        ])),
+    ]);
+  }
 }

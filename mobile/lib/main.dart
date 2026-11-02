@@ -50,6 +50,7 @@ class _HomeState extends State<Home> {
     final o = debugOpen;
     if (o == null) return;
     if (o == 'settings') tab = 4;
+    if (o.startsWith('map')) tab = 1;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (o == 'trash') Navigator.push(context, MaterialPageRoute(builder: (_) => const TrashScreen()));
       if (o.startsWith('incident:')) Navigator.push(context, MaterialPageRoute(builder: (_) => DetailScreen(id: o.split(':')[1])));

@@ -36,7 +36,7 @@
   "next": "পরবর্তী",
   "back": "পেছনে",
   "confirmPost": "আমি নিশ্চিত করছি তথ্যটি সত্য এবং প্রকাশ্যে দেখানো যাবে (আনুমানিক অবস্থান)",
-  "aiConsent": "ছবিটি AI বিশ্লেষণের জন্য Meta Model API তে পাঠানোর অনুমতি দিচ্ছি",
+  "aiConsent": "ছবিটি বিশ্লেষণের জন্য Meta AI তে পাঠানোর অনুমতি দিচ্ছি",
   "title": "শিরোনাম",
   "description": "বিবরণ",
   "category": "ধরন",
@@ -381,7 +381,14 @@
     "map_country": "আমার দেশ",
     "feed_top": "শীর্ষ",
     "feed_latest": "সর্বশেষ",
-    "meta_ai_live": "Meta AI চালু আছে।"
+    "meta_ai_live": "Meta AI চালু আছে।",
+    "translating": "Meta AI দিয়ে অনুবাদ হচ্ছে…",
+    "translation_failed": "এই মুহূর্তে অনুবাদ পাওয়া যাচ্ছে না।",
+    "meta_ai_analysis": "Meta AI বিশ্লেষণ",
+    "translated_by_meta_ai": "Meta AI দিয়ে অনূদিত",
+    "heatmap": "হিটম্যাপ",
+    "hot_areas": "ঝুঁকিপূর্ণ এলাকা",
+    "heat_note": "উজ্জ্বল অংশে রিপোর্ট বেশি, তীব্রতা অনুযায়ী। ফাঁকা এলাকা মানে রাস্তা নিরাপদ নয়।"
   },
   "cat": {
     "road_accident": "সড়ক দুর্ঘটনা",

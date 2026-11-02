@@ -5,6 +5,7 @@ import 'package:rescuelens/core/format.dart';
 import 'package:rescuelens/core/i18n.dart';
 import 'package:rescuelens/core/theme.dart';
 import 'package:rescuelens/core/widgets.dart';
+import 'package:rescuelens/core/post_tr.dart';
 import 'package:rescuelens/features/incident/ui/media_view.dart';
 import 'package:rescuelens/features/incident/ui/post_actions.dart';
 import 'package:rescuelens/features/feed/ui/home_header.dart';
@@ -25,9 +26,10 @@ class CommentsSectionState extends State<CommentsSection> {
   final focus = FocusNode();
   bool sending = false;
   @override
-  void initState() { super.initState(); load(); }
+  void initState() { super.initState(); load(); PostTr.notifier.addListener(_tr); }
+  void _tr() { if (mounted) setState(() {}); }
   @override
-  void dispose() { input.dispose(); edit.dispose(); focus.dispose(); super.dispose(); }
+  void dispose() { PostTr.notifier.removeListener(_tr); input.dispose(); edit.dispose(); focus.dispose(); super.dispose(); }
   Future<void> load() async {
     try {
       final r = await Api.get('/incidents/${widget.incidentId}/comments?lang=$curLang${widget.preview ? '&limit=2' : ''}');
@@ -81,7 +83,7 @@ class CommentsSectionState extends State<CommentsSection> {
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Row(mainAxisSize: MainAxisSize.min, children: [Flexible(child: Text('${c['author']}', overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13))),
                 if (mod) ...[const SizedBox(width: 4), const Icon(LucideIcons.badgeCheck, size: 14, color: RL.primary)]]),
-              ExpandableText('${c['body_translated'] ?? c['body']}', lines: 4),
+              ExpandableText('${(PostTr.data(widget.incidentId)?['comments'] as Map?)?['${c['id']}'] ?? c['body']}', lines: 4),
             ]))),
           if (c['can_manage'] == true) SizedBox(width: 32, child: PopupMenuButton<String>(padding: EdgeInsets.zero, icon: Icon(LucideIcons.ellipsis, size: 18, color: RL.text2),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),

@@ -113,6 +113,35 @@ class IncidentController extends Controller
         return ['data' => $one[0]];
     }
 
+    /**
+     * Whole post translation in one call: title, description, the Meta AI analysis text and comments,
+     * translated together into ?lang and cached. Originals are never changed.
+     */
+    public function translation(Request $r, Incident $incident)
+    {
+        $user = $r->user('sanctum');
+        $visible = (in_array($incident->status, Incident::PUBLIC_STATUSES) && $incident->feed_eligible) || ($user && ($user->id === $incident->user_id || $user->isModerator()));
+        abort_unless($visible, 404);
+        $lang = (string) $r->input('lang', $user?->locale ?? 'en');
+        abort_unless(preg_match('/^[a-z]{2,3}$/', $lang) && \App\Models\Language::where('code', $lang)->where('enabled', true)->exists(), 422);
+        $a = $incident->analyses()->where('status', 'completed')->latest()->first();
+        $as = $a ? (Present::assessment($a) ?? []) : [];
+        $comments = $incident->comments()->latest()->limit(100)->get(['id', 'body']);
+        $texts = array_filter(array_merge([$incident->title, $incident->description, $as['summary'] ?? null],
+            $as['reasons'] ?? [], $as['precautions'] ?? [], $comments->pluck('body')->all()), fn ($t) => is_string($t) && trim($t) !== '' && mb_strlen($t) <= 2000);
+        $byKey = [];
+        foreach ($texts as $t) $byKey[\App\Services\I18n\ContentTranslation::key($t)] = $t;
+        $have = \App\Models\UiTranslation::where('lang', $lang)->whereIn('key', array_keys($byKey))->pluck('value', 'key')->all();
+        $missing = array_diff_key($byKey, $have);
+        foreach (array_chunk($missing, 20, true) as $chunk) \App\Jobs\TranslateContent::dispatchSync($lang, $chunk);
+        if ($missing) $have = \App\Models\UiTranslation::where('lang', $lang)->whereIn('key', array_keys($byKey))->pluck('value', 'key')->all();
+        $tr = fn ($t) => is_string($t) && $t !== '' ? ($have[\App\Services\I18n\ContentTranslation::key($t)] ?? $t) : $t;
+        return ['data' => ['lang' => $lang, 'provider' => 'Meta AI',
+            'title' => $tr($incident->title), 'description' => $tr($incident->description),
+            'analysis' => $as ? ['summary' => $tr($as['summary'] ?? null), 'reasons' => array_map($tr, $as['reasons'] ?? []), 'precautions' => array_map($tr, $as['precautions'] ?? [])] : null,
+            'comments' => $comments->mapWithKeys(fn ($c) => [(string) $c->id => $tr($c->body)])]];
+    }
+
     public function duplicates(Request $r)
     {
         $d = $r->validate(['category' => ['required', Rule::in(Incident::CATEGORIES)], 'lat' => 'required|numeric|between:-90,90', 'lng' => 'required|numeric|between:-180,180']);

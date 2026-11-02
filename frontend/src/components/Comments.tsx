@@ -1,3 +1,4 @@
+import { usePostTr } from '../lib/postTranslation'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -33,6 +34,8 @@ function Face({ name, url, size = 32 }: { name: string; url?: string | null; siz
  */
 export function Comments({ id, preview = false }: { id: string; preview?: boolean }) {
   const { t, lang } = useI18n()
+  const trE = usePostTr(id)
+  const trC = trE?.status === 'on' && trE.data?.lang === lang ? trE.data.comments : null
   const { user } = useAuth()
   const qc = useQueryClient()
   const toast = useToast()
@@ -71,7 +74,7 @@ export function Comments({ id, preview = false }: { id: string; preview?: boolea
           </form>
         ) : (
           <div className="row" style={{ alignItems: 'flex-start', gap: 4 }}>
-            <div className="bubble"><b className="small">{c.author}</b>{['moderator', 'admin'].includes(c.author_role) && <span className="badge badge-verified" style={{ marginLeft: 6 }}>{t('mod')}</span>}<SeeMore text={c.body_translated || c.body} lines={4} /></div>
+            <div className="bubble"><b className="small">{c.author}</b>{['moderator', 'admin'].includes(c.author_role) && <span className="badge badge-verified" style={{ marginLeft: 6 }}>{t('mod')}</span>}<SeeMore text={trC?.[String(c.id)] ?? c.body} lines={4} /></div>
             {c.can_manage && <CommentMenu onEdit={() => { setEditing(c.id); setDraft(c.body) }} onDelete={() => del(c)} canEdit={c.is_mine} />}
           </div>
         )}

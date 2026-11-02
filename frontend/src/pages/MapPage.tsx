@@ -7,7 +7,7 @@ import { type MapPoint, ttl } from '../lib/types'
 import { ListSkeleton, Sk } from '../components/Skeleton'
 import { StatusBadge } from '../components/PostCard'
 import { MapErrorBoundary } from '../components/map/MapErrorBoundary'
-import { Eye, Globe, LocateFixed, Flag } from 'lucide-react'
+import { Eye, Globe, LocateFixed, Flag, Flame } from 'lucide-react'
 import { COUNTRY_CENTER, type MapFocus } from '../lib/countryCenter'
 
 const GoogleIncidentMap = lazy(() => import('../components/map/GoogleIncidentMap'))
@@ -21,6 +21,8 @@ export default function MapPage() {
   const [googleFailed, setGoogleFailed] = useState(false)
   const onError = useCallback(() => setGoogleFailed(true), [])
   const [hours, setHours] = useState(168)
+  const [heat, setHeat] = useState(() => localStorage.getItem('rl_heat') === '1')
+  const toggleHeat = () => setHeat((v) => { localStorage.setItem('rl_heat', v ? '0' : '1'); return !v })
   const [cats, setCats] = useState<string[]>([])
   const [sevs, setSevs] = useState<string[]>([])
   // Nearby: reports within 25 km of the device (location stays in the browser). World: every public report from the last 30 days.
@@ -46,6 +48,9 @@ export default function MapPage() {
         <div className="row"><b className="grow" style={{ fontSize: 20 }}>{t('ui.filters')}</b>{(cats.length > 0 || sevs.length > 0) && <button className="btn btn-ghost small" onClick={() => { setCats([]); setSevs([]) }}>{t('ui.clear_filters')}</button>}</div>
         <div className="section-title">{t('ui.map_view')}</div>
         <div className="chips">{(['nearby', 'country', 'world'] as const).map((v) => { const I = { nearby: LocateFixed, country: Flag, world: Globe }[v]; return <button key={v} className={'chip' + (scope === v ? ' on' : '')} onClick={() => setScope(v)}><I size={14} aria-hidden /> {t('ui.map_' + v)}</button> })}</div>
+        <div className="section-title">{t('ui.heatmap')}</div>
+        <div className="chips"><button className={'chip' + (heat ? ' on' : '')} aria-pressed={heat} onClick={toggleHeat}><Flame size={14} aria-hidden /> {t('ui.hot_areas')}</button></div>
+        {heat && <p className="small muted">{t('ui.heat_note')}</p>}
         {scope === 'nearby' && geoErr && <p className="small muted">{t('ui.map_location_off')}</p>}
         {scope === 'nearby' && <><div className="section-title">{t('ui.time_window')}</div>
         <div className="chips">{HOURS.map((h) => <button key={h} className={'chip' + (hours === h ? ' on' : '')} onClick={() => setHours(h)}>{t('ui.last_hours', { count: h })}</button>)}</div></>}
@@ -57,7 +62,7 @@ export default function MapPage() {
       <div className="card map-canvas">
         {q.isLoading ? <Sk h="100%" r={8} /> : (
           <Suspense fallback={<Sk h="100%" r={8} />}>
-            {useGoogle ? <MapErrorBoundary fallback={<LeafletIncidentMap points={points} focus={focus} dark={dark} />}><GoogleIncidentMap apiKey={GMAPS_KEY} points={points} dark={dark} onError={onError} focus={focus} /></MapErrorBoundary> : <LeafletIncidentMap points={points} focus={focus} dark={dark} />}
+            {useGoogle ? <MapErrorBoundary fallback={<LeafletIncidentMap points={points} focus={focus} dark={dark} heat={heat} />}><GoogleIncidentMap apiKey={GMAPS_KEY} points={points} dark={dark} onError={onError} focus={focus} heat={heat} /></MapErrorBoundary> : <LeafletIncidentMap points={points} focus={focus} dark={dark} heat={heat} />}
           </Suspense>)}
         <div className="small muted map-note"><span className="live-dot" /> {t('ui.live')} · {useGoogle ? 'Google Maps' : 'OpenStreetMap'} · {t('ui.markers_show_approximate_locations_an')}</div>
       </div>

@@ -1,5 +1,7 @@
 # RescueLens Demo Script (2:55)
 
+**LOCKED.** Final as of Nov 2 2026. Every VO claim was checked against the built features.
+
 Promo style voiceover for an Indian male voice: warm, confident, medium pace (about 150 words per minute). Narration always says "Meta AI". Record with the local setup (AI_PROVIDER=ollama) so no DEMO labels appear. Seeded posts carry real Meta AI analyses (run `php artisan rescuelens:analyze-seeded` once after seeding). The sidebar shows only "Meta AI", the emergency banner follows the viewer's location (999 with its source in Bangladesh), and app map pins are Meta blue incident type icons that follow the theme.
 
 Screens: web at http://localhost:5173 (dark mode, 1280 by 860), app on the iPhone simulator (dark theme). Subtitles are burned in, white on a 60 percent black bar, bottom center, max two lines.
@@ -27,15 +29,16 @@ All portals use the seeded demo password. Emails and the password are listed onl
 8. Live dispatch status (Alerted, Accepted, On the way, On scene, Resolved) and responder sheet with verified call button. Shot 7 (1:14)
 9. Nearby user alerts and how nearby people help (saw this, confirm, comment). Shot 8 (1:22)
 10. Portal logins with live alerts: citizen, NGO, help center, responder, moderator, admin. Shot 9 (1:30 to 1:58)
-11. Map: opens on your country, Near me, My country, World, type and severity filters, light and dark styles. Shot 10 (1:58)
+11. Map: opens on your country, Hot areas heatmap, Near me, My country, World, type and severity filters, light and dark styles. Shot 10 (1:58)
 12. Ranked feed (Top and Latest), live updates, shimmer loading. Shot 11 (2:12)
 13. Verified emergency numbers with source, SOS banner, "never claims a road is safe". Shot 11 (2:18)
 14. Notifications live, mark all read. Shot 9 (1:30)
-15. Profile, settings, language (English, Bangla, Hindi, Spanish, Arabic), theme, alert radius, location privacy. Shot 12 (2:24)
-16. Trash and restore, edit and delete own posts. Shot 12 (2:30)
-17. Admin panel: users, organizations, emergency resources, moderation queue, verify or merge reports. Shot 9 (1:50)
-18. Offline drafts and installable web app. Shot 12 (2:34)
-19. Privacy: approximate public location, GPS stripped from photos and videos. Shot 3 and Shot 10
+15. One tap translation of a whole post with its comments through Meta AI. Shot 12 (2:24)
+16. Profile, settings, language (English, Bangla, Hindi, Spanish, Arabic), theme, alert radius, location privacy. Shot 12 (2:24)
+17. Trash and restore, edit and delete own posts. Shot 12 (2:30)
+18. Admin panel: users, organizations, emergency resources, moderation queue, verify or merge reports. Shot 9 (1:50)
+19. Offline drafts and installable web app. Shot 12 (2:34)
+20. Privacy: approximate public location, GPS stripped from photos and videos. Shot 3 and Shot 10
 
 ## Scene by scene
 
@@ -47,7 +50,7 @@ VO: "Every minute after an accident matters. RescueLens turns one photo into hel
 
 **Shot 2. Meta AI analysis, web Report page (0:08 to 0:30)**
 Screen: logged in as Rina. Report page, drop a road accident photo. Shimmer skeleton, then the analysis card with evidence boxes.
-VO: "Snap a photo. Meta AI reads it from every angle. Incident type: road accident. Risk: blocked lane and injured people. Severity: critical, with its confidence and the reasoning in plain words. Tap a box to see the evidence it used."
+VO: "Snap a photo. Meta AI names the incident: road accident. The risk: a blocked lane and injured people. Severity: critical, with confidence and reasoning in plain words. Tap a box to see the evidence."
 At 0:22 upload a normal street photo.
 VO: "And when nothing is wrong, Meta AI says so honestly. Low severity, no alarm."
 SFX: soft click per tap. Subtitle highlights: "Type", "Risk", "Severity", "Confidence", "Reasoning".
@@ -63,15 +66,15 @@ Music: beat drops on each chip. SFX: tick per chip.
 
 **Shot 5. Confirm and post (0:48 to 0:56)**
 Screen: Rina edits the Meta AI draft, ticks the public consent box, presses Post. Duplicate check shows a nearby report with "Join existing report".
-VO: "You stay in control. Nothing is published until you confirm, and duplicates are merged instead of spamming the map."
+VO: "You stay in control. Nothing posts until you confirm, and duplicates merge instead of spamming the map."
 
 **Shot 6. Comments and reactions update severity (0:56 to 1:06)**
 Screen: incident detail. Two users confirm and comment "two people trapped". The severity badge moves from High to Critical with the reason line.
 VO: "As people confirm and comment, Meta AI rereads the thread and updates severity, and always shows why."
 
 **Shot 7. Rescue flow and responder sheet (1:06 to 1:22)**
-Screen: app incident detail, Responders row, tap Demo Fire Station. Responder sheet: why alerted, live status steps, verified call button.
-VO: "The moment a report goes live, RescueLens automatically alerts matched responders: ambulances and hospitals for crashes, fire service and relief centers for floods. Each one shows why they were alerted and live status, from alerted to resolved. Calls are always placed by you, to a verified number."
+Screen: app incident detail, Responders row, tap Lalbagh Fire Station. Responder sheet: why alerted, live status steps, verified call button.
+VO: "The moment a report goes live, RescueLens alerts matched responders: ambulances for crashes, fire service and relief centers for floods. Each sees why it was alerted, with live status to resolved. Calls go only to verified numbers."
 
 **Shot 8. Nearby people help (1:22 to 1:30)**
 Screen: second simulator or web as another citizen. Alert banner "CRITICAL: Bus and rickshaw collision near Shahbag, about 2 km from you". Tap "I saw this", Confirm.
@@ -85,20 +88,20 @@ Fast cuts, about 4 seconds each, login screen then inbox. Screenshots for refere
 * Responder (ambulance): Responder inbox with Accept, Decline, Directions. Tap Accept; status turns Accepted live.
 * Moderator: review alerts, Moderation queue, Verify or Merge.
 * Admin: Admin panel, Users, Organizations, Emergency resources.
-VO: "Every account gets its own portal. NGOs and help centers receive response requests. Responders accept and get directions. Moderators verify. Admins manage users, organizations and verified emergency numbers."
+VO: "Every account gets its own portal, and alerts arrive live in each one. NGOs and help centers receive response requests. Responders accept and get directions. Moderators verify reports. Admins manage users, organizations and verified emergency numbers."
 SFX: notification chime on each inbox.
 
 **Shot 10. Map (1:58 to 2:12)**
-Screen: web Map opens centered on Bangladesh (My country). Click Near me (25 km), then World, then filter Fire, then toggle the theme for light and dark map styles. Cut to the app map doing the same.
-VO: "The map opens on your country. Zoom to what is near you, or see the whole world. Filter by type and severity. Locations are approximate, and an empty area never means a road is safe."
+Screen: web Map opens centered on Bangladesh (My country). Click Near me (25 km), then World, then tap Hot areas to show the heatmap, then filter Fire, then toggle the theme for light and dark map styles. Cut to the app map doing the same.
+VO: "The map opens on your country. Switch to near me, or the whole world, and see hot areas glow on the heatmap. Filter by type and severity. An empty area never means a road is safe."
 
 **Shot 11. Feed and safety (2:12 to 2:24)**
 Screen: web Feed, Top tab then Latest tab, shimmer while loading, live dot. Then the SOS banner with the verified number and its source.
 VO: "The feed ranks what matters most first: unresolved, severe, and confirmed. And emergency numbers are only shown when verified, with the source right there."
 
 **Shot 12. Your account (2:24 to 2:40)**
-Screen: app Profile, Settings (language Bangla flip, theme, alert radius, location privacy), My trash with Restore. Web: install prompt and Drafts card.
-VO: "Five languages, dark and light themes, your own alert radius, a trash you can restore from, and drafts that wait when you are offline."
+Screen: web Feed, tap See translation on a post: title, description, Meta AI analysis and comments translate together, tap See original. Then app Profile, Settings (language Bangla flip, theme, alert radius, location privacy), My trash with Restore. Web: install prompt and Drafts card.
+VO: "Translate any post, with all its comments, in one tap. Five languages, dark and light themes, your own alert radius, a restorable trash, and offline drafts."
 
 **Shot 13. Outro (2:40 to 2:55)**
 Screen: motion graphic. Split screen of web and app, then logo.
