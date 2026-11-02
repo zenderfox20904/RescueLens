@@ -59,7 +59,9 @@ class IncidentService
         User::whereNotNull('alert_lat')->where('id', '!=', $i->user_id)->chunkById(500, function ($users) use ($i, &$n) {
             foreach ($users as $u) {
                 $dist = self::distanceKm($u->alert_lat, $u->alert_lng, $i->public_lat, $i->public_lng);
-                if ($dist <= $u->alert_radius_km) {
+                // Critical incidents reach twice the personal radius; preferences and quiet hours are respected.
+                $radius = $u->alert_radius_km * ($i->severity === 'critical' ? 2 : 1);
+                if ($dist <= $radius && $u->wantsAlert($i->category, $i->severity ?? 'moderate')) {
                     UserNotification::create(['user_id' => $u->id, 'incident_id' => $i->id, 'type' => 'nearby',
                         'title' => strtoupper($i->severity).': '.$i->title, 'body' => sprintf('About %.1f km from your alert area. Unverified community report.', $dist)]);
                     $n++;

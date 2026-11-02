@@ -58,6 +58,9 @@ Route::prefix('v1')->middleware('throttle:api')->group(function () {
         Route::post('org/dispatches/{dispatch}/status', [\App\Http\Controllers\Api\OrganizationController::class, 'setStatus'])->middleware('throttle:write');
         Route::get('notifications', [NotificationController::class, 'index']);
         Route::post('notifications/read-all', [NotificationController::class, 'readAll']);
+        Route::delete('notifications', [NotificationController::class, 'clear']);
+        Route::patch('notifications/{id}', [NotificationController::class, 'update'])->whereNumber('id');
+        Route::delete('notifications/{id}', [NotificationController::class, 'destroy'])->whereNumber('id');
 
         // Admin data tables (CrudPolicy decides per entity): list, show, create, edit, Trash, restore, permanent delete.
         Route::middleware('role:moderator')->prefix('crud')->group(function () {

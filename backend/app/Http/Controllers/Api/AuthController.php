@@ -64,8 +64,13 @@ class AuthController extends Controller
         $d = $r->validate([
             'name' => 'sometimes|string|max:80', 'locale' => ['sometimes', 'regex:/^[a-z]{2,3}$/'], 'country_code' => 'sometimes|string|size:2|alpha', 'distance_unit' => 'sometimes|in:km,mi', 'timezone' => 'sometimes|nullable|timezone', 'ai_consent' => 'sometimes|boolean', 'auto_post_enabled' => 'sometimes|boolean', 'auto_post_consent' => 'accepted_if:auto_post_enabled,true,1',
             'alert_lat' => 'nullable|numeric|between:-90,90', 'alert_lng' => 'nullable|numeric|between:-180,180',
-            'alert_radius_km' => 'sometimes|integer|between:1,50',
+            'alert_radius_km' => 'sometimes|integer|between:1,50', 'theme' => 'sometimes|in:light,dark,system',
+            'notify_prefs' => 'sometimes|array', 'notify_prefs.push' => 'sometimes|boolean', 'notify_prefs.categories' => 'sometimes|array',
+            'notify_prefs.categories.*' => ['string', \Illuminate\Validation\Rule::in(\App\Models\Incident::CATEGORIES)],
+            'notify_prefs.quiet_start' => 'sometimes|nullable|date_format:H:i', 'notify_prefs.quiet_end' => 'sometimes|nullable|date_format:H:i',
+            'notify_prefs.min_severity' => 'sometimes|in:low,moderate,high,critical',
         ]);
+        if (isset($d['notify_prefs'])) $d['notify_prefs'] = array_intersect_key(array_merge($r->user()->notifyPrefs(), $d['notify_prefs']), \App\Models\User::NOTIFY_DEFAULTS);
         if (isset($d["country_code"])) $d["country_code"] = strtoupper($d["country_code"]);
         // Auto post is opt in: enabling it requires explicit consent, which is timestamped and audited.
         unset($d['auto_post_consent']);
