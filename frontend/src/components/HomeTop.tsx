@@ -1,3 +1,5 @@
+import { useAuth } from '../lib/auth'
+import { NearbyHelp } from './NearbyHelp'
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { CATS, SEVS, fmtNumber, timeAgo, useI18n } from '../lib/i18n'
@@ -21,10 +23,13 @@ export function HomeTop({ points, loading }: { points?: MapPoint[]; loading: boo
   const [me, setMe] = useState<{ lat: number; lng: number } | null>(null)
   // Location stays on the device; it is only used to sort alerts by distance.
   useEffect(() => { navigator.geolocation?.getCurrentPosition((p) => setMe({ lat: p.coords.latitude, lng: p.coords.longitude }), () => {}, { maximumAge: 300000, timeout: 8000 }) }, [])
+  const { user } = useAuth()
+  const center = user?.alert_lat != null && user?.alert_lng != null ? { lat: user.alert_lat, lng: user.alert_lng } : me
+  const radius = user?.alert_radius_km ?? 10
   const active = (points ?? []).filter((p) => !p.is_stale && !['resolved', 'expired'].includes(p.status))
   const alerts = active
     .map((p) => ({ ...p, d: me ? km(me, p) : null }))
-    .filter((p) => p.d === null || p.d <= 25)
+    .filter((p) => p.d === null || p.d <= Math.max(radius, 25))
     .sort((a, b) => (RANK[a.severity] - RANK[b.severity]) || ((a.d ?? 0) - (b.d ?? 0)))
     .slice(0, 10)
   return (
@@ -71,6 +76,7 @@ export function HomeTop({ points, loading }: { points?: MapPoint[]; loading: boo
           <Suspense fallback={<Sk w="100%" h={220} r={8} />}><div style={{ height: 220 }}><LeafletIncidentMap points={active} /></div></Suspense>
         )}
       </div>
+      {center && <NearbyHelp lat={center.lat} lng={center.lng} radiusKm={radius} compact />}
     </section>
   )
 }

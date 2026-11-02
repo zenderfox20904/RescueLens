@@ -57,11 +57,11 @@ class IncidentController extends Controller
         if (! $user && empty($d['mine'])) {
             $key = 'feed:'.Incident::cacheVersion().':'.md5(json_encode($d));
             $out = \Illuminate\Support\Facades\Cache::remember($key, 15, $build);
-            $out['data'] = \App\Services\I18n\ContentTranslation::apply(collect($out['data'])->all(), $r->input('lang'));
+            $out['data'] = \App\Services\I18n\ContentTranslation::applyAll(collect($out['data'])->all(), $r->input('lang'));
             return response()->json($out)->header('Cache-Control', 'private, max-age=10');
         }
         $out = $build();
-        $out['data'] = \App\Services\I18n\ContentTranslation::apply($out['data']->all(), $r->input('lang') ?? $user?->locale);
+        $out['data'] = \App\Services\I18n\ContentTranslation::applyAll($out['data']->all(), $r->input('lang') ?? $user?->locale);
         return $out;
     }
 
@@ -70,7 +70,7 @@ class IncidentController extends Controller
     {
         $d = $r->validate(['hours' => 'nullable|integer|between:1,720', 'category' => ['nullable', Rule::in(Incident::CATEGORIES)]]);
         $key = 'map:'.Incident::cacheVersion().':'.md5(json_encode($d));
-        $tr = fn ($o) => ['data' => \App\Services\I18n\ContentTranslation::apply(collect($o['data'])->all(), $r->input('lang'))];
+        $tr = fn ($o) => ['data' => \App\Services\I18n\ContentTranslation::applyAll(collect($o['data'])->all(), $r->input('lang'))];
         return response()->json($tr(\Illuminate\Support\Facades\Cache::remember($key, 15, fn () => ['data' => Incident::public()->with('media')
             ->where('created_at', '>=', now()->subHours($d['hours'] ?? 168))
             ->when($d['category'] ?? null, fn ($q, $v) => $q->where('category', $v))
@@ -87,7 +87,7 @@ class IncidentController extends Controller
         $visible = (in_array($incident->status, Incident::PUBLIC_STATUSES) && $incident->feed_eligible) || ($user && ($user->id === $incident->user_id || $user->isModerator()));
         abort_unless($visible, 404);
         $incident->load(['user', 'media', 'analyses.regions', 'confirmations']);
-        $one = \App\Services\I18n\ContentTranslation::apply([Present::incident($incident, $user, true)], $r->input('lang') ?? $user?->locale);
+        $one = \App\Services\I18n\ContentTranslation::applyAll([Present::incident($incident, $user, true)], $r->input('lang') ?? $user?->locale);
         $one = \App\Services\I18n\ContentTranslation::apply($one, $r->input('lang') ?? $user?->locale, 'description');
         return ['data' => $one[0]];
     }
@@ -204,8 +204,9 @@ class IncidentController extends Controller
     public function comments(Incident $incident)
     {
         abort_unless(in_array($incident->status, Incident::PUBLIC_STATUSES), 404);
-        return ['data' => $incident->comments()->with('user')->latest()->limit(100)->get()->reverse()->values()
-            ->map(fn ($c) => ['id' => $c->id, 'body' => $c->body, 'author' => $c->user?->name, 'author_role' => $c->user?->role, 'created_at' => $c->created_at->toIso8601String()])];
+        $rows = $incident->comments()->with('user')->latest()->limit(100)->get()->reverse()->values()
+            ->map(fn ($c) => ['id' => $c->id, 'body' => $c->body, 'author' => $c->user?->name, 'author_role' => $c->user?->role, 'created_at' => $c->created_at->toIso8601String()])->all();
+        return ['data' => \App\Services\I18n\ContentTranslation::apply($rows, request()->input('lang') ?? request()->user('sanctum')?->locale, 'body')];
     }
 
     public function comment(Request $r, Incident $incident)

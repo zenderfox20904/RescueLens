@@ -66,6 +66,17 @@ export const ENTITIES: Entity[] = [
     edit: [{ key: 'name', label: 'ui.name', maxLength: 120 }, { key: 'interval_seconds', label: 'ui.interval_seconds', type: 'number' }, { key: 'is_active', label: 'ui.active', type: 'bool' }],
   },
   {
+    key: 'organizations', label: 'ui.organizations', icon: '🏥', adminOnly: true, title: (r) => r.name, defaultSort: 'created_at',
+    cols: [{ key: 'name', label: 'ui.name', sort: 'name' }, { key: 'type', label: 'ui.kind', sort: 'type', kind: 'badge' }, { key: 'phone', label: 'ui.phone', kind: 'code' }, { key: 'country_code', label: 'ui.country', kind: 'code' },
+      { key: 'coverage_km', label: 'ui.coverage_radius', kind: 'number' }, { key: 'verified', label: 'verified', sort: 'verified_at', kind: 'bool' }, { key: 'created_at', label: 'ui.created', sort: 'created_at', kind: 'date' }],
+    filters: { type: list('hospital', 'ambulance', 'fire_service', 'police', 'help_center', 'ngo', 'volunteer') },
+    create: [{ key: 'type', label: 'ui.kind', type: 'select', options: list('hospital', 'ambulance', 'fire_service', 'police', 'help_center', 'ngo', 'volunteer'), required: true }, { key: 'name', label: 'ui.name', required: true, maxLength: 160 },
+      { key: 'phone', label: 'ui.phone', required: true }, { key: 'location', label: 'location', type: 'location', required: true }, { key: 'country_code', label: 'ui.country', maxLength: 2 },
+      { key: 'coverage_km', label: 'ui.coverage_radius', type: 'number' }, { key: 'service_hours', label: 'ui.service_hours' }, { key: 'verified', label: 'verified', type: 'bool' }],
+    edit: [{ key: 'name', label: 'ui.name', maxLength: 160 }, { key: 'phone', label: 'ui.phone' }, { key: 'location', label: 'location', type: 'location' }, { key: 'coverage_km', label: 'ui.coverage_radius', type: 'number' },
+      { key: 'service_hours', label: 'ui.service_hours' }, { key: 'verified', label: 'verified', type: 'bool' }],
+  },
+  {
     key: 'languages', label: 'ui.languages', icon: '🌐', adminOnly: true, title: (r) => `${r.native_name} · ${r.english_name}`, defaultSort: 'sort',
     cols: [{ key: 'code', label: 'ui.code', sort: 'code', kind: 'code' }, { key: 'native_name', label: 'ui.native_name' }, { key: 'english_name', label: 'ui.english_name', sort: 'english_name' },
       { key: 'rtl', label: 'RTL', kind: 'bool' }, { key: 'hand_translated', label: 'ui.hand_translated', kind: 'bool' }, { key: 'enabled', label: 'ui.enabled', kind: 'bool' }],

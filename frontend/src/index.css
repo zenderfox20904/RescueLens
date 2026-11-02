@@ -285,3 +285,31 @@ input, textarea, select { font: inherit; color: var(--text); }
 .confirm{max-width:420px;padding:20px}
 .rail-emoji{width:20px;text-align:center;font-size:17px}
 @media (max-width:700px){.ent-fields{grid-template-columns:1fr}.kv>div{grid-template-columns:1fr}}
+/* Nearby help, dispatch, signup */
+.nearby{padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.nearby-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.nearby-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.nearby-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--divider)}
+.nearby-item:first-child{border-top:0}
+.nearby-ic{font-size:22px;width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:var(--hover);flex:none}
+.nearby-body{flex:1;min-width:0}
+.nearby-name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nearby-empty{padding:8px 0}
+.nearby-note{border-top:1px solid var(--divider);padding-top:8px}
+.vbadge{display:inline-grid;place-items:center;margin-inline-start:6px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:var(--primary);color:#fff;font-size:10px;font-weight:700}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip-sm{font-size:12px;padding:3px 8px;border-radius:999px;background:var(--hover)}
+.dstatus{font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--hover);white-space:nowrap}
+.dstatus-accepted,.dstatus-en_route{background:#E7F0FF;color:#1559c7}
+.dstatus-on_scene{background:#FFF4DB;color:#8a5a00}
+.dstatus-resolved{background:#E6F6EA;color:#1d7a3a}
+.dstatus-declined{background:#F2F2F2;color:#666}
+[data-theme="dark"] .dstatus-accepted,[data-theme="dark"] .dstatus-en_route{background:#1d2e4a;color:#9cc2ff}
+[data-theme="dark"] .dstatus-on_scene{background:#3d3215;color:#ffd27a}
+[data-theme="dark"] .dstatus-resolved{background:#183824;color:#8fe0a8}
+.steps{display:flex;gap:6px}.steps span{flex:1;height:4px;border-radius:2px;background:var(--divider)}.steps span.on{background:var(--primary)}
+.acct-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.acct{display:flex;align-items:center;gap:8px;padding:10px;border-radius:10px;border:1px solid var(--divider);background:var(--card);color:var(--text);text-align:start;transition:border-color .12s,background .12s}
+.acct span{font-size:20px}.acct:hover{background:var(--hover)}
+.acct.on{border-color:var(--primary);background:var(--primary-soft)}
+.input.invalid{border-color:#C0392B}.field-err{color:#C0392B;margin-top:-6px}

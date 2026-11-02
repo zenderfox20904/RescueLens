@@ -7,6 +7,8 @@ import { PostCard } from '../components/PostCard'
 import { DetailSkeleton } from '../components/Skeleton'
 import { useAuth } from '../lib/auth'
 import { ModActions } from './Moderation'
+import { NearbyHelp } from '../components/NearbyHelp'
+import { DispatchPanel } from '../components/DispatchPanel'
 
 export default function IncidentDetail() {
   const { id } = useParams()
@@ -20,6 +22,8 @@ export default function IncidentDetail() {
     <div className="main">
       <PostCard i={i} detail />
       {user && ['moderator', 'admin'].includes(user.role) && <ModActions i={i} />}
+      <DispatchPanel incidentId={i.id} />
+      <NearbyHelp lat={i.location.lat} lng={i.location.lng} radiusKm={10} />
       <div className="card" style={{ padding: 16 }}>
         <b>{t('ui.status_timeline')}</b>
         {i.history?.map((h, k) => (

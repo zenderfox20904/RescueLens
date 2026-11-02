@@ -13,6 +13,13 @@ final class ContentTranslation
 {
     public static function key(string $text): string { return 'c:'.sha1($text); }
 
+    /** Translate several fields (title and description by default); the originals are always kept alongside. */
+    public static function applyAll(array $rows, ?string $lang, array $fields = ['title', 'description']): array
+    {
+        foreach ($fields as $f) $rows = self::apply($rows, $lang, $f);
+        return $rows;
+    }
+
     /** @param array<int,array> $rows rows with a 'title' field; adds 'title_translated' when a cached translation exists. */
     public static function apply(array $rows, ?string $lang, string $field = 'title'): array
     {

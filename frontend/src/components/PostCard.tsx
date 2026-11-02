@@ -39,13 +39,21 @@ export function shareLinks(i: Incident) {
   }
 }
 
+/** Shows machine translated user content with a toggle back to the original text. */
+function Translated({ original, translated }: { original: string; translated?: string | null }) {
+  const { t } = useI18n()
+  const [orig, setOrig] = useState(false)
+  if (!translated) return <div>{original}</div>
+  return <div>{orig ? original : translated} <button type="button" className="link-btn small" onClick={() => setOrig((v) => !v)}>{orig ? t('ui.see_translation') : t('ui.see_original')}</button></div>
+}
+
 function Comments({ id }: { id: string }) {
   const { t, lang } = useI18n()
   const { user } = useAuth()
   const qc = useQueryClient()
   const toast = useToast()
   const [body, setBody] = useState('')
-  const q = useQuery({ queryKey: ['comments', id], queryFn: () => api<{ data: { id: number; body: string; author: string; author_role: string; created_at: string }[] }>(`/incidents/${id}/comments`), refetchInterval: 8000 })
+  const q = useQuery({ queryKey: ['comments', id], queryFn: () => api<{ data: { id: number; body: string; body_translated?: string; author: string; author_role: string; created_at: string }[] }>(`/incidents/${id}/comments`), refetchInterval: 8000 })
   const m = useMutation({
     mutationFn: () => api(`/incidents/${id}/comments`, { body: { body } }),
     onSuccess: () => { setBody(''); qc.invalidateQueries({ queryKey: ['comments', id] }); qc.invalidateQueries({ queryKey: ['feed'] }) },
@@ -54,7 +62,7 @@ function Comments({ id }: { id: string }) {
   return (
     <div style={{ paddingBottom: 8 }}>
       {q.isLoading ? <ListSkeleton rows={2} /> : q.data?.data.map((c) => (
-        <div key={c.id} className="comment fade-in"><Avatar name={c.author} size={32} /><div><div className="bubble"><b className="small">{c.author}</b>{['moderator', 'admin'].includes(c.author_role) && <span className="badge badge-verified" style={{ marginLeft: 6 }}>{t('mod')}</span>}<div>{c.body}</div></div><span className="small muted" style={{ marginLeft: 12 }}>{timeAgo(c.created_at, lang)}</span></div></div>
+        <div key={c.id} className="comment fade-in"><Avatar name={c.author} size={32} /><div><div className="bubble"><b className="small">{c.author}</b>{['moderator', 'admin'].includes(c.author_role) && <span className="badge badge-verified" style={{ marginLeft: 6 }}>{t('mod')}</span>}<Translated original={c.body} translated={c.body_translated} /></div><span className="small muted" style={{ marginLeft: 12 }}>{timeAgo(c.created_at, lang)}</span></div></div>
       ))}
       {user ? (
         <form className="comment" onSubmit={(e) => { e.preventDefault(); if (body.trim()) m.mutate() }}>
@@ -73,6 +81,8 @@ export function PostCard({ i, detail = false }: { i: Incident; detail?: boolean 
   const [showComments, setShowComments] = useState(detail)
   const [showRegions, setShowRegions] = useState(true)
   const [shareOpen, setShareOpen] = useState(false)
+  const [orig, setOrig] = useState(false)
+  const hasTr = !!(i.title_translated || i.description_translated)
   const react = useMutation({
     mutationFn: (type: 'confirm' | 'dispute' | 'none') => api(`/incidents/${i.id}/reactions`, { body: { type } }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['feed'] }); qc.invalidateQueries({ queryKey: ['incident', i.id] }) },
@@ -93,8 +103,9 @@ export function PostCard({ i, detail = false }: { i: Incident; detail?: boolean 
         </div>
         <StatusBadge i={i} />
       </div>
-      <Link to={`/incidents/${i.id}`} style={{ color: 'inherit' }}><div className="post-title">{ttl(i)}</div></Link>
-      {i.description && <div style={{ whiteSpace: 'pre-wrap' }}>{i.description_translated || i.description}</div>}
+      <Link to={`/incidents/${i.id}`} style={{ color: 'inherit' }}><div className="post-title">{orig ? i.title.replace('[DEMO] ', '') : ttl(i)}</div></Link>
+      {i.description && <div style={{ whiteSpace: 'pre-wrap' }}>{orig ? i.description : i.description_translated || i.description}</div>}
+      {hasTr && <button type="button" className="link-btn small" onClick={() => setOrig((v) => !v)}>{orig ? t('ui.see_translation') : t('ui.see_original')}</button>}
       {i.analysis && <div className="small muted" style={{ marginTop: 6 }}>✨ {t('aiSuggestion')}{i.analysis.mode === 'demo' ? ' (DEMO)' : ''}: {i.analysis.hazards.map((h) => CATS[h]?.[lang] ?? h).join(', ')}</div>}
       {img && (
         <div className="post-media" onClick={() => setShowRegions((v) => !v)}>

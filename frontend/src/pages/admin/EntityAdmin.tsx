@@ -236,7 +236,7 @@ function EditModal({ ent, row, onClose, onSave }: { ent: Entity; row: Row | 'new
     e.preventDefault(); setErr(null)
     const body: Record<string, any> = {}
     for (const f of fields) {
-      if (f.type === 'location') { if (loc) Object.assign(body, { lat: loc.lat, lng: loc.lng, ...(ent.key === 'incidents' ? { address: loc.address } : {}) }); else if (f.required) { setErr(t('ui.pick_a_location')); return } continue }
+      if (f.type === 'location') { if (loc) Object.assign(body, { lat: loc.lat, lng: loc.lng, ...(['incidents', 'organizations'].includes(ent.key) ? { address: loc.address } : {}) }); else if (f.required) { setErr(t('ui.pick_a_location')); return } continue }
       const val = v[f.key]
       if (row !== 'new' && val === (row[f.key] ?? (f.type === 'bool' ? false : ''))) continue
       if (row === 'new' && (val === '' || val === null) && !f.required) continue

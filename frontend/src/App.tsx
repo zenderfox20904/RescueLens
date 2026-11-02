@@ -12,6 +12,7 @@ import Feed from './pages/Feed'
 
 // Route level code splitting: heavy pages (Leaflet map, report flow) load on demand.
 const Report = lazy(() => import('./pages/Report'))
+const Responder = lazy(() => import('./pages/Responder'))
 const MapPage = lazy(() => import('./pages/MapPage'))
 const IncidentDetail = lazy(() => import('./pages/IncidentDetail'))
 const Moderation = lazy(() => import('./pages/Moderation'))
@@ -83,6 +84,7 @@ export default function App() {
             <Route path="/moderation" element={<RequireMod><Moderation /></RequireMod>} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/notifications" element={<Notifications />} />
+            <Route path="/responder" element={<Responder />} />
           </Route>
           <Route element={<WideLayout />}>
             <Route path="/map" element={<MapPage />} />

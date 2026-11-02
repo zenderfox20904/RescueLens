@@ -91,6 +91,7 @@ export function LeftSidebar() {
       {item('/report', <IPlus size={18} />, t('report'))}
       {item('/feed?mine=1', <IUser size={18} />, t('ui.my_reports'))}
       {user && item('/notifications', <IBell size={18} />, t('notifications'))}
+      {user && user.account_type && user.account_type !== 'citizen' && item('/responder', <span aria-hidden>🚑</span>, t('ui.responder_inbox'))}
       {user && (user.role === 'moderator' || user.role === 'admin') && item('/admin', <IShield size={18} />, t('ui.admin_panel'))}
       {user && item('/settings', <ISettings size={18} />, t('ui.settings'))}
       {n > 0 && <div className="card" style={{ padding: 12, marginTop: 8 }}><b>{t('drafts')}: {n}</b><button className="btn btn-primary" style={{ width: '100%', marginTop: 8 }} onClick={async () => toast(`${await flushDrafts()} sent`)}>{t('sendNow')}</button></div>}

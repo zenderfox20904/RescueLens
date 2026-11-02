@@ -1,6 +1,10 @@
 export type Severity = 'low' | 'moderate' | 'high' | 'critical'
 export type Category = 'road_accident' | 'flood' | 'fire' | 'electrical' | 'building_collapse' | 'injury' | 'other'
-export interface User { id: string; name: string; email: string; role: 'citizen' | 'responder' | 'moderator' | 'admin'; locale: 'bn' | 'en'; ai_consent: boolean; auto_post_enabled?: boolean; alert_radius_km: number; alert_area_set: boolean; is_demo: boolean }
+export interface User { id: string; name: string; email: string; role: 'citizen' | 'responder' | 'moderator' | 'admin'; locale: 'bn' | 'en'; ai_consent: boolean; auto_post_enabled?: boolean; alert_radius_km: number; alert_area_set: boolean; alert_lat?: number | null; alert_lng?: number | null; is_demo: boolean; account_type?: string; organization?: Org | null }
+export interface Org { id: string; type: string; name: string; phone: string; lat: number; lng: number; address?: string; country_code?: string; coverage_km?: number; service_hours?: string; verified: boolean; distance_km?: number; source: string; is_demo?: boolean }
+export interface DispatchRow { id: number; status: string; distance_km: number; reason: string | null; updated_at: string; organization: { id: string; name: string; type: string; phone: string; verified: boolean } | null; incident?: { id: string; title: string; category: string; severity: string; area_name: string | null; lat: number; lng: number } | null }
+export const ORG_TYPES = ['hospital', 'ambulance', 'fire_service', 'police', 'help_center', 'ngo', 'volunteer'] as const
+export const ORG_ICON: Record<string, string> = { hospital: '🏥', ambulance: '🚑', fire_service: '🚒', police: '🚓', help_center: '🆘', ngo: '🤝', volunteer: '🙋' }
 export interface Region { label: string; source: string; box: [number, number, number, number]; image_width: number; image_height: number; confidence?: number | null }
 export interface Media { id: string; url: string; width: number; height: number }
 export interface Incident {

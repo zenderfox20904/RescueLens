@@ -15,7 +15,7 @@ use App\Models\UserNotification;
 class DispatchService
 {
     public const MAP = [
-        'fire' => ['fire_service', 'ambulance', 'hospital'],
+        'fire' => ['fire_service', 'ambulance'],
         'wildfire' => ['fire_service', 'help_center', 'volunteer'],
         'road_accident' => ['ambulance', 'hospital', 'police'],
         'injury' => ['ambulance', 'hospital'],
