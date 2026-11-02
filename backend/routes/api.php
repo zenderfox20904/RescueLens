@@ -1,0 +1,66 @@
+<?php
+
+use App\Http\Controllers\Api\AnalysisController;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\IncidentController;
+use App\Http\Controllers\Api\MediaController;
+use App\Http\Controllers\Api\MetaController;
+use App\Http\Controllers\Api\ModerationController;
+use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\SocialAuthController;
+use Illuminate\Support\Facades\Route;
+
+Route::prefix('v1')->middleware('throttle:api')->group(function () {
+    Route::get('health', [MetaController::class, 'health']);
+    Route::get('emergency-resources', [MetaController::class, 'resources']);
+    Route::get('stats', [MetaController::class, 'stats']);
+
+    Route::middleware('throttle:auth')->group(function () {
+        Route::post('auth/register', [AuthController::class, 'register']);
+        Route::post('auth/login', [AuthController::class, 'login']);
+        Route::post('auth/social/exchange', [SocialAuthController::class, 'exchange']);
+    });
+    Route::get('auth/{provider}/redirect', [SocialAuthController::class, 'redirect'])->whereIn('provider', ['facebook', 'google']);
+    Route::get('auth/{provider}/callback', [SocialAuthController::class, 'callback'])->whereIn('provider', ['facebook', 'google']);
+
+    Route::get('media/{media}/file', [MediaController::class, 'show'])->middleware('signed')->name('media.file');
+
+    Route::get('incidents', [IncidentController::class, 'index']);
+    Route::get('incidents/map', [IncidentController::class, 'map']);
+    Route::get('incidents/{incident}', [IncidentController::class, 'show']);
+    Route::get('incidents/{incident}/comments', [IncidentController::class, 'comments']);
+
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('auth/me', [AuthController::class, 'me']);
+        Route::patch('auth/me', [AuthController::class, 'updateMe']);
+        Route::delete('auth/me', [AuthController::class, 'destroyMe']);
+        Route::post('auth/logout', [AuthController::class, 'logout']);
+
+        Route::post('media', [MediaController::class, 'store'])->middleware('throttle:uploads');
+        Route::post('analyses', [AnalysisController::class, 'store'])->middleware('throttle:ai');
+        Route::get('analyses/{id}', [AnalysisController::class, 'show']);
+
+        Route::middleware('throttle:write')->group(function () {
+            Route::get('incident-duplicates', [IncidentController::class, 'duplicates']);
+            Route::post('incidents', [IncidentController::class, 'store']);
+            Route::patch('incidents/{incident}', [IncidentController::class, 'update']);
+            Route::post('incidents/{incident}/withdraw', [IncidentController::class, 'withdraw']);
+            Route::post('incidents/{incident}/reactions', [IncidentController::class, 'react']);
+            Route::post('incidents/{incident}/comments', [IncidentController::class, 'comment']);
+        });
+
+        Route::get('notifications', [NotificationController::class, 'index']);
+        Route::post('notifications/read-all', [NotificationController::class, 'readAll']);
+
+        Route::prefix('mod')->middleware('role:moderator')->group(function () {
+            Route::get('incidents', [ModerationController::class, 'queue']);
+            Route::post('incidents/{incident}/status', [ModerationController::class, 'setStatus']);
+            Route::post('incidents/{incident}/facebook-page', [ModerationController::class, 'postToFacebookPage']);
+            Route::post('incidents/{incident}/merge', [ModerationController::class, 'merge']);
+            Route::get('users', [ModerationController::class, 'users']);
+            Route::post('users/{user}/role', [ModerationController::class, 'setRole']);
+            Route::get('audit-logs', [ModerationController::class, 'audit']);
+            Route::post('emergency-resources/{resource}/verify', [ModerationController::class, 'verifyResource']);
+        });
+    });
+});
