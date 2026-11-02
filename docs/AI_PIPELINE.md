@@ -58,3 +58,31 @@ RescueLens now defaults to `AI_PROVIDER=llama`, which runs Meta Llama open weigh
 * Code: `app/Services/AI/Llama` (OpenAiCompatClient, LlamaVisionProvider, LlamaTextTranslator). Output is validated against the same schema and retried once.
 * There is no segmentation model on this path, so region masks are skipped.
 * `AI_PROVIDER=meta` still selects the Meta Model API; the legacy native Ollama provider remains DEV ONLY.
+
+## Meta Model API (production provider)
+
+Set `AI_PROVIDER=meta` and `META_MODEL_API_KEY` in `backend/.env` (never commit it). Everything below follows the official docs, checked on 2 Nov 2026.
+
+| Item | Value | Source |
+| --- | --- | --- |
+| Base URL | `https://api.meta.ai/v1` (`META_MODEL_API_BASE_URL`) | https://dev.meta.ai/docs/api-reference |
+| Auth | `Authorization: Bearer <key>`; keys look like `LLM_<id>_<secret>` | https://dev.meta.ai/docs/authentication |
+| Endpoint we call | `POST /v1/responses` (OpenAI Responses compatible) | https://dev.meta.ai/docs/protocols/responses |
+| Models | `META_VISION_MODEL` (default `muse-spark-1.3`), `META_TEXT_MODEL`, `META_SEGMENTATION_MODEL` (`sam-3.1`). Cheaper Contributor mode: `muse-spark-1.3-contributor` (your content may be used to train Meta models) | https://dev.meta.ai/docs/models, https://dev.meta.ai/docs/pricing-rate-limits |
+| Image input | `input_image` block with `image_url` as a base64 `data:` URL; jpeg, png, gif, webp; max 50 MB inline, 50 images per request | https://dev.meta.ai/docs/image-understanding |
+| Video input | mp4 via Files API `file_id` (`input_file`) or `input_video` with `video_url` | https://dev.meta.ai/docs/video-understanding |
+| JSON output | `text.format` with `type: json_schema`, `strict: true` (Responses API). On Chat Completions use `response_format` | https://dev.meta.ai/docs/structured-output |
+| Sampling | Muse Spark always reasons and is tuned for default temperature, so `AI_TEMPERATURE` is empty by default | https://dev.meta.ai/docs/protocols/chat-completions |
+| Errors | Envelope `{error:{message,type,param,code}}`. We do not retry 400, 401, 402, 403, 404, 413, 504. We retry 429, 500, 503 with backoff and honor `Retry-After` | https://dev.meta.ai/docs/error-handling |
+| Rate limits | Per team per model, for example `muse-spark-1.3` 3,000 RPM and 4M TPM; contributor 150 RPM. We store `x-ratelimit-remaining-*` headers in cache | https://dev.meta.ai/docs/pricing-rate-limits |
+
+### Getting a key
+
+1. Sign in to the Model API dashboard at https://dev.meta.ai, open the API keys tab, click Create API key and copy it once.
+2. Put it in `backend/.env` as `META_MODEL_API_KEY`.
+
+Billing: the docs describe pay as you go billing only (Muse Spark 1.3: $1.25 per 1M input tokens, $4.25 per 1M output; Contributor mode $0.10 and $0.20). No free tier is documented, and a billing problem returns `HTTP 402 billing_not_configured`, so expect to add a payment method. Without a key the app runs in the labeled DEMO mode.
+
+### Contract test
+
+`backend/tests/Feature/MetaModelApiContractTest.php` mocks the documented success object and error envelopes and checks the request shape (URL, Bearer header, `input_image` data URL, `json_schema` format, model taken from config), error mapping, which errors are retried, and that no request is made without a key.

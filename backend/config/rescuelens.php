@@ -8,13 +8,15 @@ return [
         'api_key' => env('META_MODEL_API_KEY'),
         'base_url' => rtrim(env('META_MODEL_API_BASE_URL', 'https://api.meta.ai/v1'), '/'),
         'vision_model' => env('META_VISION_MODEL', 'muse-spark-1.3'),
+        'text_model' => env('META_TEXT_MODEL', env('META_VISION_MODEL', 'muse-spark-1.3')),
+        'max_retry_after' => (int) env('AI_MAX_RETRY_AFTER', 5),
         'segmentation_model' => env('META_SEGMENTATION_MODEL', 'sam-3.1'),
         'timeout' => (int) env('AI_REQUEST_TIMEOUT', 45),
         'max_retries' => (int) env('AI_MAX_RETRIES', 2),
         'daily_budget' => (int) env('AI_DAILY_BUDGET', 500),
         'reasoning_effort' => env('AI_REASONING_EFFORT', 'high'),
-        // Low temperature for consistent triage. Leave empty if the model rejects the parameter.
-        'temperature' => env('AI_TEMPERATURE', '0.2'),
+        // Muse Spark is tuned for the default sampling (temperature 1.0); docs advise leaving it unset.
+        'temperature' => env('AI_TEMPERATURE', ''),
         'segmentation_enabled' => (bool) env('AI_ENABLE_SEGMENTATION', true),
     ],
     'public_location_decimals' => (int) env('RL_PUBLIC_LOCATION_DECIMALS', 3),

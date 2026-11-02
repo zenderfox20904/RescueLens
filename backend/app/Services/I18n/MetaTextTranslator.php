@@ -11,7 +11,7 @@ class MetaTextTranslator implements TextTranslator
     public function translate(array $strings, string $targetCode, string $targetName): array
     {
         $res = $this->client->responses([
-            'model' => config('rescuelens.meta.vision_model'),
+            'model' => config('rescuelens.meta.text_model'),
             'instructions' => PromptTranslation::system($targetCode, $targetName),
             'input' => json_encode($strings, JSON_UNESCAPED_UNICODE),
         ]);
