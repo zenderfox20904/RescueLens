@@ -1,19 +1,26 @@
 import { Link } from 'react-router-dom'
-import { useState } from 'react'
-import { MapContainer, TileLayer, CircleMarker, Popup, Tooltip, useMapEvents } from 'react-leaflet'
+import { useEffect, useState } from 'react'
+import type { MapFocus } from '../../lib/countryCenter'
+import { MapContainer, TileLayer, CircleMarker, Popup, Tooltip, useMapEvents, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import { timeAgo, useI18n } from '../../lib/i18n'
 import { type MapPoint, ttl } from '../../lib/types'
 
 const SEV = { low: '#31A24C', moderate: '#F7B928', high: '#F5793B', critical: '#E41E3F' }
 /** OpenStreetMap fallback used when no Google Maps key is configured or the key fails. */
-export default function LeafletIncidentMap({ points }: { points: MapPoint[] }) {
+function Focus({ focus, points }: { focus: MapFocus; points: MapPoint[] }) {
+  const m = useMap()
+  useEffect(() => { if (focus) m.setView([focus.lat, focus.lng], focus.zoom); else if (points.length) m.fitBounds(points.map((p) => [p.lat, p.lng] as [number, number]), { padding: [40, 40] }) }, [focus, points.length]) // eslint-disable-line react-hooks/exhaustive-deps
+  return null
+}
+export default function LeafletIncidentMap({ points, focus = null }: { points: MapPoint[]; focus?: MapFocus }) {
   const { t, lang } = useI18n()
   const [zoom, setZoom] = useState(12)
   const { singles, clusters } = cluster(points, zoom)
   const center: [number, number] = points.length ? [points[0].lat, points[0].lng] : [23.78, 90.39]
   return (
     <MapContainer center={center} zoom={12} style={{ height: '100%', minHeight: 420, borderRadius: 8 }} scrollWheelZoom>
+      <Focus focus={focus} points={points} />
       <ZoomWatch onZoom={setZoom} />
       {clusters.map((c) => (
         <CircleMarker key={c.key} center={[c.lat, c.lng]} radius={14 + Math.min(16, c.n * 2)} pathOptions={{ color: '#fff', weight: 3, fillColor: SEV[c.worst], fillOpacity: 0.85 }}>

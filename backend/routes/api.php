@@ -28,10 +28,13 @@ Route::prefix('v1')->middleware('throttle:api')->group(function () {
     Route::get('auth/{provider}/callback', [SocialAuthController::class, 'callback'])->whereIn('provider', ['facebook', 'google']);
 
     Route::get('media/{media}/file', [MediaController::class, 'show'])->middleware('signed')->name('media.file');
+    Route::get('media/{media}/video', [MediaController::class, 'video'])->middleware('signed')->name('media.video');
 
     Route::get('avatars/{user}', [AuthController::class, 'avatarFile'])->middleware('signed')->name('avatar.file');
     Route::get('incidents', [IncidentController::class, 'index']);
     Route::get('users/{user:public_id}/profile', [IncidentController::class, 'profile']);
+    // Country only, from the edge proxy header when present (no third party lookup, the IP is not stored).
+    Route::get('geo/ip', fn (\Illuminate\Http\Request $r) => response()->json(['country_code' => preg_match('/^[A-Z]{2}$/', (string) $r->header('CF-IPCountry')) && $r->header('CF-IPCountry') !== 'XX' ? $r->header('CF-IPCountry') : null]));
     Route::get('incidents/map', [IncidentController::class, 'map']);
     Route::get('incidents/{incident}', [IncidentController::class, 'show']);
     Route::get('nearby-help', [\App\Http\Controllers\Api\OrganizationController::class, 'nearby']);

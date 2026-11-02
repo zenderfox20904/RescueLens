@@ -32,6 +32,7 @@ class L10n extends ChangeNotifier {
 
   static const _s = <String, Map<String, String>>{
     'en': {
+      'map_country': 'My country',
       'c_crowd_stampede': 'Crowd stampede',
       'c_landslide': 'Landslide',
       'c_earthquake': 'Earthquake',
@@ -243,6 +244,7 @@ class L10n extends ChangeNotifier {
       'your_reports': 'Your reports', 'reports_title': 'Reports', 'reports_count': '{n} reports', 'no_reports_profile': 'No reports yet', 'no_reports_profile_me': 'When you report an incident it appears here, where you can edit it or move it to Trash.', 'no_reports_profile_other': 'This person has not shared any public reports.',
     },
     'bn': {
+      'map_country': 'আমার দেশ',
       'c_crowd_stampede': 'ভিড়ে পদদলন',
       'c_landslide': 'ভূমিধস',
       'c_earthquake': 'ভূমিকম্প',
@@ -335,6 +337,7 @@ class L10n extends ChangeNotifier {
       'your_reports': 'আপনার রিপোর্ট', 'reports_title': 'রিপোর্ট', 'reports_count': '{n}টি রিপোর্ট', 'no_reports_profile': 'এখনও কোনো রিপোর্ট নেই', 'no_reports_profile_me': 'আপনি কোনো ঘটনা রিপোর্ট করলে তা এখানে দেখাবে, যেখানে সম্পাদনা বা ট্র্যাশে সরাতে পারবেন।', 'no_reports_profile_other': 'এই ব্যক্তি এখনও কোনো পাবলিক রিপোর্ট শেয়ার করেননি।',
     },
     'hi': {
+      'map_country': 'मेरा देश',
       'c_crowd_stampede': 'भगदड़',
       'c_landslide': 'भूस्खलन',
       'c_earthquake': 'भूकंप',
@@ -426,6 +429,7 @@ class L10n extends ChangeNotifier {
       'your_reports': 'आपकी रिपोर्ट', 'reports_title': 'रिपोर्ट', 'reports_count': '{n} रिपोर्ट', 'no_reports_profile': 'अभी कोई रिपोर्ट नहीं', 'no_reports_profile_me': 'जब आप कोई घटना रिपोर्ट करेंगे तो वह यहां दिखेगी, जहां आप उसे संपादित या ट्रैश में डाल सकते हैं।', 'no_reports_profile_other': 'इस व्यक्ति ने कोई सार्वजनिक रिपोर्ट साझा नहीं की है।',
     },
     'es': {
+      'map_country': 'Mi país',
       'c_crowd_stampede': 'Estampida',
       'c_landslide': 'Deslizamiento',
       'c_earthquake': 'Terremoto',
@@ -517,6 +521,7 @@ class L10n extends ChangeNotifier {
       'your_reports': 'Tus reportes', 'reports_title': 'Reportes', 'reports_count': '{n} reportes', 'no_reports_profile': 'Aún no hay reportes', 'no_reports_profile_me': 'Cuando reportes un incidente aparecerá aquí, donde podrás editarlo o enviarlo a la papelera.', 'no_reports_profile_other': 'Esta persona no ha compartido reportes públicos.',
     },
     'ar': {
+      'map_country': 'بلدي',
       'c_crowd_stampede': 'تدافع',
       'c_landslide': 'انهيار أرضي',
       'c_earthquake': 'زلزال',

@@ -68,7 +68,7 @@ class Present
             'reporter' => ['id' => $i->is_anonymous && ! $mine ? null : $i->user?->public_id, 'avatar' => $i->is_anonymous && ! $mine ? null : self::avatar($i->user), 'name' => $i->is_anonymous && ! $mine ? null : $i->user?->name, 'anonymous' => $i->is_anonymous, 'is_me' => $mine],
             'counts' => ['confirm' => $i->confirmations_count, 'dispute' => $i->disputes_count, 'comments' => $i->comments_count],
             'my_reaction' => $viewer ? $i->confirmations->firstWhere('user_id', $viewer->id)?->type : null,
-            'media' => $i->media->map(fn ($m) => ['id' => $m->public_id, 'url' => $m->signedUrl(), 'mime' => $m->mime, 'width' => $m->width, 'height' => $m->height])->values(),
+            'media' => $i->media->map(fn ($m) => ['id' => $m->public_id, 'url' => $m->signedUrl(), 'video_url' => $m->videoUrl(), 'mime' => $m->mime, 'width' => $m->width, 'height' => $m->height])->values(),
             'analysis' => $analysis ? [
                 'mode' => $analysis->mode, 'hazards' => collect($analysis->result['possible_hazards'] ?? [])->pluck('type')->unique()->values(),
                 'severity' => $analysis->severity, 'requires_human_review' => $analysis->requires_human_review,

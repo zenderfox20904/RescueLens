@@ -1,3 +1,4 @@
+import type { MapFocus } from '../../lib/countryCenter'
 /// <reference types="google.maps" />
 import { useEffect } from 'react'
 import { APIProvider, Map, useMap } from '@vis.gl/react-google-maps'
@@ -36,7 +37,7 @@ function icon(p: MapPoint): google.maps.Icon {
   return { url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg), scaledSize: new google.maps.Size(40, 40), anchor: new google.maps.Point(20, 20) }
 }
 
-function Markers({ points }: { points: MapPoint[] }) {
+function Markers({ points, focus }: { points: MapPoint[]; focus: MapFocus }) {
   const map = useMap()
   const nav = useNavigate()
   useEffect(() => {
@@ -48,14 +49,19 @@ function Markers({ points }: { points: MapPoint[] }) {
       m.addListener('click', () => nav(`/incidents/${p.id}`))
       return m
     })
-    if (points.length) { const b = new google.maps.LatLngBounds(); points.forEach((p) => b.extend({ lat: p.lat, lng: p.lng })); map.fitBounds(b, 48) }
     const c = new MarkerClusterer({ map, markers })
     return () => { c.clearMarkers(); markers.forEach((m) => m.setMap(null)) }
   }, [map, points])
+  // Camera: a focus (nearby or the active country) wins; otherwise fit every point (world view).
+  useEffect(() => {
+    if (!map) return
+    if (focus) { map.setCenter({ lat: focus.lat, lng: focus.lng }); map.setZoom(focus.zoom) }
+    else if (points.length) { const b = new google.maps.LatLngBounds(); points.forEach((p) => b.extend({ lat: p.lat, lng: p.lng })); map.fitBounds(b, 48) }
+  }, [map, focus, points.length]) // eslint-disable-line react-hooks/exhaustive-deps
   return null
 }
 
-export default function GoogleIncidentMap({ apiKey, points, dark, onError }: { apiKey: string; points: MapPoint[]; dark: boolean; onError: () => void }) {
+export default function GoogleIncidentMap({ apiKey, points, dark, onError, focus = null }: { apiKey: string; points: MapPoint[]; dark: boolean; onError: () => void; focus?: MapFocus }) {
   useEffect(() => {
     // Google calls this global when the key is rejected (billing, referrer or API restrictions).
     ;(window as any).gm_authFailure = onError
@@ -66,7 +72,7 @@ export default function GoogleIncidentMap({ apiKey, points, dark, onError }: { a
     <APIProvider apiKey={apiKey} onError={onError} language={lang} region={country}>
       <Map style={{ height: '100%', minHeight: 420, borderRadius: 8 }} defaultCenter={{ lat: 23.78, lng: 90.39 }} defaultZoom={12}
         styles={dark ? FB_DARK : FB_STYLE} gestureHandling="greedy" streetViewControl={false} mapTypeControl={false}>
-        <Markers points={points} />
+        <Markers points={points} focus={focus} />
       </Map>
     </APIProvider>
   )
