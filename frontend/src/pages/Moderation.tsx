@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, errMsg } from '../lib/api'
 import { CATS, timeAgo, useI18n } from '../lib/i18n'
-import type { Incident } from '../lib/types'
+import { type Incident, ttl } from '../lib/types'
 import { StatusBadge } from '../components/PostCard'
 import { ListSkeleton } from '../components/Skeleton'
 import { useToast } from '../components/Toast'
@@ -46,7 +46,7 @@ export default function Moderation() {
       </div>
       {q.isLoading ? <div className="card" style={{ padding: 12 }}><ListSkeleton rows={6} /></div> : q.data?.data.length === 0 ? <div className="card muted" style={{ padding: 16 }}>{t('ui.empty')}</div> : q.data?.data.map((i) => (
         <div key={i.id} className="card" style={{ padding: 12 }}>
-          <div className="row"><span style={{ fontSize: 24 }}>{CATS[i.category]?.icon}</span><Link to={`/incidents/${i.id}`} className="grow" style={{ color: 'var(--text)' }}><b>{i.title}</b><div className="small muted">{i.location.area_name} · {timeAgo(i.created_at, lang)} · 👁️ {i.counts.confirm} · ⚑ {i.counts.dispute} · ID {i.id}</div></Link><StatusBadge i={i} /></div>
+          <div className="row"><span style={{ fontSize: 24 }}>{CATS[i.category]?.icon}</span><Link to={`/incidents/${i.id}`} className="grow" style={{ color: 'var(--text)' }}><b>{ttl(i)}</b><div className="small muted">{i.location.area_name} · {timeAgo(i.created_at, lang)} · 👁️ {i.counts.confirm} · ⚑ {i.counts.dispute} · ID {i.id}</div></Link><StatusBadge i={i} /></div>
           <div style={{ marginTop: 8 }}><ModActions i={i} /></div>
         </div>))}
     </div>

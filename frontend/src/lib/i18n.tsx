@@ -1,39 +1,50 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import i18n from 'i18next'
 import { initReactI18next, useTranslation } from 'react-i18next'
-import LanguageDetector from 'i18next-browser-languagedetector'
+import HttpBackend from 'i18next-http-backend'
 import bn from '../locales/bn.json'
 import en from '../locales/en.json'
 
 /**
- * Language registry. To add a language: create src/locales/<code>.json with the same keys as en.json,
- * import it in RESOURCES and add an entry here. RTL languages (ar, ur, fa, he) set dir automatically.
+ * Worldwide languages. The list comes from GET /languages (admin managed). en and bn are hand translated and bundled;
+ * every other language is loaded through the i18next http backend from GET /i18n/{code}, which machine translates
+ * missing strings once through the AI provider and caches them. Untranslated keys fall back to English.
  * See docs/INTERNATIONALIZATION.md.
  */
-export const LANGUAGES: { code: string; native: string; font?: string }[] = [
-  { code: 'bn', native: 'বাংলা', font: 'bn' },
-  { code: 'en', native: 'English' },
+export type Language = { code: string; native_name: string; english_name: string; rtl: boolean; hand_translated?: boolean }
+export const BUNDLED: Language[] = [
+  { code: 'en', native_name: 'English', english_name: 'English', rtl: false, hand_translated: true },
+  { code: 'bn', native_name: 'বাংলা', english_name: 'Bengali', rtl: false, hand_translated: true },
 ]
-const RESOURCES = { bn: { translation: bn }, en: { translation: en } }
-const RTL = ['ar', 'ur', 'fa', 'he']
+/** Kept for older imports: the two bundled languages. */
+export const LANGUAGES = BUNDLED.map((l) => ({ code: l.code, native: l.native_name }))
+const RTL = ['ar', 'ur', 'fa', 'he', 'ps', 'sd', 'yi', 'ckb']
+const API_BASE = (import.meta.env.VITE_API_URL as string) || 'http://127.0.0.1:8000/api/v1'
 
-i18n.use(LanguageDetector).use(initReactI18next).init({
-  resources: RESOURCES,
-  supportedLngs: LANGUAGES.map((l) => l.code),
-  nonExplicitSupportedLngs: true,
+i18n.use(HttpBackend).use(initReactI18next).init({
+  resources: { en: { translation: en }, bn: { translation: bn } },
+  partialBundledLanguages: true,
+  backend: { loadPath: `${API_BASE}/i18n/{{lng}}`, requestOptions: { cache: 'default' } },
   fallbackLng: 'en',
+  load: 'languageOnly',
   interpolation: { escapeValue: false },
-  // English by default. Only an explicit choice in the switcher (saved in rl_lang) changes it; no browser or region detection.
+  // English by default. Only an explicit choice in the switcher (saved in rl_lang, and on the profile) changes it.
+  // No browser or region language detection.
   lng: localStorage.getItem('rl_lang') || 'en',
-  detection: { order: ['localStorage'], lookupLocalStorage: 'rl_lang', caches: ['localStorage'] },
 })
+
+/** Switch language: remembered on this device and, for signed in users, on the profile. */
+export async function chooseLanguage(code: string) {
+  localStorage.setItem('rl_lang', code)
+  await i18n.changeLanguage(code)
+}
 
 export function applyDocumentLang(l: string) {
   document.documentElement.lang = l
-  document.documentElement.dir = RTL.includes(l.slice(0, 2)) ? 'rtl' : 'ltr'
+  document.documentElement.dir = RTL.includes(l.split('-')[0]) ? 'rtl' : 'ltr'
 }
 i18n.on('languageChanged', applyDocumentLang)
-applyDocumentLang(i18n.resolvedLanguage || 'en')
+applyDocumentLang(i18n.language || 'en')
 
 const ICONS: Record<string, string> = { road_accident: '🚗', flood: '🌊', fire: '🔥', electrical: '⚡', building_collapse: '🏚️', injury: '🩹', crowd_stampede: '👥', landslide: '⛰️', earthquake: '🌐', wildfire: '🌲', tsunami: '🌊', cyclone_storm: '🌀', snow_ice: '❄️', other: '⚠️' }
 type Label = { icon: string } & Record<string, string>
@@ -62,13 +73,13 @@ type Ctx = {
 const I18n = createContext<Ctx>(null!)
 export function I18nProvider({ children }: { children: ReactNode }) {
   const { t, i18n: inst } = useTranslation()
-  const lang = (inst.resolvedLanguage || 'en').slice(0, 2)
+  const lang = inst.language || 'en'
   const [country, setC] = useState(detectCountry)
   const [units, setU] = useState<'km' | 'mi'>(() => (localStorage.getItem('rl_units') as 'km' | 'mi') || (MILES.includes(detectCountry()) ? 'mi' : 'km'))
   useEffect(() => { localStorage.setItem('rl_country', country) }, [country])
   const value: Ctx = {
     lang, t: (k, o) => t(k, o) as string,
-    setLang: (l) => { inst.changeLanguage(l) },
+    setLang: (l) => { chooseLanguage(l) },
     country, setCountry: setC,
     units, setUnits: (u) => { localStorage.setItem('rl_units', u); setU(u) },
     locale: `${lang}-${country}`,
@@ -79,8 +90,9 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 export const useI18n = () => useContext(I18n)
 
 /** Locale aware helpers. Bangla uses Bangla digits through Intl (bn-BD). Times use the browser time zone. */
-export const intlLocale = (lang: string) => (lang === 'bn' ? 'bn-BD' : lang)
-export function fmtNumber(n: number, lang: string) { return new Intl.NumberFormat(intlLocale(lang)).format(n) }
+export const intlLocale = (lang: string) => (lang === 'bn' ? 'bn-BD' : lang === 'ar' ? 'ar-EG' : lang)
+export const isRtl = (lang: string) => RTL.includes(lang.split('-')[0])
+export function fmtNumber(n: number, lang: string, digits?: number) { return new Intl.NumberFormat(intlLocale(lang), digits == null ? undefined : { maximumFractionDigits: digits, minimumFractionDigits: digits }).format(n) }
 export function fmtDateTime(iso: string, lang: string) { return new Intl.DateTimeFormat(intlLocale(lang), { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(iso)) }
 export function fmtDistance(meters: number, units: 'km' | 'mi', lang: string) {
   const v = units === 'mi' ? meters / 1609.344 : meters / 1000

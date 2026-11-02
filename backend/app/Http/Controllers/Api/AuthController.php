@@ -19,7 +19,7 @@ class AuthController extends Controller
             'name' => 'required|string|max:80',
             'email' => 'required|email:rfc|max:160|unique:users,email',
             'password' => ['required', Password::min(8)->letters()->numbers()],
-            'locale' => ['nullable', 'regex:/^[a-z]{2}$/'],
+            'locale' => ['nullable', 'regex:/^[a-z]{2,3}$/'],
             'device_name' => 'nullable|string|max:60',
         ]);
         $u = User::create(['name' => $d['name'], 'email' => strtolower($d['email']), 'password' => $d['password'], 'locale' => $d['locale'] ?? 'en']);
@@ -53,7 +53,7 @@ class AuthController extends Controller
     public function updateMe(Request $r)
     {
         $d = $r->validate([
-            'name' => 'sometimes|string|max:80', 'locale' => ['sometimes', 'regex:/^[a-z]{2}$/'], 'country_code' => 'sometimes|string|size:2|alpha', 'distance_unit' => 'sometimes|in:km,mi', 'timezone' => 'sometimes|nullable|timezone', 'ai_consent' => 'sometimes|boolean', 'auto_post_enabled' => 'sometimes|boolean', 'auto_post_consent' => 'accepted_if:auto_post_enabled,true,1',
+            'name' => 'sometimes|string|max:80', 'locale' => ['sometimes', 'regex:/^[a-z]{2,3}$/'], 'country_code' => 'sometimes|string|size:2|alpha', 'distance_unit' => 'sometimes|in:km,mi', 'timezone' => 'sometimes|nullable|timezone', 'ai_consent' => 'sometimes|boolean', 'auto_post_enabled' => 'sometimes|boolean', 'auto_post_consent' => 'accepted_if:auto_post_enabled,true,1',
             'alert_lat' => 'nullable|numeric|between:-90,90', 'alert_lng' => 'nullable|numeric|between:-180,180',
             'alert_radius_km' => 'sometimes|integer|between:1,50',
         ]);

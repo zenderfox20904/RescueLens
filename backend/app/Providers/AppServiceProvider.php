@@ -22,15 +22,18 @@ class AppServiceProvider extends ServiceProvider
         if (config('rescuelens.ai_provider') === 'ollama' && ! $this->app->environment('production')) {
             $this->app->bind(VisionAnalysisProvider::class, fn () => new \App\Services\AI\DevOllama\OllamaVisionProvider);
             $this->app->bind(ImageSegmentationProvider::class, fn () => new \App\Services\AI\DevOllama\NoSegmentationProvider);
+            $this->app->bind(\App\Services\I18n\TextTranslator::class, fn () => new \App\Services\AI\DevOllama\OllamaTextTranslator);
             return;
         }
         $live = fn () => filled(config('rescuelens.meta.api_key'));
         $this->app->bind(VisionAnalysisProvider::class, fn ($app) => $live() ? new MetaVisionProvider($app->make(MetaModelClient::class)) : new DemoVisionProvider);
         $this->app->bind(ImageSegmentationProvider::class, fn ($app) => $live() ? new MetaSamProvider($app->make(MetaModelClient::class)) : new DemoSegmentationProvider);
+        $this->app->bind(\App\Services\I18n\TextTranslator::class, fn ($app) => $live() ? new \App\Services\I18n\MetaTextTranslator($app->make(MetaModelClient::class)) : new \App\Services\I18n\NullTextTranslator);
     }
 
     public function boot(): void
     {
+        \Illuminate\Support\Facades\Gate::define('crud', [\App\Policies\CrudPolicy::class, 'manage']);
         $key = fn (Request $r) => $r->user()?->id ?: $r->ip();
         RateLimiter::for('api', fn (Request $r) => Limit::perMinute((int) config('rescuelens.rate_limit_api', 120))->by($key($r)));
         RateLimiter::for('auth', fn (Request $r) => [Limit::perMinute(10)->by($r->ip()), Limit::perMinute(5)->by(strtolower((string) $r->input('email')).$r->ip())]);

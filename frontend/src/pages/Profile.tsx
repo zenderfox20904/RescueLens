@@ -1,14 +1,15 @@
 import { useState } from 'react'
 import { useAuth } from '../lib/auth'
 import { api, errMsg } from '../lib/api'
-import { COUNTRIES, LANGUAGES, countryName, useI18n } from '../lib/i18n'
+import { COUNTRIES, countryName, useI18n } from '../lib/i18n'
+import { LanguagePicker } from '../components/LanguagePicker'
 import { Avatar } from '../components/Shell'
 import { Sk } from '../components/Skeleton'
 import { useToast } from '../components/Toast'
 
 export default function Profile() {
   const { user, loading, refresh } = useAuth()
-  const { t, lang, setLang, country, setCountry, units, setUnits } = useI18n()
+  const { t, lang, country, setCountry, units, setUnits } = useI18n()
   const toast = useToast()
   const [radius, setRadius] = useState(user?.alert_radius_km ?? 5)
   if (loading || !user) return <div className="main"><div className="card" style={{ padding: 16 }}><div className="row"><Sk w={96} h={96} r={48} /><div className="grow"><Sk w="50%" h={20} /><Sk w="30%" h={12} style={{ marginTop: 8 }} /></div></div></div></div>
@@ -29,7 +30,7 @@ export default function Profile() {
         <label className="small">{t('ui.radius')}: {radius} km<input type="range" min={1} max={50} value={radius} onChange={(e) => setRadius(+e.target.value)} style={{ width: '100%' }} /></label>
         <button className="btn btn-primary" onClick={setArea}>{t('ui.use_my_current_area')}</button>
         <label className="row small"><input type="checkbox" checked={user.ai_consent} onChange={(e) => save({ ai_consent: e.target.checked })} /> {t('ui.ai_analysis_consent')}</label>
-        <label className="row small">{t('ui.language')}<select className="input" style={{ width: 160 }} value={lang} onChange={(e) => { setLang(e.target.value); save({ locale: e.target.value }) }}>{LANGUAGES.map((l) => <option key={l.code} value={l.code}>{l.native}</option>)}</select></label>
+        <label className="row small">{t('ui.language')}<LanguagePicker variant="field" /></label>
         <label className="row small">{t('ui.country')}<select className="input" style={{ width: 220 }} value={country} onChange={(e) => { setCountry(e.target.value); save({ country_code: e.target.value }) }}>{COUNTRIES.map((c) => <option key={c} value={c}>{countryName(c, lang)}</option>)}</select></label>
         <label className="row small">{t('ui.units')}<select className="input" style={{ width: 160 }} value={units} onChange={(e) => { const u = e.target.value as 'km' | 'mi'; setUnits(u); save({ distance_unit: u }) }}><option value="km">{t('ui.km')}</option><option value="mi">{t('ui.mi')}</option></select></label>
       </div>

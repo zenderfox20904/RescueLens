@@ -1,6 +1,7 @@
 import { useAuth } from '../lib/auth'
 import { api, errMsg } from '../lib/api'
-import { COUNTRIES, LANGUAGES, countryName, useI18n } from '../lib/i18n'
+import { COUNTRIES, countryName, useI18n } from '../lib/i18n'
+import { LanguagePicker } from '../components/LanguagePicker'
 import { useTheme } from '../components/Shell'
 import { useToast } from '../components/Toast'
 import { Sk } from '../components/Skeleton'
@@ -10,7 +11,7 @@ const ZONES: string[] = (Intl as any).supportedValuesOf ? (Intl as any).supporte
 /** Facebook style settings: grouped cards with a row per setting. */
 export default function Settings() {
   const { user, refresh } = useAuth()
-  const { t, lang, setLang, country, setCountry, units, setUnits, timeZone } = useI18n()
+  const { t, lang, country, setCountry, units, setUnits, timeZone } = useI18n()
   const theme = useTheme()
   const toast = useToast()
   const save = async (body: Record<string, unknown>) => { if (!user) return; try { await api('/auth/me', { method: 'PATCH', body }); await refresh(); toast(t('ui.saved')) } catch (e) { toast(errMsg(e)) } }
@@ -26,7 +27,7 @@ export default function Settings() {
       </div>
       <div className="card settings-card">
         <div className="settings-head">{t('ui.region_language')}</div>
-        {row(t('ui.language'), <select className="input sel" value={lang} onChange={(e) => { setLang(e.target.value); save({ locale: e.target.value }) }}>{LANGUAGES.map((l) => <option key={l.code} value={l.code}>{l.native}</option>)}</select>)}
+        {row(t('ui.language'), <LanguagePicker variant="field" />)}
         {row(t('ui.country'), <select className="input sel" value={country} onChange={(e) => { setCountry(e.target.value); save({ country_code: e.target.value }) }}>{COUNTRIES.map((c) => <option key={c} value={c}>{countryName(c, lang)}</option>)}</select>, t('ui.country_hint'))}
         {row(t('ui.units'), <select className="input sel" value={units} onChange={(e) => { const u = e.target.value as 'km' | 'mi'; setUnits(u); save({ distance_unit: u }) }}><option value="km">{t('ui.km')}</option><option value="mi">{t('ui.mi')}</option></select>)}
         {row(t('ui.timezone'), <select className="input sel" defaultValue={timeZone} onChange={(e) => save({ timezone: e.target.value })}>{ZONES.map((z) => <option key={z} value={z}>{z}</option>)}</select>)}

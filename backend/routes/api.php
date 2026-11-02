@@ -14,6 +14,8 @@ Route::prefix('v1')->middleware('throttle:api')->group(function () {
     Route::get('health', [MetaController::class, 'health']);
     Route::get('emergency-resources', [MetaController::class, 'resources']);
     Route::get('stats', [MetaController::class, 'stats']);
+    Route::get('languages', [\App\Http\Controllers\Api\LanguageController::class, 'index']);
+    Route::get('i18n/{code}', [\App\Http\Controllers\Api\LanguageController::class, 'bundle'])->where('code', '[a-zA-Z-]{2,12}')->middleware('throttle:ai');
 
     Route::middleware('throttle:auth')->group(function () {
         Route::post('auth/register', [AuthController::class, 'register']);
@@ -51,6 +53,19 @@ Route::prefix('v1')->middleware('throttle:api')->group(function () {
 
         Route::get('notifications', [NotificationController::class, 'index']);
         Route::post('notifications/read-all', [NotificationController::class, 'readAll']);
+
+        // Admin data tables (CrudPolicy decides per entity): list, show, create, edit, Trash, restore, permanent delete.
+        Route::middleware('role:moderator')->prefix('crud')->group(function () {
+            $c = \App\Http\Controllers\Api\CrudController::class;
+            Route::get('/', [$c, 'meta']);
+            Route::get('{entity}', [$c, 'index']);
+            Route::post('{entity}', [$c, 'store'])->middleware('throttle:write');
+            Route::get('{entity}/{id}', [$c, 'show']);
+            Route::patch('{entity}/{id}', [$c, 'update'])->middleware('throttle:write');
+            Route::delete('{entity}/{id}', [$c, 'destroy'])->middleware('throttle:write');
+            Route::post('{entity}/{id}/restore', [$c, 'restore'])->middleware('throttle:write');
+            Route::delete('{entity}/{id}/force', [$c, 'forceDelete'])->middleware('throttle:write');
+        });
 
         Route::prefix('mod')->middleware('role:moderator')->group(function () {
             Route::get('incidents', [ModerationController::class, 'queue']);

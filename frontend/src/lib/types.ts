@@ -4,6 +4,8 @@ export interface User { id: string; name: string; email: string; role: 'citizen'
 export interface Region { label: string; source: string; box: [number, number, number, number]; image_width: number; image_height: number; confidence?: number | null }
 export interface Media { id: string; url: string; width: number; height: number }
 export interface Incident {
+  title_translated?: string | null
+  description_translated?: string | null
   id: string; title: string; description: string | null; category: Category; severity: Severity; status: string; is_stale: boolean
   is_demo: boolean; ai_assisted: boolean; source?: string; ai_unverified?: boolean
   location: { lat: number; lng: number; area_name: string | null; precision: string }
@@ -23,4 +25,7 @@ export interface Analysis {
   evidence_regions: Region[]; media: Media | null
 }
 export interface Notification { id: number; type: string; title: string; body: string | null; incident_id: string | null; read: boolean; created_at: string }
-export interface MapPoint { id: string; title: string; category: Category; severity: Severity; status: string; is_stale: boolean; is_demo: boolean; lat: number; lng: number; area_name: string | null; confirm: number; created_at: string; thumb: string | null }
+export interface MapPoint { id: string; title: string; title_translated?: string | null; category: Category; severity: Severity; status: string; is_stale: boolean; is_demo: boolean; lat: number; lng: number; area_name: string | null; confirm: number; created_at: string; thumb: string | null }
+
+/** Title in the selected UI language when the AI cache has it, else the original. */
+export const ttl = (i: { title: string; title_translated?: string | null }) => (i.title_translated || i.title).replace('[DEMO] ', '')

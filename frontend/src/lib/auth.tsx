@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import { api, tokenStore } from './api'
 import type { User } from './types'
+import { chooseLanguage } from './i18n'
 
 type Ctx = { user: User | null; loading: boolean; setSession: (u: User, token: string) => void; logout: () => Promise<void>; refresh: () => Promise<void> }
 const AuthCtx = createContext<Ctx>(null!)
@@ -12,7 +13,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try { setUser((await api<{ user: User }>('/auth/me')).user) } catch { setUser(null) } finally { setLoading(false) }
   }
   useEffect(() => { refresh() }, [])
-  const setSession = (u: User, token: string) => { tokenStore.set(token); setUser(u) }
+  // The language a user picked is remembered on the profile and restored at sign in (English when never chosen).
+  const setSession = (u: User, token: string) => { tokenStore.set(token); setUser(u); if (u.locale) chooseLanguage(u.locale) }
   const logout = async () => { try { await api('/auth/logout', { method: 'POST' }) } catch { /* ignore */ } tokenStore.set(null); setUser(null) }
   return <AuthCtx.Provider value={{ user, loading, setSession, logout, refresh }}>{children}</AuthCtx.Provider>
 }

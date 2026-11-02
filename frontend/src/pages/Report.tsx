@@ -1,4 +1,5 @@
 import { EmergencyBanner } from '../components/Emergency'
+import { LocationPicker, type PickedLocation } from '../components/location/LocationPicker'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -9,7 +10,7 @@ import type { Analysis, Incident } from '../lib/types'
 import { drafts, newKey } from '../lib/offline'
 import { RegionOverlay, StatusBadge } from '../components/PostCard'
 import { Sk } from '../components/Skeleton'
-import { ICamera, IPin, ISpark, IX } from '../components/Icons'
+import { ICamera, ISpark, IX } from '../components/Icons'
 import { useToast } from '../components/Toast'
 
 type Step = 'photo' | 'analyzing' | 'review' | 'duplicates' | 'posting'
@@ -29,8 +30,9 @@ export default function Report() {
   const [analysis, setAnalysis] = useState<Analysis | null>(null)
   const [consentAi, setConsentAi] = useState(true)
   const [scenario, setScenario] = useState('')
-  const [form, setForm] = useState({ title: '', description: '', category: 'road_accident', severity: 'moderate', area_name: '', lat: DHAKA.lat, lng: DHAKA.lng, is_anonymous: false })
-  const [locSet, setLocSet] = useState(false)
+  const [form, setForm] = useState({ title: '', description: '', category: 'road_accident', severity: 'moderate', area_name: '', address: '', lat: DHAKA.lat, lng: DHAKA.lng, is_anonymous: false })
+  const [loc, setLoc] = useState<PickedLocation | null>(null)
+  const autoArea = useRef('')
   const [confirmPublic, setConfirmPublic] = useState(false)
   const [dups, setDups] = useState<Incident[]>([])
   const [err, setErr] = useState<string | null>(null)
@@ -52,10 +54,6 @@ export default function Report() {
   useEffect(() => { if (!user) nav('/login') }, [user])
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview) }, [preview])
 
-  const locate = () => navigator.geolocation?.getCurrentPosition(
-    (p) => { setForm((f) => ({ ...f, lat: +p.coords.latitude.toFixed(6), lng: +p.coords.longitude.toFixed(6) })); setLocSet(true) },
-    () => toast(t('ui.location_unavailable_enter_it_manually')),
-    { enableHighAccuracy: true, timeout: 8000 })
 
   const pick = (f: File | undefined) => {
     if (!f) return
@@ -176,10 +174,8 @@ export default function Report() {
             <div className="small muted">{t('severity')}</div>
             <div className="chips">{Object.entries(SEVS).map(([k, v]) => <button key={k} type="button" className={'chip' + (form.severity === k ? ' on' : '')} onClick={() => setForm({ ...form, severity: k })}>{v[lang]}</button>)}</div>
             <div className="small muted">{t('location')}</div>
-            <div className="row"><button type="button" className="btn" onClick={locate}><IPin size={18} /> {t('useMyLocation')}</button><span className="small muted">{locSet ? `✓ ${form.lat.toFixed(4)}, ${form.lng.toFixed(4)}` : (t('ui.default_dhaka'))}</span></div>
-            <div className="row"><input className="input" type="number" step="0.000001" value={form.lat} onChange={(e) => { setForm({ ...form, lat: +e.target.value }); setLocSet(true) }} aria-label={t('ui.lat')} /><input className="input" type="number" step="0.000001" value={form.lng} onChange={(e) => { setForm({ ...form, lng: +e.target.value }); setLocSet(true) }} aria-label={t('ui.lng')} /></div>
-            <input className="input" maxLength={120} placeholder={t('ui.area_name_eg_mirpur_10')} value={form.area_name} onChange={(e) => setForm({ ...form, area_name: e.target.value })} />
-            <div className="small muted">{t('ui.only_an_approximate_location_about')}</div>
+            <LocationPicker value={loc} onChange={(v) => { setLoc(v); setForm((f) => ({ ...f, lat: v.lat, lng: v.lng, address: v.address ?? '', area_name: f.area_name && f.area_name !== autoArea.current ? f.area_name : (autoArea.current = v.area_name ?? '') })) }} />
+            <input className="input" maxLength={120} placeholder={t('ui.area_name_eg_mirpur_10')} value={form.area_name} onChange={(e) => setForm({ ...form, area_name: e.target.value })} aria-label={t('ui.public_area_name')} />
             <label className="row small"><input type="checkbox" checked={form.is_anonymous} onChange={(e) => setForm({ ...form, is_anonymous: e.target.checked })} /> {t('anonymous')}</label>
             <label className="row small" style={{ fontWeight: 600 }}><input type="checkbox" checked={confirmPublic} onChange={(e) => setConfirmPublic(e.target.checked)} /> {t('confirmPost')}</label>
             <button className="btn btn-primary" style={{ padding: 12 }} disabled={!confirmPublic || !form.title.trim() || step === 'posting'} onClick={checkDuplicates}>{step === 'posting' ? '…' : t('post')}</button>

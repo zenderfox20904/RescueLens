@@ -19,9 +19,10 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        foreach (\App\Models\Language::seedRows() as $l) \App\Models\Language::withTrashed()->updateOrCreate(['code' => $l['code']], $l);
         $mk = function (string $name, string $email, string $role, float $lat, float $lng) {
             $u = User::firstOrNew(['email' => $email]);
-            $u->fill(['name' => $name, 'password' => 'password', 'locale' => 'bn', 'alert_lat' => $lat, 'alert_lng' => $lng, 'alert_radius_km' => 10, 'ai_consent' => true]);
+            $u->fill(['name' => $name, 'password' => 'password', 'locale' => 'en', 'alert_lat' => $lat, 'alert_lng' => $lng, 'alert_radius_km' => 10, 'ai_consent' => true]);
             $u->forceFill(['role' => $role, 'is_demo' => true, 'email_verified_at' => now()])->save();
             return $u;
         };

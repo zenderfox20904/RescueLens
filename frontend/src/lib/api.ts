@@ -19,6 +19,8 @@ export async function api<T = any>(path: string, opts: { method?: string; body?:
   let body: BodyInit | undefined
   if (opts.body instanceof FormData) body = opts.body
   else if (opts.body !== undefined) { headers['Content-Type'] = 'application/json'; body = JSON.stringify(opts.body) }
+  // Incident reads carry the UI language so titles come back translated (title_translated) from the AI cache.
+  if (!opts.method && !body && path.startsWith('/incidents')) path += (path.includes('?') ? '&' : '?') + 'lang=' + encodeURIComponent(i18n.language || 'en')
   const res = await fetch(API + path, { method: opts.method || (body ? 'POST' : 'GET'), headers, body })
   if (res.status === 204) return undefined as T
   const data = await res.json().catch(() => ({}))

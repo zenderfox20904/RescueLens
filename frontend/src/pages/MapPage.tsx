@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '../lib/api'
 import { CATS, SEVS, timeAgo, useI18n } from '../lib/i18n'
-import type { MapPoint } from '../lib/types'
+import { type MapPoint, ttl } from '../lib/types'
 import { ListSkeleton, Sk } from '../components/Skeleton'
 import { StatusBadge } from '../components/PostCard'
 import { MapErrorBoundary } from '../components/map/MapErrorBoundary'
@@ -47,7 +47,7 @@ export default function MapPage() {
       <aside className="card map-list" role="list" aria-label={t('ui.incident_list')}>
         <div className="row" style={{ padding: 8 }}><b className="grow" style={{ fontSize: 20 }}>{t('ui.incident_list')}</b><span className="badge">{points.length}</span></div>
         {q.isLoading ? <ListSkeleton rows={6} /> : !points.length ? <p className="muted" style={{ padding: 8 }}>{t('ui.empty')}</p> : points.map((p) => (
-          <Link role="listitem" key={p.id} to={`/incidents/${p.id}`} className="notif fade-in"><div className={'sideicon sev-ring sev-' + p.severity} style={{ flex: 'none' }} aria-hidden>{CATS[p.category]?.icon}</div><div className="grow"><b>{p.title}</b><div className="small muted">{p.area_name} · {timeAgo(p.created_at, lang)} · 👁️ {p.confirm}</div></div><StatusBadge i={p} /></Link>))}
+          <Link role="listitem" key={p.id} to={`/incidents/${p.id}`} className="notif fade-in"><div className={'sideicon sev-ring sev-' + p.severity} style={{ flex: 'none' }} aria-hidden>{CATS[p.category]?.icon}</div><div className="grow"><b>{ttl(p)}</b><div className="small muted">{p.area_name} · {timeAgo(p.created_at, lang)} · 👁️ {p.confirm}</div></div><StatusBadge i={p} /></Link>))}
       </aside>
     </div>
   )

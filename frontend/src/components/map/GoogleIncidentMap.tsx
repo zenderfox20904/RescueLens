@@ -4,7 +4,7 @@ import { APIProvider, Map, useMap } from '@vis.gl/react-google-maps'
 import { MarkerClusterer } from '@googlemaps/markerclusterer'
 import { useNavigate } from 'react-router-dom'
 import { CATS, useI18n } from '../../lib/i18n'
-import type { MapPoint } from '../../lib/types'
+import { type MapPoint, ttl } from '../../lib/types'
 
 const SEV = { low: '#31A24C', moderate: '#F7B928', high: '#F5793B', critical: '#E41E3F' }
 
@@ -44,7 +44,7 @@ function Markers({ points }: { points: MapPoint[] }) {
     const markers = points.map((p) => {
       // Points are already approximate (rounded server side); precise reporter location never reaches the client.
       const m = new google.maps.Marker( // classic Marker keeps JSON styling working (AdvancedMarker needs a cloud Map ID)
-        { position: { lat: p.lat, lng: p.lng }, icon: icon(p), title: p.title })
+        { position: { lat: p.lat, lng: p.lng }, icon: icon(p), title: ttl(p) })
       m.addListener('click', () => nav(`/incidents/${p.id}`))
       return m
     })

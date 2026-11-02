@@ -57,10 +57,18 @@ function OfflineSync() {
   return null
 }
 
+/** Content (incident titles) is served in the UI language, so a language switch refetches everything once. */
+function LangRefetch() {
+  const qc = useQueryClient()
+  useEffect(() => { const f = () => qc.invalidateQueries(); i18n.on('languageChanged', f); return () => i18n.off('languageChanged', f) }, [qc])
+  return null
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <OfflineSync />
+      <LangRefetch />
       <Suspense fallback={null}>
         <Routes>
           <Route path="/" element={<Landing />} />

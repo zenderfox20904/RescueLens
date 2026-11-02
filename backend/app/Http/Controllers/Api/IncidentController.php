@@ -56,10 +56,13 @@ class IncidentController extends Controller
         // Anonymous public feed is cached briefly; any incident write bumps the version key.
         if (! $user && empty($d['mine'])) {
             $key = 'feed:'.Incident::cacheVersion().':'.md5(json_encode($d));
-            return response()->json(\Illuminate\Support\Facades\Cache::remember($key, 15, $build))
-                ->header('Cache-Control', 'public, max-age=10');
+            $out = \Illuminate\Support\Facades\Cache::remember($key, 15, $build);
+            $out['data'] = \App\Services\I18n\ContentTranslation::apply(collect($out['data'])->all(), $r->input('lang'));
+            return response()->json($out)->header('Cache-Control', 'private, max-age=10');
         }
-        return $build();
+        $out = $build();
+        $out['data'] = \App\Services\I18n\ContentTranslation::apply($out['data']->all(), $r->input('lang') ?? $user?->locale);
+        return $out;
     }
 
     /** Lightweight payload for map markers and the "stories" alert strip. */
@@ -67,14 +70,15 @@ class IncidentController extends Controller
     {
         $d = $r->validate(['hours' => 'nullable|integer|between:1,720', 'category' => ['nullable', Rule::in(Incident::CATEGORIES)]]);
         $key = 'map:'.Incident::cacheVersion().':'.md5(json_encode($d));
-        return response()->json(\Illuminate\Support\Facades\Cache::remember($key, 15, fn () => ['data' => Incident::public()->with('media')
+        $tr = fn ($o) => ['data' => \App\Services\I18n\ContentTranslation::apply(collect($o['data'])->all(), $r->input('lang'))];
+        return response()->json($tr(\Illuminate\Support\Facades\Cache::remember($key, 15, fn () => ['data' => Incident::public()->with('media')
             ->where('created_at', '>=', now()->subHours($d['hours'] ?? 168))
             ->when($d['category'] ?? null, fn ($q, $v) => $q->where('category', $v))
             ->latest()->limit(500)->get()
             ->map(fn ($i) => ['id' => $i->public_id, 'title' => $i->title, 'category' => $i->category, 'severity' => $i->severity,
                 'status' => $i->status, 'is_stale' => $i->isStale(), 'is_demo' => $i->is_demo, 'lat' => $i->public_lat, 'lng' => $i->public_lng,
                 'area_name' => $i->area_name, 'confirm' => $i->confirmations_count, 'created_at' => $i->created_at->toIso8601String(),
-                'thumb' => $i->media->first()?->signedUrl()])->values()]))->header('Cache-Control', 'public, max-age=10');
+                'thumb' => $i->media->first()?->signedUrl()])->values()])))->header('Cache-Control', 'private, max-age=10');
     }
 
     public function show(Request $r, Incident $incident)
@@ -83,7 +87,9 @@ class IncidentController extends Controller
         $visible = (in_array($incident->status, Incident::PUBLIC_STATUSES) && $incident->feed_eligible) || ($user && ($user->id === $incident->user_id || $user->isModerator()));
         abort_unless($visible, 404);
         $incident->load(['user', 'media', 'analyses.regions', 'confirmations']);
-        return ['data' => Present::incident($incident, $user, true)];
+        $one = \App\Services\I18n\ContentTranslation::apply([Present::incident($incident, $user, true)], $r->input('lang') ?? $user?->locale);
+        $one = \App\Services\I18n\ContentTranslation::apply($one, $r->input('lang') ?? $user?->locale, 'description');
+        return ['data' => $one[0]];
     }
 
     public function duplicates(Request $r)
@@ -99,7 +105,7 @@ class IncidentController extends Controller
             'title' => 'required|string|max:160', 'description' => 'nullable|string|max:2000',
             'category' => ['required', Rule::in(Incident::CATEGORIES)], 'severity' => ['required', Rule::in(Incident::SEVERITIES)],
             'lat' => 'required|numeric|between:-90,90', 'lng' => 'required|numeric|between:-180,180',
-            'area_name' => 'nullable|string|max:120', 'is_anonymous' => 'boolean',
+            'area_name' => 'nullable|string|max:120', 'address' => 'nullable|string|max:300', 'is_anonymous' => 'boolean',
             'media_ids' => 'array|max:4', 'media_ids.*' => 'string|size:26', 'analysis_id' => 'nullable|string|size:26',
             'consent_public' => 'accepted', 'auto_post' => 'boolean', 'occurred_at' => 'nullable|date|before_or_equal:now',
         ]);
@@ -122,7 +128,7 @@ class IncidentController extends Controller
                 'user_id' => $user->id, 'title' => strip_tags($d['title']), 'description' => isset($d['description']) ? strip_tags($d['description']) : null,
                 'category' => $d['category'], 'severity' => $d['severity'], 'status' => 'reported',
                 'lat' => $d['lat'], 'lng' => $d['lng'], 'public_lat' => Incident::roundPublic($d['lat']), 'public_lng' => Incident::roundPublic($d['lng']),
-                'area_name' => $d['area_name'] ?? null, 'is_anonymous' => $d['is_anonymous'] ?? false,
+                'area_name' => $d['area_name'] ?? null, 'address' => $d['address'] ?? null, 'is_anonymous' => $d['is_anonymous'] ?? false,
                 'ai_assisted' => ! empty($d['analysis_id']), 'occurred_at' => $d['occurred_at'] ?? now(),
                 'source' => $auto ? 'auto_post' : 'user', 'ai_unverified' => $auto,
             ]);

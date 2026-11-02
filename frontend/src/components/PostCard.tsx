@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, errMsg, SHARE_BASE } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { CATS, SEVS, timeAgo, useI18n } from '../lib/i18n'
-import type { Incident, Region } from '../lib/types'
+import { type Incident, type Region, ttl } from '../lib/types'
 import { Avatar } from './Shell'
 import { IChat, IEye, IFacebook, IFlag, IShare, IWhatsApp } from './Icons'
 import { ListSkeleton } from './Skeleton'
@@ -95,8 +95,8 @@ export function PostCard({ i, detail = false }: { i: Incident; detail?: boolean 
         </div>
         <StatusBadge i={i} />
       </div>
-      <Link to={`/incidents/${i.id}`} style={{ color: 'inherit' }}><div className="post-title">{i.title}</div></Link>
-      {i.description && <div style={{ whiteSpace: 'pre-wrap' }}>{i.description}</div>}
+      <Link to={`/incidents/${i.id}`} style={{ color: 'inherit' }}><div className="post-title">{ttl(i)}</div></Link>
+      {i.description && <div style={{ whiteSpace: 'pre-wrap' }}>{i.description_translated || i.description}</div>}
       {i.analysis && <div className="small muted" style={{ marginTop: 6 }}>✨ {t('aiSuggestion')}{i.analysis.mode === 'demo' ? ' (DEMO)' : ''}: {i.analysis.hazards.map((h) => CATS[h]?.[lang] ?? h).join(', ')}</div>}
       {img && (
         <div className="post-media" onClick={() => setShowRegions((v) => !v)}>

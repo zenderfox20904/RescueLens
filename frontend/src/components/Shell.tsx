@@ -3,7 +3,8 @@ import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
-import { CATS, LANGUAGES, timeAgo, useI18n } from '../lib/i18n'
+import { CATS, timeAgo, useI18n } from '../lib/i18n'
+import { LanguagePicker } from './LanguagePicker'
 import type { Notification } from '../lib/types'
 import { LogoMark } from './Logo'
 import { EmergencyBanner, useEmergency } from './Emergency'
@@ -135,11 +136,7 @@ export function RightSidebar() {
   )
 }
 
-/** Top bar language switcher. Saves to localStorage and, when signed in, to the profile (PATCH /auth/me). */
+/** Top bar language switcher: the searchable worldwide picker. */
 export function LangToggle({ className = 'iconbtn' }: { className?: string }) {
-  const { lang, setLang, t } = useI18n(); const { user } = useAuth()
-  const next = LANGUAGES[(LANGUAGES.findIndex((l) => l.code === lang) + 1) % LANGUAGES.length]
-  return <button data-testid="lang-toggle" className={className} onClick={() => { setLang(next.code); if (user) api('/auth/me', { method: 'PATCH', body: { locale: next.code } }).catch(() => {}) }} aria-label={t('ui.switch_language')} title={next.native}>
-    {className === 'iconbtn' ? <span style={{ fontSize: 13, fontWeight: 700 }}>{next.code === 'bn' ? 'বা' : next.code.toUpperCase()}</span> : next.native}
-  </button>
+  return <LanguagePicker variant={className === 'iconbtn' ? 'icon' : 'field'} />
 }

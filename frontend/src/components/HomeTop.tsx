@@ -1,7 +1,7 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { CATS, SEVS, timeAgo, useI18n } from '../lib/i18n'
-import type { MapPoint } from '../lib/types'
+import { CATS, SEVS, fmtNumber, timeAgo, useI18n } from '../lib/i18n'
+import { type MapPoint, ttl } from '../lib/types'
 import { EmergencyBanner } from './Emergency'
 import { Sk } from './Skeleton'
 
@@ -17,6 +17,7 @@ function km(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
 /** Main features first: one tap report, AI auto detect, nearby live alerts, verified numbers, live map preview. */
 export function HomeTop({ points, loading }: { points?: MapPoint[]; loading: boolean }) {
   const { t, lang } = useI18n()
+  const strip = useRef<HTMLDivElement>(null)
   const [me, setMe] = useState<{ lat: number; lng: number } | null>(null)
   // Location stays on the device; it is only used to sort alerts by distance.
   useEffect(() => { navigator.geolocation?.getCurrentPosition((p) => setMe({ lat: p.coords.latitude, lng: p.coords.longitude }), () => {}, { maximumAge: 300000, timeout: 8000 }) }, [])
@@ -44,16 +45,25 @@ export function HomeTop({ points, loading }: { points?: MapPoint[]; loading: boo
           <h3 className="h3"><span className="live-dot" /> {t('ui.nearby_live_alerts')}</h3>
           <Link to="/map" className="small link">{t('ui.open_live_map')}</Link>
         </div>
-        <div className="alert-strip">
-          {loading ? Array.from({ length: 4 }).map((_, i) => <Sk key={i} w={210} h={64} r={10} style={{ flex: 'none' }} />)
-            : alerts.length === 0 ? <div className="muted small" style={{ padding: 8 }}>{t('ui.no_active_alerts_nearby')}</div>
-            : alerts.map((a) => (
-              <Link key={a.id} to={`/incidents/${a.id}`} className={'alert-chip sev-' + a.severity}>
-                <span className="alert-ic">{CATS[a.category]?.icon}</span>
-                <span className="alert-tx"><b>{a.title.replace('[DEMO] ', '')}</b>
-                  <small>{SEVS[a.severity]?.[lang] ?? a.severity} · {a.d !== null ? `${a.d.toFixed(1)} km · ` : ''}{timeAgo(a.created_at, lang)}</small></span>
-              </Link>
-            ))}
+        <div className="alert-wrap">
+          {!loading && alerts.length > 2 && <button className="alert-arrow prev" aria-label={t('ui.previous')} onClick={() => strip.current?.scrollBy({ left: -strip.current.clientWidth * (document.dir === 'rtl' ? -0.9 : 0.9), behavior: 'smooth' })}>‹</button>}
+          <div className="alert-grid" ref={strip} data-testid="alert-grid">
+            {loading ? Array.from({ length: 4 }).map((_, i) => <Sk key={i} h={76} r={12} />)
+              : alerts.length === 0 ? <div className="muted small" style={{ padding: 8 }}>{t('ui.no_active_alerts_nearby')}</div>
+              : alerts.map((a) => (
+                <Link key={a.id} to={`/incidents/${a.id}`} className="alert-card fade-in" title={ttl(a)}>
+                  <span className="alert-ic" aria-hidden>{CATS[a.category]?.icon}</span>
+                  <span className="alert-tx">
+                    <b>{ttl(a)}</b>
+                    <span className="alert-meta">
+                      <span className={'sev-pill sev-pill-' + a.severity}><i aria-hidden />{SEVS[a.severity]?.[lang] ?? a.severity}</span>
+                      <small>{a.d !== null ? `${fmtNumber(+a.d.toFixed(1), lang)} km · ` : ''}{timeAgo(a.created_at, lang)}</small>
+                    </span>
+                  </span>
+                </Link>
+              ))}
+          </div>
+          {!loading && alerts.length > 2 && <button className="alert-arrow next" aria-label={t('ui.next')} onClick={() => strip.current?.scrollBy({ left: strip.current.clientWidth * (document.dir === 'rtl' ? -0.9 : 0.9), behavior: 'smooth' })}>›</button>}
         </div>
       </div>
       <div className="card hero-map">
