@@ -25,6 +25,7 @@ class L10n extends ChangeNotifier {
 
   static const _s = <String, Map<String, String>>{
     'en': {
+      'map_unavailable': 'The map is not available on this device right now. The list below shows the same reports.',
       'home': 'Home', 'map': 'Map', 'report': 'Report', 'alerts': 'Alerts', 'profile': 'Profile',
       'min_ago': '{n} min ago', 'h_ago': '{n} h ago', 'd_ago': '{n} d ago', 'just_now': 'Just now',
       'load_error': 'We could not reach RescueLens. Check your connection and try again.', 'retry': 'Try again',
@@ -40,6 +41,7 @@ class L10n extends ChangeNotifier {
       'no_alerts': 'No alerts yet', 'low': 'Low', 'moderate': 'Moderate', 'high': 'High', 'critical': 'Critical', 'nothing_yet': 'Nothing reported yet',
     },
     'bn': {
+      'map_unavailable': 'এই মুহূর্তে এই ডিভাইসে ম্যাপ দেখানো যাচ্ছে না। নিচের তালিকায় একই রিপোর্ট আছে।',
       'home': 'হোম', 'map': 'ম্যাপ', 'report': 'রিপোর্ট', 'alerts': 'সতর্কতা', 'profile': 'প্রোফাইল',
       'min_ago': '{n} মিনিট আগে', 'h_ago': '{n} ঘণ্টা আগে', 'd_ago': '{n} দিন আগে', 'just_now': 'এইমাত্র',
       'load_error': 'RescueLens এ সংযোগ করা যায়নি। ইন্টারনেট দেখে আবার চেষ্টা করুন।', 'retry': 'আবার চেষ্টা করুন',
@@ -55,6 +57,7 @@ class L10n extends ChangeNotifier {
       'no_alerts': 'এখনো কোনো সতর্কতা নেই', 'low': 'কম', 'moderate': 'মাঝারি', 'high': 'উচ্চ', 'critical': 'সংকটপূর্ণ', 'nothing_yet': 'এখনো কিছু রিপোর্ট হয়নি',
     },
     'hi': {
+      'map_unavailable': 'इस डिवाइस पर अभी मानचित्र उपलब्ध नहीं है। नीचे की सूची में वही रिपोर्ट हैं।',
       'home': 'होम', 'map': 'मानचित्र', 'report': 'रिपोर्ट', 'alerts': 'अलर्ट', 'profile': 'प्रोफ़ाइल',
       'min_ago': '{n} मिनट पहले', 'h_ago': '{n} घंटे पहले', 'd_ago': '{n} दिन पहले', 'just_now': 'अभी',
       'load_error': 'RescueLens से कनेक्ट नहीं हो सका। कनेक्शन जांचें और फिर से कोशिश करें।', 'retry': 'फिर से कोशिश करें',
@@ -69,6 +72,7 @@ class L10n extends ChangeNotifier {
       'no_alerts': 'अभी कोई अलर्ट नहीं', 'low': 'कम', 'moderate': 'मध्यम', 'high': 'उच्च', 'critical': 'गंभीर', 'nothing_yet': 'अभी कुछ रिपोर्ट नहीं हुआ',
     },
     'es': {
+      'map_unavailable': 'El mapa no está disponible en este dispositivo ahora. La lista de abajo muestra los mismos reportes.',
       'home': 'Inicio', 'map': 'Mapa', 'report': 'Reportar', 'alerts': 'Alertas', 'profile': 'Perfil',
       'min_ago': 'hace {n} min', 'h_ago': 'hace {n} h', 'd_ago': 'hace {n} d', 'just_now': 'Ahora',
       'load_error': 'No pudimos conectar con RescueLens. Revisa tu conexión e inténtalo de nuevo.', 'retry': 'Reintentar',
@@ -83,6 +87,7 @@ class L10n extends ChangeNotifier {
       'no_alerts': 'Aún no hay alertas', 'low': 'Baja', 'moderate': 'Moderada', 'high': 'Alta', 'critical': 'Crítica', 'nothing_yet': 'Aún no hay reportes',
     },
     'ar': {
+      'map_unavailable': 'الخريطة غير متاحة على هذا الجهاز الآن. تعرض القائمة أدناه البلاغات نفسها.',
       'home': 'الرئيسية', 'map': 'الخريطة', 'report': 'إبلاغ', 'alerts': 'التنبيهات', 'profile': 'الملف',
       'min_ago': 'منذ {n} د', 'h_ago': 'منذ {n} س', 'd_ago': 'منذ {n} يوم', 'just_now': 'الآن',
       'load_error': 'تعذر الاتصال بـ RescueLens. تحقق من الاتصال وحاول مرة أخرى.', 'retry': 'إعادة المحاولة',

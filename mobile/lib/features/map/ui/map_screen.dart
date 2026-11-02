@@ -15,13 +15,13 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapState extends State<MapScreen> {
-  List? pts;
+  List? pts; bool? maps;
   @override
-  void initState() { super.initState(); Api.get('/incidents/map?hours=168&lang=$curLang').then((r) { if (mounted) setState(() => pts = r['data']); }).catchError((_) {}); }
+  void initState() { super.initState(); NativeConfig.hasMapsKey().then((v) { if (mounted) setState(() => maps = v); }); Api.get('/incidents/map?hours=168&lang=$curLang').then((r) { if (mounted) setState(() => pts = r['data']); }).catchError((_) {}); }
   double hue(String s) => {'low': BitmapDescriptor.hueGreen, 'moderate': BitmapDescriptor.hueYellow, 'high': BitmapDescriptor.hueOrange}[s] ?? BitmapDescriptor.hueRed;
   @override
   Widget build(BuildContext context) => Column(children: [
-    SizedBox(height: 320, child: pts == null ? const Shim(child: Sk(h: 320, r: 0)) : GoogleMap(
+    SizedBox(height: 320, child: pts == null || maps == null ? const Shim(child: Sk(h: 320, r: 0)) : maps == false ? const MapUnavailable() : GoogleMap(
       initialCameraPosition: const CameraPosition(target: LatLng(23.78, 90.39), zoom: 11),
       markers: {for (final p in pts!) Marker(markerId: MarkerId(p['id']), position: LatLng((p['lat'] as num).toDouble(), (p['lng'] as num).toDouble()),
         icon: BitmapDescriptor.defaultMarkerWithHue(hue(p['severity'])), infoWindow: InfoWindow(title: '${RL.catIcon[p['category']]} ${title(p)}', snippet: p['area_name'], onTap: () => openDetail(context, p['id'])))},
@@ -31,4 +31,14 @@ class _MapState extends State<MapScreen> {
       for (final p in pts!) ListTile(leading: Text(RL.catIcon[p['category']] ?? '⚠️', style: const TextStyle(fontSize: 24)), title: Text(title(p)), subtitle: Text('${p['area_name'] ?? ''} · ${ago(p['created_at'])}'), onTap: () => openDetail(context, p['id'])),
     ])),
   ]);
+}
+
+/// Shown when the map cannot be displayed on this build; the list below still works.
+class MapUnavailable extends StatelessWidget {
+  const MapUnavailable({super.key});
+  @override
+  Widget build(BuildContext context) => Container(color: Theme.of(context).cardColor, alignment: Alignment.center, padding: const EdgeInsets.all(24), child: Column(mainAxisSize: MainAxisSize.min, children: [
+    const Icon(Icons.map_outlined, size: 40, color: RL.text2), const SizedBox(height: 8),
+    Text(tr('map_unavailable'), textAlign: TextAlign.center, style: const TextStyle(color: RL.text2)),
+  ]));
 }

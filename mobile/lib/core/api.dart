@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/services.dart' show MethodChannel;
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -39,6 +40,17 @@ class Api {
       ..headers.addAll({'Accept': 'application/json', if (token != null) 'Authorization': 'Bearer $token'})
       ..files.add(await http.MultipartFile.fromPath('image', filePath));
     return _decode(await http.Response.fromStream(await req.send()));
+  }
+}
+
+/// Native capability checks. iOS reports whether a Google Maps key was provided at build time.
+class NativeConfig {
+  static const _ch = MethodChannel('rescuelens/config');
+  static bool? _maps;
+  static Future<bool> hasMapsKey() async {
+    if (_maps != null) return _maps!;
+    if (kIsWeb || !Platform.isIOS) return _maps = true;
+    try { return _maps = (await _ch.invokeMethod<bool>('hasMapsKey')) ?? false; } catch (_) { return _maps = false; }
   }
 }
 

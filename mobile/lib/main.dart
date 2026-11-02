@@ -38,7 +38,8 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  int tab = 0;
+  // Debug aid for automated screenshots: --dart-define=RL_START_TAB=1 opens the Map tab.
+  int tab = const int.fromEnvironment('RL_START_TAB');
   void go(int i) { HapticFeedback.selectionClick(); setState(() => tab = i); }
   @override
   Widget build(BuildContext context) {
