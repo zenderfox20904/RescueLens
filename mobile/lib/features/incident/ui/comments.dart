@@ -36,7 +36,7 @@ class CommentsSectionState extends State<CommentsSection> {
       widget.onCount?.call(total);
     } catch (_) { if (mounted) setState(() => error = true); }
   }
-  void snack(String m, {VoidCallback? undo}) => ScaffoldMessenger.of(context)..hideCurrentSnackBar()..showSnackBar(SnackBar(content: Text(m), behavior: SnackBarBehavior.floating, action: undo == null ? null : SnackBarAction(label: tr('undo'), onPressed: undo)));
+  void snack(String m, {VoidCallback? undo}) => ScaffoldMessenger.of(context)..hideCurrentSnackBar()..showSnackBar(SnackBar(persist: false, duration: const Duration(seconds: 5), content: Text(m), behavior: SnackBarBehavior.floating, action: undo == null ? null : SnackBarAction(label: tr('undo'), onPressed: undo)));
   Future<void> send() async {
     final b = input.text.trim(); if (b.isEmpty || sending) return;
     setState(() => sending = true);
@@ -83,7 +83,7 @@ class CommentsSectionState extends State<CommentsSection> {
                 if (mod) ...[const SizedBox(width: 4), const Icon(LucideIcons.badgeCheck, size: 14, color: RL.primary)]]),
               ExpandableText('${c['body_translated'] ?? c['body']}', lines: 4),
             ]))),
-          if (c['can_manage'] == true) SizedBox(width: 32, child: PopupMenuButton<String>(padding: EdgeInsets.zero, icon: const Icon(LucideIcons.ellipsis, size: 18, color: RL.text2),
+          if (c['can_manage'] == true) SizedBox(width: 32, child: PopupMenuButton<String>(padding: EdgeInsets.zero, icon: Icon(LucideIcons.ellipsis, size: 18, color: RL.text2),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             onSelected: (v) { if (v == 'e') { edit.text = '${c['body']}'; setState(() => editing = c['id']); } else { remove(c); } },
             itemBuilder: (_) => [
@@ -92,9 +92,9 @@ class CommentsSectionState extends State<CommentsSection> {
             ])),
         ]),
         Padding(padding: const EdgeInsets.only(left: 10, top: 2), child: Wrap(spacing: 14, crossAxisAlignment: WrapCrossAlignment.center, children: [
-          Text('${ago(c['created_at'])}${c['edited_at'] != null ? ' · ${tr('edited')}' : ''}', style: const TextStyle(color: RL.text2, fontSize: 12)),
+          Text('${ago(c['created_at'])}${c['edited_at'] != null ? ' · ${tr('edited')}' : ''}', style: TextStyle(color: RL.text2, fontSize: 12)),
           InkWell(onTap: () => like(c), child: Text('${tr('like')}${(c['likes'] ?? 0) > 0 ? ' · ${c['likes']}' : ''}', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: c['liked'] == true ? RL.primary : RL.text2))),
-          if (Api.token != null) InkWell(onTap: () => reply(c), child: Text(tr('reply'), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: RL.text2))),
+          if (Api.token != null) InkWell(onTap: () => reply(c), child: Text(tr('reply'), style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: RL.text2))),
         ])),
       ])),
     ]));
@@ -105,14 +105,14 @@ class CommentsSectionState extends State<CommentsSection> {
     if (rows == null) return error ? TextButton(onPressed: load, child: Text(tr('retry'))) : const Padding(padding: EdgeInsets.all(8), child: Shim(child: Sk(h: 36)));
     final tops = rows!.where((c) => c['parent_id'] == null).toList();
     final list = <Widget>[
-      if (widget.preview && total > rows!.length) Align(alignment: Alignment.centerLeft, child: TextButton(onPressed: widget.onOpenAll, child: Text(tr('more_comments'), style: const TextStyle(color: RL.text2, fontWeight: FontWeight.w700)))),
+      if (widget.preview && total > rows!.length) Align(alignment: Alignment.centerLeft, child: TextButton(onPressed: widget.onOpenAll, child: Text(tr('more_comments'), style: TextStyle(color: RL.text2, fontWeight: FontWeight.w700)))),
       for (final c in tops) ...[tile(c), for (final r in rows!.where((x) => x['parent_id'] == c['id'])) tile(r)],
-      if (!widget.preview && rows!.isEmpty) Padding(padding: const EdgeInsets.all(16), child: Text(tr('no_comments'), textAlign: TextAlign.center, style: const TextStyle(color: RL.text2))),
+      if (!widget.preview && rows!.isEmpty) Padding(padding: const EdgeInsets.all(16), child: Text(tr('no_comments'), textAlign: TextAlign.center, style: TextStyle(color: RL.text2))),
     ];
     return AnimatedSize(duration: const Duration(milliseconds: 200), alignment: Alignment.topCenter, child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       ...list,
       if (!widget.preview && Api.token != null) Padding(padding: const EdgeInsets.only(top: 10), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        if (replyTo != null) Row(children: [const SizedBox(width: 8), Expanded(child: Text(tr('replying_to', {'name': '${replyTo!['author']}'}), style: const TextStyle(color: RL.text2, fontSize: 12))), TextButton(onPressed: () => setState(() => replyTo = null), child: Text(tr('cancel')))]),
+        if (replyTo != null) Row(children: [const SizedBox(width: 8), Expanded(child: Text(tr('replying_to', {'name': '${replyTo!['author']}'}), style: TextStyle(color: RL.text2, fontSize: 12))), TextButton(onPressed: () => setState(() => replyTo = null), child: Text(tr('cancel')))]),
         Row(children: [
           Avatar(name: '${Me.user?['name'] ?? ''}', url: Me.user?['avatar_url'], r: 16), const SizedBox(width: 8),
           Expanded(child: TextField(key: const Key('comment-input'), controller: input, focusNode: focus, minLines: 1, maxLines: 4, maxLength: 1000, textInputAction: TextInputAction.send, onSubmitted: (_) => send(),

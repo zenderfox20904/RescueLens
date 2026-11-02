@@ -1,3 +1,4 @@
+import 'package:url_launcher/url_launcher.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -43,7 +44,7 @@ class _PostTileState extends State<PostTile> with SingleTickerProviderStateMixin
   Widget build(BuildContext context) {
     final media = (i['media'] as List?) ?? [];
     final n = seen ?? i['counts']?['confirm'] ?? 0;
-    const meta = TextStyle(color: RL.text2, fontSize: 13);
+    final meta = TextStyle(color: RL.text2, fontSize: 13);
     return Card(clipBehavior: Clip.antiAlias, child: InkWell(onTap: open, onDoubleTap: verify, child: Stack(children: [
       Padding(padding: const EdgeInsets.all(12), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
@@ -52,7 +53,7 @@ class _PostTileState extends State<PostTile> with SingleTickerProviderStateMixin
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             GestureDetector(onTap: i['reporter']?['id'] == null ? null : () => Navigator.push(context, MaterialPageRoute(builder: (_) => UserProfileScreen('${i['reporter']['id']}'))),
               child: Text(maxLines: 1, overflow: TextOverflow.ellipsis, i['reporter']?['name'] ?? tr('anonymous'), style: const TextStyle(fontWeight: FontWeight.w600))),
-            Text('${ago(i['created_at'])}${i['edited_at'] != null ? ' · ${tr('edited')}' : ''} · ${i['location']?['area_name'] ?? ''}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: RL.text2, fontSize: 12)),
+            Text('${ago(i['created_at'])}${i['edited_at'] != null ? ' · ${tr('edited')}' : ''} · ${i['location']?['area_name'] ?? ''}', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: RL.text2, fontSize: 12)),
           ])),
           StatusChip(i),
           PostMenu(i, onUpdated: widget.onUpdated, onRemoved: widget.onRemoved, onRestored: widget.onRestored),
@@ -65,7 +66,7 @@ class _PostTileState extends State<PostTile> with SingleTickerProviderStateMixin
         Row(children: [
           Icon(mine ? LucideIcons.eye : LucideIcons.eye, size: 16, color: mine ? RL.primary : RL.text2), const SizedBox(width: 4),
           Flexible(child: Text(tr('seen_by', {'n': n}), style: meta, overflow: TextOverflow.ellipsis)), const SizedBox(width: 12),
-          const Icon(LucideIcons.messageCircle, size: 16, color: RL.text2), const SizedBox(width: 4),
+          Icon(LucideIcons.messageCircle, size: 16, color: RL.text2), const SizedBox(width: 4),
           Text(tr('comments', {'n': i['counts']?['comments'] ?? 0}), style: meta),
           const Spacer(),
           if (!widget.inDetail) TextButton(onPressed: open, child: Text(tr('view'))),
@@ -96,7 +97,7 @@ class _DetailState extends State<DetailScreen> {
   void initState() {
     super.initState(); load();
     NativeConfig.hasMapsKey().then((v) { if (mounted) setState(() => maps = v); });
-    Api.get('/incidents/${widget.id}/dispatches').then((r) { if (mounted) setState(() => responders = r['data']); }).catchError((_) { if (mounted) setState(() => responders = []); });
+    Api.get('/incidents/${widget.id}/dispatches').then((r) { if (mounted) setState(() => responders = r['data']); if ((debugOpen ?? '').endsWith(':sheet') && mounted && (r['data'] as List).isNotEmpty) Future.delayed(const Duration(milliseconds: 900), () { if (mounted && i != null) showResponder(context, r['data'][0], i!); }); }).catchError((_) { if (mounted) setState(() => responders = []); });
   }
   Future<void> load() async { try { final r = await Api.get('/incidents/${widget.id}?lang=$curLang'); if (mounted) setState(() { i = r['data']; error = false; }); } catch (_) { if (mounted) setState(() => error = true); } }
   Future<void> react(String type) async {
@@ -130,11 +131,12 @@ class _DetailState extends State<DetailScreen> {
               initialCameraPosition: CameraPosition(target: LatLng((x['location']['lat'] as num).toDouble(), (x['location']['lng'] as num).toDouble()), zoom: 14),
               circles: {Circle(circleId: const CircleId('a'), center: LatLng((x['location']['lat'] as num).toDouble(), (x['location']['lng'] as num).toDouble()), radius: 250, fillColor: _sevC(x['severity']).withValues(alpha: .25), strokeColor: _sevC(x['severity']), strokeWidth: 2)})))),
             Padding(padding: const EdgeInsets.only(top: 8), child: Text('${x['location']?['area_name'] ?? ''}', style: const TextStyle(fontWeight: FontWeight.w600))),
-            Text(tr('approx_location'), style: const TextStyle(color: RL.text2, fontSize: 12)),
+            Text(tr('approx_location'), style: TextStyle(color: RL.text2, fontSize: 12)),
           ])),
           section(tr('responders'), LucideIcons.hospital, responders == null ? const Shim(child: Sk(h: 40))
-            : responders!.isEmpty ? Text(tr('no_responders'), style: const TextStyle(color: RL.text2))
-            : Column(children: [for (final d in responders!) ListTile(contentPadding: EdgeInsets.zero, dense: true,
+            : responders!.isEmpty ? Text(tr('no_responders'), style: TextStyle(color: RL.text2))
+            : Column(children: [for (final d in responders!) ListTile(contentPadding: EdgeInsets.zero, dense: true, onTap: () => showResponder(context, d, x),
+                trailing: const Icon(LucideIcons.chevronRight, size: 18),
                 leading: CircleAvatar(backgroundColor: RL.primary.withValues(alpha: .15), child: Icon(_orgIcon('${d['organization']?['type']}'), color: RL.primary, size: 20)),
                 title: Row(children: [Flexible(child: Text('${d['organization']?['name'] ?? ''}', overflow: TextOverflow.ellipsis)), if (d['organization']?['verified'] == true) const Padding(padding: EdgeInsets.only(left: 4), child: Icon(LucideIcons.badgeCheck, size: 14, color: RL.primary))]),
                 subtitle: Text('${tr('st_${d['status']}')} · ${(d['distance_km'] as num?)?.toStringAsFixed(1) ?? '?'} km'))])),
@@ -143,7 +145,7 @@ class _DetailState extends State<DetailScreen> {
             CommentsSection(x['id']),
           ]))),
           const SizedBox(height: 10),
-          Text(tr('community_note'), style: const TextStyle(color: RL.text2, fontSize: 12)),
+          Text(tr('community_note'), style: TextStyle(color: RL.text2, fontSize: 12)),
         ])));
   }
 }
@@ -155,7 +157,7 @@ class _Stat extends StatelessWidget {
   const _Stat(this.icon, this.n, this.label);
   @override
   Widget build(BuildContext context) => Expanded(child: Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: RL.primary.withValues(alpha: .08), borderRadius: BorderRadius.circular(12)),
-    child: Row(children: [Icon(icon, color: RL.primary), const SizedBox(width: 8), Text(n, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)), const SizedBox(width: 6), Flexible(child: Text(label, overflow: TextOverflow.ellipsis, style: const TextStyle(color: RL.text2)))])));
+    child: Row(children: [Icon(icon, color: RL.primary), const SizedBox(width: 8), Text(n, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)), const SizedBox(width: 6), Flexible(child: Text(label, overflow: TextOverflow.ellipsis, style: TextStyle(color: RL.text2)))])));
 }
 
 /// Severity banner plus the Meta AI analysis summary when present. Never states that a road is safe.
@@ -165,10 +167,10 @@ class SeverityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = _sevC(i['severity']); final a = i['analysis'] as Map?;
-    return Card(margin: const EdgeInsets.only(top: 10), child: Container(decoration: BoxDecoration(borderRadius: BorderRadius.circular(16), border: Border(left: BorderSide(color: c, width: 5))), padding: const EdgeInsets.all(14),
+    return Card(margin: const EdgeInsets.only(top: 10), child: Container(padding: const EdgeInsets.all(14),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [Icon(LucideIcons.triangleAlert, color: c), const SizedBox(width: 8), Text('${tr('severity')}: ${tr('${i['severity']}')}', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: c))]),
-        if (i['severity_reason'] != null) Padding(padding: const EdgeInsets.only(top: 6), child: Text('${i['severity_reason']}', style: const TextStyle(color: RL.text2))),
+        if (i['severity_reason'] != null) Padding(padding: const EdgeInsets.only(top: 6), child: Text('${i['severity_reason']}', style: TextStyle(color: RL.text2))),
         const Divider(height: 22),
         Row(children: [const Icon(LucideIcons.sparkles, color: RL.primary, size: 20), const SizedBox(width: 8), Text(tr('ai_analysis'), style: const TextStyle(fontWeight: FontWeight.w800)),
           const Spacer(), if (a?['mode'] == 'demo') Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2), decoration: BoxDecoration(color: Colors.orange.withValues(alpha: .2), borderRadius: BorderRadius.circular(8)), child: const Text('DEMO', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.orange)))]),
@@ -176,8 +178,42 @@ class SeverityCard extends StatelessWidget {
         Text(a == null ? tr('no_ai_analysis') : '${a['summary'] ?? a['description'] ?? tr('ai_done')}', style: const TextStyle(height: 1.35)),
         if (a?['hazards'] is List && (a!['hazards'] as List).isNotEmpty) Padding(padding: const EdgeInsets.only(top: 8), child: Wrap(spacing: 6, runSpacing: 6, children: [for (final h in a['hazards']) Chip(visualDensity: VisualDensity.compact, label: Text('$h'))])),
         const SizedBox(height: 6),
-        Text(tr('never_safe_note'), style: const TextStyle(color: RL.text2, fontSize: 11)),
+        Text(tr('never_safe_note'), style: TextStyle(color: RL.text2, fontSize: 11)),
       ])));
   }
 }
 Color _sevC(dynamic s) => RL.sev['$s'] ?? RL.primary;
+
+/// Responder details sheet: who was alerted, why, live status steps and tap to call. RescueLens never places calls itself.
+void showResponder(BuildContext context, Map d, Map incident) {
+  final o = (d['organization'] as Map?) ?? {};
+  const steps = ['alerted', 'accepted', 'en_route', 'on_scene', 'resolved'];
+  final st = '${d['status']}';
+  final at = steps.indexOf(st);
+  showModalBottomSheet(context: context, showDragHandle: true, isScrollControlled: true, builder: (c) => SafeArea(child: Padding(padding: const EdgeInsets.fromLTRB(20, 0, 20, 20), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+    Row(children: [
+      CircleAvatar(radius: 24, backgroundColor: RL.primary.withValues(alpha: .15), child: Icon(_orgIcon('${o['type']}'), color: RL.primary)),
+      const SizedBox(width: 12),
+      Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [Flexible(child: Text('${o['name'] ?? ''}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800))),
+          if (o['verified'] == true) const Padding(padding: EdgeInsets.only(left: 4), child: Icon(LucideIcons.badgeCheck, size: 18, color: RL.primary))]),
+        Text('${tr('org_${o['type']}')} · ${(d['distance_km'] as num?)?.toStringAsFixed(1) ?? '?'} km', style: TextStyle(color: RL.text2)),
+      ])),
+    ]),
+    if (d['reason'] != null) Padding(padding: const EdgeInsets.only(top: 12), child: Text(tr('why_alerted', {'reason': '${d['reason']}'}))),
+    const SizedBox(height: 16),
+    Text(tr('live_status'), style: const TextStyle(fontWeight: FontWeight.w800)),
+    const SizedBox(height: 8),
+    if (st == 'declined') Text(tr('st_declined'), style: const TextStyle(color: Color(0xFFE41E3F), fontWeight: FontWeight.w700))
+    else for (final (n, s) in steps.indexed) Row(children: [
+      Icon(n <= at ? LucideIcons.circleCheck : LucideIcons.circle, size: 20, color: n <= at ? RL.sev['low'] : RL.text2),
+      const SizedBox(width: 10),
+      Padding(padding: const EdgeInsets.symmetric(vertical: 5), child: Text(tr('st_$s'), style: TextStyle(fontWeight: n == at ? FontWeight.w800 : FontWeight.w500, color: n <= at ? null : RL.text2))),
+    ]),
+    if (d['updated_at'] != null) Padding(padding: const EdgeInsets.only(top: 6), child: Text(tr('updated_at', {'date': fmtDate(d['updated_at'])}), style: TextStyle(color: RL.text2, fontSize: 12))),
+    const SizedBox(height: 16),
+    if ('${o['phone'] ?? ''}'.isNotEmpty) SizedBox(width: double.infinity, child: FilledButton.icon(onPressed: () => launchUrl(Uri.parse('tel:${o['phone']}')),
+      icon: const Icon(LucideIcons.phone), label: Text(tr('call_org', {'phone': '${o['phone']}'})))),
+    Padding(padding: const EdgeInsets.only(top: 8), child: Text(tr('responder_source'), style: TextStyle(color: RL.text2, fontSize: 11))),
+  ]))));
+}

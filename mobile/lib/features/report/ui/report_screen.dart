@@ -98,26 +98,26 @@ class AiCard extends StatelessWidget {
         if (a['mode'] == 'demo') Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2), decoration: BoxDecoration(color: Colors.amber.withValues(alpha: .2), borderRadius: BorderRadius.circular(8)), child: Text(tr('demo'), style: const TextStyle(color: Colors.amber, fontSize: 12, fontWeight: FontWeight.w700))),
       ]),
       const SizedBox(height: 12),
-      if (!ok) Text(tr('ai_not_incident'), style: const TextStyle(color: RL.text2))
+      if (!ok) Text(tr('ai_not_incident'), style: TextStyle(color: RL.text2))
       else Wrap(spacing: 8, runSpacing: 8, children: [
         Chip(avatar: Icon(RL.cat(x['category']), size: 18), label: Text(tr('c_${x['category']}'))),
         Chip(backgroundColor: color.withValues(alpha: .2), side: BorderSide.none, label: Text(tr(sev), style: TextStyle(color: color, fontWeight: FontWeight.w700))),
       ]),
       const SizedBox(height: 12),
-      Row(children: [Text(tr('ai_confidence'), style: const TextStyle(color: RL.text2, fontSize: 13)), const Spacer(), Text('${(conf * 100).round()}%', style: const TextStyle(fontWeight: FontWeight.w600))]),
+      Row(children: [Text(tr('ai_confidence'), style: TextStyle(color: RL.text2, fontSize: 13)), const Spacer(), Text('${(conf * 100).round()}%', style: const TextStyle(fontWeight: FontWeight.w600))]),
       const SizedBox(height: 4),
       ClipRRect(borderRadius: BorderRadius.circular(4), child: TweenAnimationBuilder<double>(tween: Tween(begin: 0, end: conf), duration: const Duration(milliseconds: 600),
         builder: (_, v, _) => LinearProgressIndicator(value: v, minHeight: 6, color: ok ? color : RL.text2, backgroundColor: RL.text2.withValues(alpha: .15)))),
       if ((x['reasons'] as List?)?.isNotEmpty == true) ...[
         const SizedBox(height: 12), Text(tr('ai_why'), style: const TextStyle(fontWeight: FontWeight.w600)), const SizedBox(height: 4),
-        for (final r in x['reasons']) Padding(padding: const EdgeInsets.only(top: 4), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('•  ', style: TextStyle(color: RL.text2)), Expanded(child: Text('$r', style: const TextStyle(fontSize: 13)))])),
+        for (final r in x['reasons']) Padding(padding: const EdgeInsets.only(top: 4), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('•  ', style: TextStyle(color: RL.text2)), Expanded(child: Text('$r', style: const TextStyle(fontSize: 13)))])),
       ],
       if ((x['responders'] as List?)?.isNotEmpty == true) ...[
         const SizedBox(height: 12), Text(tr('ai_responders'), style: const TextStyle(fontWeight: FontWeight.w600)), const SizedBox(height: 8),
         Wrap(spacing: 8, runSpacing: 8, children: [for (final r in x['responders']) Chip(visualDensity: VisualDensity.compact, label: Text(tr('r_$r')))]),
       ],
       const SizedBox(height: 12),
-      Text(tr('ai_applied'), style: const TextStyle(color: RL.text2, fontSize: 12)),
+      Text(tr('ai_applied'), style: TextStyle(color: RL.text2, fontSize: 12)),
     ])));
   }
 }

@@ -27,7 +27,7 @@ class _MapState extends State<MapScreen> {
       markers: {for (final p in pts!) Marker(markerId: MarkerId(p['id']), position: LatLng((p['lat'] as num).toDouble(), (p['lng'] as num).toDouble()),
         icon: BitmapDescriptor.defaultMarkerWithHue(hue(p['severity'])), infoWindow: InfoWindow(title: title(p), snippet: p['area_name'], onTap: () => openDetail(context, p['id'])))},
     )),
-    Padding(padding: const EdgeInsets.all(8), child: Text(tr('map_note'), style: const TextStyle(color: RL.text2, fontSize: 12))),
+    Padding(padding: const EdgeInsets.all(8), child: Text(tr('map_note'), style: TextStyle(color: RL.text2, fontSize: 12))),
     Expanded(child: pts == null ? ListView(children: const [PostSkeleton()]) : ListView(padding: const EdgeInsets.only(bottom: 120), children: [
       for (final p in pts!) ListTile(leading: Icon(RL.cat(p['category']), size: 24, color: RL.primary), title: Text(title(p)), subtitle: Text('${p['area_name'] ?? ''} · ${ago(p['created_at'])}'), onTap: () => openDetail(context, p['id'])),
     ])),
@@ -39,7 +39,7 @@ class MapUnavailable extends StatelessWidget {
   const MapUnavailable({super.key});
   @override
   Widget build(BuildContext context) => Container(color: Theme.of(context).cardColor, alignment: Alignment.center, padding: const EdgeInsets.all(24), child: Column(mainAxisSize: MainAxisSize.min, children: [
-    const Icon(LucideIcons.map, size: 40, color: RL.text2), const SizedBox(height: 8),
-    Text(tr('map_unavailable'), textAlign: TextAlign.center, style: const TextStyle(color: RL.text2)),
+    Icon(LucideIcons.map, size: 40, color: RL.text2), const SizedBox(height: 8),
+    Text(tr('map_unavailable'), textAlign: TextAlign.center, style: TextStyle(color: RL.text2)),
   ]));
 }

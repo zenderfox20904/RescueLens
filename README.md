@@ -1,6 +1,6 @@
 # RescueLens
 
-AI assisted community incident reporting. Snap a photo, Meta Muse Spark drafts the report, SAM 3.1 highlights the evidence, you confirm, and nearby people are alerted while moderators verify.
+AI assisted community incident reporting. Snap a photo, Meta AI drafts the report and highlights the evidence, you confirm, and nearby people are alerted while moderators verify.
 
 * `backend/`: Laravel 13 API (Sanctum, MariaDB)
 * `frontend/`: React 19 and Vite PWA

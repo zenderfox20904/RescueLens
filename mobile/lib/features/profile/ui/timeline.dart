@@ -38,9 +38,9 @@ class ProfileTimelineState extends State<ProfileTimeline> {
     if (first) ...[const PostSkeleton(), const PostSkeleton()],
     if (error && items.isEmpty) ErrorCard(onRetry: () { setState(() => error = false); more(); }),
     if (!first && !error && items.isEmpty) Card(child: Padding(padding: const EdgeInsets.all(28), child: Column(children: [
-      const Icon(LucideIcons.newspaper, size: 44, color: RL.text2), const SizedBox(height: 8),
+      Icon(LucideIcons.newspaper, size: 44, color: RL.text2), const SizedBox(height: 8),
       Text(tr('no_reports_profile'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)), const SizedBox(height: 4),
-      Text(widget.isMe ? tr('no_reports_profile_me') : tr('no_reports_profile_other'), textAlign: TextAlign.center, style: const TextStyle(color: RL.text2)),
+      Text(widget.isMe ? tr('no_reports_profile_me') : tr('no_reports_profile_other'), textAlign: TextAlign.center, style: TextStyle(color: RL.text2)),
     ]))),
     for (final (n, i) in items.indexed) Builder(key: ValueKey(i['id']), builder: (_) {
       if (n == items.length - 3 || n == items.length - 1) WidgetsBinding.instance.addPostFrameCallback((_) => more());
@@ -72,7 +72,7 @@ class _UserProfileState extends State<UserProfileScreen> {
         Container(padding: const EdgeInsets.all(4), decoration: BoxDecoration(color: Theme.of(context).cardColor, shape: BoxShape.circle), child: p == null ? const Shim(child: Sk(w: 84, h: 84, r: 42)) : Avatar(name: '${p!['name']}', url: p!['avatar_url'], r: 42)),
         const SizedBox(height: 6),
         Text(p?['name'] ?? '', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
-        if (p != null) Text(tr('reports_count', {'n': p!['reports']}), style: const TextStyle(color: RL.text2)),
+        if (p != null) Text(tr('reports_count', {'n': p!['reports']}), style: TextStyle(color: RL.text2)),
       ])),
     ])),
     ProfileTimeline(userId: widget.userId, isMe: p?['is_me'] == true),

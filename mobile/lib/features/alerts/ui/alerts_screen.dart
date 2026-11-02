@@ -33,7 +33,7 @@ class _AlertsState extends State<AlertsScreen> {
     } catch (_) { if (mounted && items == null) setState(() => error = true); }
   }
 
-  void snack(String m, {SnackBarAction? action}) => ScaffoldMessenger.of(context)..hideCurrentSnackBar()..showSnackBar(SnackBar(content: Text(m), action: action, behavior: SnackBarBehavior.floating, margin: const EdgeInsets.fromLTRB(12, 0, 12, 100)));
+  void snack(String m, {SnackBarAction? action}) => ScaffoldMessenger.of(context)..hideCurrentSnackBar()..showSnackBar(SnackBar(persist: false, duration: const Duration(seconds: 5), content: Text(m), action: action, behavior: SnackBarBehavior.floating, margin: const EdgeInsets.fromLTRB(12, 0, 12, 100)));
 
   Future<void> setRead(Map a, bool read) async {
     setState(() { a['read'] = read; unread += read ? -1 : 1; });
@@ -45,7 +45,7 @@ class _AlertsState extends State<AlertsScreen> {
     setState(() { items!.remove(a); pending.add(a['id']); if (a['read'] != true) unread--; });
     var undone = false;
     final c = ScaffoldMessenger.of(context)..hideCurrentSnackBar();
-    c.showSnackBar(SnackBar(content: Text(tr('n_deleted')), behavior: SnackBarBehavior.floating, margin: const EdgeInsets.fromLTRB(12, 0, 12, 100),
+    c.showSnackBar(SnackBar(persist: false, duration: const Duration(seconds: 5), content: Text(tr('n_deleted')), behavior: SnackBarBehavior.floating, margin: const EdgeInsets.fromLTRB(12, 0, 12, 100),
       action: SnackBarAction(label: tr('undo'), onPressed: () { undone = true; setState(() { items!.insert(index.clamp(0, items!.length), a); pending.remove(a['id']); if (a['read'] != true) unread++; }); }))).closed.then((_) async {
       if (undone) return;
       try { await Api.delete('/notifications/${a['id']}'); } catch (_) {}
@@ -79,8 +79,8 @@ class _AlertsState extends State<AlertsScreen> {
     if (items == null && !error) ...[const PostSkeleton(), const PostSkeleton()],
     if (items != null && items!.isEmpty) Padding(padding: const EdgeInsets.all(40), child: Column(children: [
       Icon(LucideIcons.bellOff, size: 48, color: RL.text2.withValues(alpha: .6)), const SizedBox(height: 12),
-      Text(tr('no_alerts'), textAlign: TextAlign.center, style: const TextStyle(color: RL.text2))])),
-    if ((items ?? []).isNotEmpty) Padding(padding: const EdgeInsets.fromLTRB(4, 0, 4, 6), child: Text(tr('n_swipe_hint'), style: const TextStyle(color: RL.text2, fontSize: 12))),
+      Text(tr('no_alerts'), textAlign: TextAlign.center, style: TextStyle(color: RL.text2))])),
+    if ((items ?? []).isNotEmpty) Padding(padding: const EdgeInsets.fromLTRB(4, 0, 4, 6), child: Text(tr('n_swipe_hint'), style: TextStyle(color: RL.text2, fontSize: 12))),
     for (final (n, a) in (items ?? []).indexed) Dismissible(
       key: ValueKey('n${a['id']}'), direction: DismissDirection.endToStart, onDismissed: (_) => remove(a, n),
       background: Container(margin: const EdgeInsets.symmetric(vertical: 6), alignment: AlignmentDirectional.centerEnd, padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -120,12 +120,12 @@ Future<void> showPrefs(BuildContext context) async {
       Text(tr('n_prefs'), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
       SwitchListTile(contentPadding: EdgeInsets.zero, value: push, onChanged: (v) => set(() => push = v), title: Text(tr('n_push')), subtitle: Text(tr('n_push_sub'))),
       const SizedBox(height: 6), Text(tr('n_categories'), style: const TextStyle(fontWeight: FontWeight.w700)),
-      Text(tr('n_categories_sub'), style: const TextStyle(color: RL.text2, fontSize: 12)), const SizedBox(height: 6),
+      Text(tr('n_categories_sub'), style: TextStyle(color: RL.text2, fontSize: 12)), const SizedBox(height: 6),
       Wrap(spacing: 6, runSpacing: 6, children: [for (final k in kCategories) FilterChip(label: Text(tr('c_$k')), selected: cats.contains(k), onSelected: (v) => set(() => v ? cats.add(k) : cats.remove(k)))]),
       const SizedBox(height: 14), Text(tr('n_min_sev'), style: const TextStyle(fontWeight: FontWeight.w700)), const SizedBox(height: 6),
       SegmentedButton<String>(segments: [for (final s in kSeverities) ButtonSegment(value: s, label: Text(tr(s), style: const TextStyle(fontSize: 12)))], selected: {sev}, onSelectionChanged: (v) => set(() => sev = v.first), showSelectedIcon: false),
       const SizedBox(height: 14), Text(tr('n_quiet'), style: const TextStyle(fontWeight: FontWeight.w700)),
-      Text(tr('n_quiet_sub'), style: const TextStyle(color: RL.text2, fontSize: 12)), const SizedBox(height: 6),
+      Text(tr('n_quiet_sub'), style: TextStyle(color: RL.text2, fontSize: 12)), const SizedBox(height: 6),
       Row(children: [
         for (final (i, v) in [qs, qe].indexed) ...[
           Expanded(child: OutlinedButton.icon(icon: const Icon(LucideIcons.clock, size: 18), label: Text(v ?? tr(i == 0 ? 'n_from' : 'n_to')), onPressed: () async {

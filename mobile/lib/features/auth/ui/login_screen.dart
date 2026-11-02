@@ -39,7 +39,7 @@ class _LoginState extends State<LoginScreen> {
   Widget build(BuildContext context) => Form(key: form, autovalidateMode: AutovalidateMode.onUserInteraction, child: ListView(padding: const EdgeInsets.fromLTRB(24, 20, 24, 120), children: [
     const Entrance(child: Center(child: LogoMark(size: 64))), const SizedBox(height: 10),
     const Center(child: Text('RescueLens', style: TextStyle(color: RL.primary, fontSize: 30, fontWeight: FontWeight.w800))),
-    Center(child: Text(tr('sign_in_prompt'), textAlign: TextAlign.center, style: const TextStyle(color: RL.text2))),
+    Center(child: Text(tr('sign_in_prompt'), textAlign: TextAlign.center, style: TextStyle(color: RL.text2))),
     const SizedBox(height: 20),
     TextFormField(controller: email, keyboardType: TextInputType.emailAddress, autofillHints: const [AutofillHints.email], decoration: _f(tr('email'), LucideIcons.atSign), validator: _email),
     const SizedBox(height: 12),
@@ -49,7 +49,7 @@ class _LoginState extends State<LoginScreen> {
     if (err != null) Padding(padding: const EdgeInsets.only(bottom: 8), child: Text(err!, style: const TextStyle(color: Color(0xFFE41E3F)))),
     FilledButton(onPressed: busy ? null : submit, child: Padding(padding: const EdgeInsets.all(12), child: busy ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : Text(tr('login'), style: const TextStyle(fontSize: 17)))),
     if (social['google'] == true || social['facebook'] == true) ...[
-      Padding(padding: const EdgeInsets.symmetric(vertical: 14), child: Row(children: [const Expanded(child: Divider()), Padding(padding: const EdgeInsets.symmetric(horizontal: 10), child: Text(tr('or'), style: const TextStyle(color: RL.text2))), const Expanded(child: Divider())])),
+      Padding(padding: const EdgeInsets.symmetric(vertical: 14), child: Row(children: [const Expanded(child: Divider()), Padding(padding: const EdgeInsets.symmetric(horizontal: 10), child: Text(tr('or'), style: TextStyle(color: RL.text2))), const Expanded(child: Divider())])),
       if (social['google'] == true) GoogleSignInButton(label: tr('continue_google'), onPressed: () => socialLogin('google')),
       if (social['facebook'] == true) Padding(padding: const EdgeInsets.only(top: 8), child: FacebookSignInButton(label: tr('continue_facebook'), onPressed: () => socialLogin('facebook'))),
     ],
@@ -116,7 +116,7 @@ class _RegisterState extends State<RegisterScreen> {
       Row(children: [for (var i = 0; i < total; i++) Expanded(child: AnimatedContainer(duration: const Duration(milliseconds: 250), height: 4, margin: const EdgeInsets.symmetric(horizontal: 3),
         decoration: BoxDecoration(color: i <= step ? RL.primary : RL.text2.withValues(alpha: .25), borderRadius: BorderRadius.circular(4))))]),
       const SizedBox(height: 6),
-      Text('${tr('step')} ${step + 1} / $total', style: const TextStyle(color: RL.text2, fontSize: 12)),
+      Text('${tr('step')} ${step + 1} / $total', style: TextStyle(color: RL.text2, fontSize: 12)),
       const SizedBox(height: 12),
       AnimatedSwitcher(duration: const Duration(milliseconds: 250), child: KeyedSubtree(key: ValueKey(step), child: switch (step) {
         0 => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -190,7 +190,7 @@ class _ForgotState extends State<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: Text(tr('forgot_password'))), body: Form(key: form, autovalidateMode: AutovalidateMode.onUserInteraction, child: ListView(padding: const EdgeInsets.all(20), children: [
     const Icon(LucideIcons.keyRound, size: 56, color: RL.primary), const SizedBox(height: 10),
-    Text(tr(sent ? 'reset_enter_code' : 'reset_intro'), textAlign: TextAlign.center, style: const TextStyle(color: RL.text2)),
+    Text(tr(sent ? 'reset_enter_code' : 'reset_intro'), textAlign: TextAlign.center, style: TextStyle(color: RL.text2)),
     const SizedBox(height: 16),
     TextFormField(controller: email, enabled: !sent, keyboardType: TextInputType.emailAddress, decoration: _f(tr('email'), LucideIcons.atSign), validator: _email),
     if (sent) ...[

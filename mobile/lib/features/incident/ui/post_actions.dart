@@ -15,7 +15,7 @@ class PostMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     if (i['can_manage'] != true) return const SizedBox.shrink();
     return PopupMenuButton<String>(
-      tooltip: tr('more'), icon: const Icon(LucideIcons.ellipsis, color: RL.text2), position: PopupMenuPosition.under,
+      tooltip: tr('more'), icon: Icon(LucideIcons.ellipsis, color: RL.text2), position: PopupMenuPosition.under,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       onSelected: (v) => v == 'edit' ? edit(context) : remove(context),
       itemBuilder: (_) => [
@@ -36,7 +36,7 @@ class PostMenu extends StatelessWidget {
     try {
       await Api.delete('/incidents/${i['id']}');
       onRemoved?.call();
-      m.showSnackBar(SnackBar(behavior: SnackBarBehavior.floating, content: Text(tr('post_trashed')), action: SnackBarAction(label: tr('undo'), onPressed: () async {
+      m.showSnackBar(SnackBar(persist: false, duration: const Duration(seconds: 5), behavior: SnackBarBehavior.floating, content: Text(tr('post_trashed')), action: SnackBarAction(label: tr('undo'), onPressed: () async {
         try { await Api.post('/incidents/${i['id']}/restore', {}); onRestored?.call(); m.showSnackBar(SnackBar(behavior: SnackBarBehavior.floating, content: Text(tr('restored')))); } catch (_) {}
       })));
     } catch (_) { m.showSnackBar(SnackBar(behavior: SnackBarBehavior.floating, content: Text(tr('action_failed')))); }
@@ -82,7 +82,7 @@ class _EditPostState extends State<EditPostScreen> {
       Text(tr('severity'), style: const TextStyle(fontWeight: FontWeight.w700)), const SizedBox(height: 8),
       Wrap(spacing: 8, runSpacing: 8, children: [for (final s in sevColor.keys) ChoiceChip(showCheckmark: false, avatar: CircleAvatar(radius: 6, backgroundColor: sevColor[s]), label: Text(tr(s)), selected: sev == s, onSelected: (_) => setState(() => sev = s))]),
       const SizedBox(height: 16),
-      Text(tr('edit_note'), style: const TextStyle(color: RL.text2, fontSize: 12)),
+      Text(tr('edit_note'), style: TextStyle(color: RL.text2, fontSize: 12)),
     ])));
   }
 }
@@ -104,7 +104,7 @@ class _ExpandableTextState extends State<ExpandableText> {
     final long = tp.didExceedMaxLines;
     return AnimatedSize(duration: const Duration(milliseconds: 220), curve: Curves.easeOutCubic, alignment: Alignment.topCenter, child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text(widget.text, maxLines: open ? null : widget.lines, overflow: open ? null : TextOverflow.ellipsis),
-      if (long) GestureDetector(onTap: () => setState(() => open = !open), child: Padding(padding: const EdgeInsets.only(top: 2), child: Text(tr(open ? 'see_less' : 'see_more'), style: const TextStyle(color: RL.text2, fontWeight: FontWeight.w700)))),
+      if (long) GestureDetector(onTap: () => setState(() => open = !open), child: Padding(padding: const EdgeInsets.only(top: 2), child: Text(tr(open ? 'see_less' : 'see_more'), style: TextStyle(color: RL.text2, fontWeight: FontWeight.w700)))),
     ]));
   });
 }

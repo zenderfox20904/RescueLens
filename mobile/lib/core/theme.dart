@@ -7,7 +7,9 @@ class RL {
   static const bg = Color(0xFFF0F2F5);
   static const card = Color(0xFFFFFFFF);
   static const text = Color(0xFF050505);
-  static const text2 = Color(0xFF65676B);
+  /// Secondary text. Updated from the active brightness so muted text keeps WCAG AA contrast in dark mode.
+  static bool isDark = false;
+  static Color get text2 => isDark ? const Color(0xFFB0B3B8) : const Color(0xFF65676B);
   static const divider = Color(0xFFCED0D4);
   static const darkBg = Color(0xFF18191A);
   static const darkCard = Color(0xFF242526);

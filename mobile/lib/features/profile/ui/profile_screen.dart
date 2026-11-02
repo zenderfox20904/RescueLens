@@ -15,7 +15,7 @@ import 'package:rescuelens/features/profile/ui/timeline.dart';
 
 const kDanger = Color(0xFFE41E3F);
 
-void toast(BuildContext c, String m) => ScaffoldMessenger.of(c)..hideCurrentSnackBar()..showSnackBar(SnackBar(content: Text(m), behavior: SnackBarBehavior.floating, margin: const EdgeInsets.fromLTRB(12, 0, 12, 100)));
+void toast(BuildContext c, String m) => ScaffoldMessenger.of(c)..hideCurrentSnackBar()..showSnackBar(SnackBar(duration: const Duration(seconds: 3), content: Text(m), behavior: SnackBarBehavior.floating, margin: const EdgeInsets.fromLTRB(12, 0, 12, 100)));
 
 /// Profile: header with photo, name, account type and alert area, stats, my reports, and grouped settings.
 class ProfileScreen extends StatefulWidget {
@@ -28,7 +28,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileState extends State<ProfileScreen> {
   Map? me; Map stats = {}; bool uploading = false, loading = true;
   @override
-  void initState() { super.initState(); load(); }
+  void initState() { super.initState(); load().then((_) { if (debugOpen == 'settings' && mounted) openSettings(); }); }
   Future<void> load() async {
     if (Api.token == null) { setState(() => loading = false); return; }
     try {
@@ -61,56 +61,10 @@ class _ProfileState extends State<ProfileScreen> {
     if (changed == true) load();
   }
 
-  @override
-  Widget build(BuildContext context) {
+  /// Settings live behind the gear on the profile header (Facebook style), and inline for guests.
+  List<Widget> settingsGroups(BuildContext context) {
     final authed = Api.token != null;
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    final card = dark ? RL.darkCard : RL.card;
-    final type = '${me?['account_type'] ?? 'citizen'}';
-    final org = me?['organization'] as Map?;
-    return RefreshIndicator(onRefresh: load, child: ListView(padding: const EdgeInsets.fromLTRB(12, 12, 12, 120), children: [
-      if (authed && loading) const PostSkeleton(),
-      if (authed && me != null) Entrance(child: Container(decoration: BoxDecoration(color: card, borderRadius: BorderRadius.circular(20)), clipBehavior: Clip.antiAlias, child: Column(children: [
-        Stack(clipBehavior: Clip.none, alignment: Alignment.bottomCenter, children: [
-          Container(height: 96, color: RL.primary.withValues(alpha: dark ? .22 : .12)),
-          Positioned(bottom: -46, child: GestureDetector(onTap: uploading ? null : pickPhoto, child: Stack(children: [
-            Container(padding: const EdgeInsets.all(4), decoration: BoxDecoration(color: card, shape: BoxShape.circle),
-              child: Hero(tag: 'avatar', child: CircleAvatar(radius: 46, backgroundColor: RL.primary.withValues(alpha: .2),
-                child: ClipOval(child: SizedBox.expand(child: me!['avatar_url'] != null ? NetImage('${me!['avatar_url']}', fit: BoxFit.cover)
-                  : Center(child: Text('${me!['name']}'.trim().isEmpty ? '?' : '${me!['name']}'.trim()[0].toUpperCase(), style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w800, color: RL.primary)))))))),
-            Positioned(right: 2, bottom: 2, child: Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: RL.primary, shape: BoxShape.circle, border: Border.all(color: card, width: 2)),
-              child: uploading ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Icon(LucideIcons.camera, size: 14, color: Colors.white))),
-          ]))),
-        ]),
-        const SizedBox(height: 54),
-        Text('${org?['name'] ?? me!['name']}', textAlign: TextAlign.center, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
-        const SizedBox(height: 6),
-        Wrap(alignment: WrapAlignment.center, spacing: 6, runSpacing: 6, children: [
-          Chip(avatar: Icon(type == 'citizen' ? LucideIcons.user : LucideIcons.building2, size: 16, color: RL.primary), label: Text(tr('acct_$type')), visualDensity: VisualDensity.compact),
-          if (me!['role'] == 'admin' || me!['role'] == 'moderator') Chip(avatar: const Icon(LucideIcons.shield, size: 16, color: RL.primary), label: Text(tr('role_${me!['role']}')), visualDensity: VisualDensity.compact),
-          Chip(avatar: const Icon(LucideIcons.locateFixed, size: 16, color: RL.primary), label: Text('${me!['alert_area_set'] == true ? tr('your_alert_area') : tr('set_alert_area')} · ${me!['alert_radius_km'] ?? 5} ${me!['distance_unit'] ?? 'km'}'), visualDensity: VisualDensity.compact),
-        ]),
-        if ((me!['bio'] ?? '').toString().isNotEmpty) Padding(padding: const EdgeInsets.fromLTRB(20, 8, 20, 0), child: Text('${me!['bio']}', textAlign: TextAlign.center, style: const TextStyle(color: RL.text2))),
-        Padding(padding: const EdgeInsets.fromLTRB(12, 14, 12, 4), child: Row(children: [
-          for (final k in ['reports', 'verified', 'confirmations']) Expanded(child: Column(children: [
-            TweenAnimationBuilder<double>(tween: Tween(begin: 0, end: ((stats[k] ?? 0) as num).toDouble()), duration: const Duration(milliseconds: 700), curve: Curves.easeOutCubic,
-              builder: (_, v, _) => Text('${v.round()}', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800))),
-            Text(tr('stat_$k'), style: const TextStyle(color: RL.text2, fontSize: 12)),
-          ])),
-        ])),
-        Padding(padding: const EdgeInsets.fromLTRB(16, 10, 16, 16), child: Row(children: [
-          Expanded(child: FilledButton.icon(onPressed: () => open(EditProfileScreen(me: me!)), icon: const Icon(LucideIcons.pencil, size: 18), label: Text(tr('edit_profile')))),
-          const SizedBox(width: 8),
-          Expanded(child: OutlinedButton.icon(onPressed: () => open(const MyReportsScreen()), icon: const Icon(LucideIcons.newspaper, size: 18), label: Text(tr('my_reports')))),
-        ])),
-      ]))),
-      if (authed && me?['id'] != null) ProfileTimeline(key: ValueKey('tl${me!['id']}'), userId: '${me!['id']}', isMe: true),
-      if (!authed) Entrance(child: Card(child: Padding(padding: const EdgeInsets.all(20), child: Column(children: [
-        const Icon(LucideIcons.circleUser, size: 56, color: RL.primary), const SizedBox(height: 8),
-        Text(tr('profile_signin'), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w700)),
-        const SizedBox(height: 12),
-        FilledButton(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AuthPage())).then((_) { widget.onChanged(); load(); }), child: Text(tr('login'))),
-      ])))),
+    return [
       if (authed) _Group(index: 1, title: tr('s_account'), tiles: [
         _Tile(LucideIcons.user, tr('edit_profile'), onTap: () => open(EditProfileScreen(me: me ?? {}))),
         _Tile(LucideIcons.lock, tr('change_password'), onTap: () => open(const ChangePasswordScreen())),
@@ -137,9 +91,69 @@ class _ProfileState extends State<ProfileScreen> {
           applicationIcon: const LogoMark(size: 40), applicationLegalese: '© 2026 RescueLens', children: [Padding(padding: const EdgeInsets.only(top: 12), child: Text(tr('about_body')))])),
       ]),
       if (authed) _Group(index: 7, tiles: [
-        _Tile(LucideIcons.logOut, tr('logout'), color: kDanger, onTap: () async { if (!await confirmAction(context, title: tr('logout_q'), body: tr('logout_body'), confirm: tr('logout'), icon: LucideIcons.logOut, danger: true)) return; await Api.setToken(null); Me.user = null; widget.onChanged(); }),
+        _Tile(LucideIcons.logOut, tr('logout'), color: kDanger, onTap: () async { if (!await confirmAction(context, title: tr('logout_q'), body: tr('logout_body'), confirm: tr('logout'), icon: LucideIcons.logOut, danger: true)) return; await Api.setToken(null); Me.user = null; if (context.mounted && Navigator.canPop(context)) Navigator.pop(context); widget.onChanged(); }),
       ]),
-      const Padding(padding: EdgeInsets.all(16), child: Text('© 2026 RescueLens', textAlign: TextAlign.center, style: TextStyle(color: RL.text2, fontSize: 12))),
+    ];
+  }
+
+  void openSettings() => Navigator.push(context, MaterialPageRoute(builder: (c) => StatefulBuilder(builder: (c, setS) => Scaffold(
+    appBar: AppBar(title: Text(tr('settings'))),
+    body: ListView(padding: const EdgeInsets.fromLTRB(12, 0, 12, 40), children: [...settingsGroups(c),
+      const Padding(padding: EdgeInsets.all(16), child: Text('© 2026 RescueLens', textAlign: TextAlign.center, style: TextStyle(fontSize: 12)))]))))).then((_) => load());
+
+  @override
+  Widget build(BuildContext context) {
+    final authed = Api.token != null;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final card = dark ? RL.darkCard : RL.card;
+    final type = '${me?['account_type'] ?? 'citizen'}';
+    final org = me?['organization'] as Map?;
+    return RefreshIndicator(onRefresh: load, child: ListView(padding: const EdgeInsets.fromLTRB(12, 12, 12, 120), children: [
+      if (authed && loading) const PostSkeleton(),
+      if (authed && me != null) Entrance(child: Container(decoration: BoxDecoration(color: card, borderRadius: BorderRadius.circular(20)), clipBehavior: Clip.antiAlias, child: Column(children: [
+        Stack(clipBehavior: Clip.none, alignment: Alignment.bottomCenter, children: [
+          Container(height: 96, color: RL.primary.withValues(alpha: dark ? .22 : .12)),
+          Positioned(top: 6, right: 6, child: IconButton.filledTonal(tooltip: tr('settings'), onPressed: openSettings, icon: const Icon(LucideIcons.settings))),
+          Positioned(bottom: -46, child: GestureDetector(onTap: uploading ? null : pickPhoto, child: Stack(children: [
+            Container(padding: const EdgeInsets.all(4), decoration: BoxDecoration(color: card, shape: BoxShape.circle),
+              child: Hero(tag: 'avatar', child: CircleAvatar(radius: 46, backgroundColor: RL.primary.withValues(alpha: .2),
+                child: ClipOval(child: SizedBox.expand(child: me!['avatar_url'] != null ? NetImage('${me!['avatar_url']}', fit: BoxFit.cover)
+                  : Center(child: Text('${me!['name']}'.trim().isEmpty ? '?' : '${me!['name']}'.trim()[0].toUpperCase(), style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w800, color: RL.primary)))))))),
+            Positioned(right: 2, bottom: 2, child: Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: RL.primary, shape: BoxShape.circle, border: Border.all(color: card, width: 2)),
+              child: uploading ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Icon(LucideIcons.camera, size: 14, color: Colors.white))),
+          ]))),
+        ]),
+        const SizedBox(height: 54),
+        Text('${org?['name'] ?? me!['name']}', textAlign: TextAlign.center, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+        const SizedBox(height: 6),
+        Wrap(alignment: WrapAlignment.center, spacing: 6, runSpacing: 6, children: [
+          Chip(avatar: Icon(type == 'citizen' ? LucideIcons.user : LucideIcons.building2, size: 16, color: RL.primary), label: Text(tr('acct_$type')), visualDensity: VisualDensity.compact),
+          if (me!['role'] == 'admin' || me!['role'] == 'moderator') Chip(avatar: const Icon(LucideIcons.shield, size: 16, color: RL.primary), label: Text(tr('role_${me!['role']}')), visualDensity: VisualDensity.compact),
+          Chip(avatar: const Icon(LucideIcons.locateFixed, size: 16, color: RL.primary), label: Text('${me!['alert_area_set'] == true ? tr('your_alert_area') : tr('set_alert_area')} · ${me!['alert_radius_km'] ?? 5} ${me!['distance_unit'] ?? 'km'}'), visualDensity: VisualDensity.compact),
+        ]),
+        if ((me!['bio'] ?? '').toString().isNotEmpty) Padding(padding: const EdgeInsets.fromLTRB(20, 8, 20, 0), child: Text('${me!['bio']}', textAlign: TextAlign.center, style: TextStyle(color: RL.text2))),
+        Padding(padding: const EdgeInsets.fromLTRB(12, 14, 12, 4), child: Row(children: [
+          for (final k in ['reports', 'verified', 'confirmations']) Expanded(child: Column(children: [
+            TweenAnimationBuilder<double>(tween: Tween(begin: 0, end: ((stats[k] ?? 0) as num).toDouble()), duration: const Duration(milliseconds: 700), curve: Curves.easeOutCubic,
+              builder: (_, v, _) => Text('${v.round()}', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800))),
+            Text(tr('stat_$k'), style: TextStyle(color: RL.text2, fontSize: 12)),
+          ])),
+        ])),
+        Padding(padding: const EdgeInsets.fromLTRB(16, 10, 16, 16), child: Row(children: [
+          Expanded(child: FilledButton.icon(onPressed: () => open(EditProfileScreen(me: me!)), icon: const Icon(LucideIcons.pencil, size: 18), label: Text(tr('edit_profile')))),
+          const SizedBox(width: 8),
+          Expanded(child: OutlinedButton.icon(onPressed: () => open(const MyReportsScreen()), icon: const Icon(LucideIcons.newspaper, size: 18), label: Text(tr('my_reports')))),
+        ])),
+      ]))),
+      if (authed && me?['id'] != null) ProfileTimeline(key: ValueKey('tl${me!['id']}'), userId: '${me!['id']}', isMe: true),
+      if (!authed) Entrance(child: Card(child: Padding(padding: const EdgeInsets.all(20), child: Column(children: [
+        const Icon(LucideIcons.circleUser, size: 56, color: RL.primary), const SizedBox(height: 8),
+        Text(tr('profile_signin'), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w700)),
+        const SizedBox(height: 12),
+        FilledButton(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AuthPage())).then((_) { widget.onChanged(); load(); }), child: Text(tr('login'))),
+      ])))),
+      if (!authed) ...settingsGroups(context),
+      Padding(padding: EdgeInsets.all(16), child: Text('© 2026 RescueLens', textAlign: TextAlign.center, style: TextStyle(color: RL.text2, fontSize: 12))),
     ]));
   }
 }
@@ -154,7 +168,7 @@ class _Group extends StatelessWidget {
   const _Group({this.title, required this.tiles, this.index = 0});
   @override
   Widget build(BuildContext context) => Entrance(index: index, child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-    if (title != null) Padding(padding: const EdgeInsets.fromLTRB(8, 18, 8, 6), child: Text(title!.toUpperCase(), style: const TextStyle(color: RL.text2, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: .6))),
+    if (title != null) Padding(padding: const EdgeInsets.fromLTRB(8, 18, 8, 6), child: Text(title!.toUpperCase(), style: TextStyle(color: RL.text2, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: .6))),
     if (title == null) const SizedBox(height: 14),
     Card(margin: EdgeInsets.zero, clipBehavior: Clip.antiAlias, child: Column(children: [
       for (final (i, t) in tiles.indexed) ...[
@@ -163,7 +177,7 @@ class _Group extends StatelessWidget {
           leading: Container(width: 34, height: 34, decoration: BoxDecoration(color: (t.color ?? RL.primary).withValues(alpha: .12), borderRadius: BorderRadius.circular(10)), child: Icon(t.icon, size: 20, color: t.color ?? RL.primary)),
           title: Text(t.title, style: TextStyle(fontWeight: FontWeight.w600, color: t.color)),
           subtitle: t.sub == null ? null : Text(t.sub!, maxLines: 2, overflow: TextOverflow.ellipsis),
-          trailing: t.onTap == null ? null : const Icon(LucideIcons.chevronRight, color: RL.text2),
+          trailing: t.onTap == null ? null : Icon(LucideIcons.chevronRight, color: RL.text2),
           onTap: t.onTap),
       ],
     ])),
@@ -188,7 +202,7 @@ class _MyReportsState extends State<MyReportsScreen> {
   Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: Text(tr('my_reports'))), body: RefreshIndicator(onRefresh: load, child: ListView(padding: const EdgeInsets.fromLTRB(12, 12, 12, 40), children: [
     if (error) ErrorCard(onRetry: load),
     if (items == null && !error) ...[const PostSkeleton(), const PostSkeleton()],
-    if (items != null && items!.isEmpty) Padding(padding: const EdgeInsets.all(32), child: Text(tr('nothing_yet'), textAlign: TextAlign.center, style: const TextStyle(color: RL.text2))),
+    if (items != null && items!.isEmpty) Padding(padding: const EdgeInsets.all(32), child: Text(tr('nothing_yet'), textAlign: TextAlign.center, style: TextStyle(color: RL.text2))),
     for (final (n, i) in (items ?? []).indexed) Entrance(index: n, child: PostTile(i)),
   ])));
 }

@@ -1,3 +1,4 @@
+import 'package:rescuelens/core/format.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +9,7 @@ import 'package:rescuelens/core/widgets.dart';
 import 'package:rescuelens/features/auth/ui/login_screen.dart';
 import 'package:rescuelens/features/feed/ui/home_header.dart';
 
-void _toast(BuildContext c, String m) => ScaffoldMessenger.of(c)..hideCurrentSnackBar()..showSnackBar(SnackBar(content: Text(m), behavior: SnackBarBehavior.floating));
+void _toast(BuildContext c, String m) => ScaffoldMessenger.of(c)..hideCurrentSnackBar()..showSnackBar(SnackBar(duration: const Duration(seconds: 3), content: Text(m), behavior: SnackBarBehavior.floating));
 
 InputDecoration field(String label, {String? hint, IconData? icon}) => InputDecoration(labelText: label, hintText: hint, prefixIcon: icon == null ? null : Icon(icon), border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)));
 
@@ -158,14 +159,31 @@ class _TrashState extends State<TrashScreen> {
   Future<void> restore(Map i) async {
     try { await Api.post('/incidents/${i['id']}/restore', {}); setState(() => items!.remove(i)); if (mounted) _toast(context, tr('restored')); } catch (e) { if (mounted) _toast(context, '$e'); }
   }
+  Future<void> forever(Map i) async {
+    if (!await confirmAction(context, title: tr('delete_forever_q'), body: tr('delete_forever_body'), confirm: tr('delete_forever'), icon: LucideIcons.trash2)) return;
+    try { await Api.delete('/incidents/${i['id']}/force'); setState(() => items!.remove(i)); if (mounted) _toast(context, tr('deleted_forever')); } catch (e) { if (mounted) _toast(context, '$e'); }
+  }
+  Future<void> emptyAll() async {
+    if (!await confirmAction(context, title: tr('empty_trash_q'), body: tr('delete_forever_body'), confirm: tr('empty_trash'), icon: LucideIcons.trash2)) return;
+    try { await Api.delete('/me/trash'); setState(() => items = []); if (mounted) _toast(context, tr('trash_emptied')); } catch (e) { if (mounted) _toast(context, '$e'); }
+  }
   @override
-  Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: Text(tr('my_trash'))), body: RefreshIndicator(onRefresh: load, child: ListView(padding: const EdgeInsets.all(12), children: [
-    Padding(padding: const EdgeInsets.all(4), child: Text(tr('trash_sub'), style: const TextStyle(color: RL.text2))),
+  Widget build(BuildContext context) => Scaffold(appBar: AppBar(title: Text(tr('my_trash')), actions: [
+      if (items?.isNotEmpty == true) TextButton.icon(onPressed: emptyAll, style: TextButton.styleFrom(foregroundColor: const Color(0xFFE41E3F)), icon: const Icon(LucideIcons.trash2, size: 18), label: Text(tr('empty_trash'))),
+    ]), body: RefreshIndicator(onRefresh: load, child: ListView(padding: const EdgeInsets.all(12), children: [
+    Padding(padding: const EdgeInsets.all(4), child: Text(tr('trash_sub'), style: TextStyle(color: RL.text2))),
     if (items == null) const PostSkeleton(),
     if (items != null && items!.isEmpty) Padding(padding: const EdgeInsets.all(40), child: Column(children: [
       Icon(LucideIcons.trash2, size: 48, color: RL.text2.withValues(alpha: .6)), const SizedBox(height: 12),
-      Text(tr('trash_empty'), textAlign: TextAlign.center, style: const TextStyle(color: RL.text2))])),
-    for (final i in items ?? []) Card(child: ListTile(title: Text('${i['title']}'), subtitle: Text('${tr('deleted')} ${i['deleted_at'] ?? ''}'),
-      trailing: TextButton.icon(onPressed: () => restore(i), icon: const Icon(LucideIcons.rotateCcw), label: Text(tr('restore'))))),
+      Text(tr('trash_empty'), textAlign: TextAlign.center, style: TextStyle(color: RL.text2))])),
+    for (final i in items ?? []) Card(child: Padding(padding: const EdgeInsets.fromLTRB(14, 12, 8, 6), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Row(children: [Icon(RL.cat(i['category']), color: RL.primary), const SizedBox(width: 10),
+        Expanded(child: Text('${i['title']}'.replaceAll('[DEMO] ', ''), maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.w700)))]),
+      Padding(padding: const EdgeInsets.only(left: 34, top: 2), child: Text(tr('deleted_on', {'date': fmtDate(i['deleted_at'])}), style: TextStyle(color: RL.text2, fontSize: 12))),
+      Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+        TextButton.icon(onPressed: () => forever(i), style: TextButton.styleFrom(foregroundColor: const Color(0xFFE41E3F)), icon: const Icon(LucideIcons.trash2, size: 18), label: Text(tr('delete_forever'))),
+        FilledButton.tonalIcon(onPressed: () => restore(i), icon: const Icon(LucideIcons.rotateCcw, size: 18), label: Text(tr('restore'))),
+      ]),
+    ]))),
   ])));
 }

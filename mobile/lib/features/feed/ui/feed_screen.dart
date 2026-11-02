@@ -36,11 +36,11 @@ class _FeedState extends State<FeedScreen> {
       const Entrance(child: SosBanner()),
       Padding(padding: const EdgeInsets.fromLTRB(4, 10, 4, 4), child: Row(children: [
         Expanded(child: Text(tr('latest_near_you'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800))),
-        const LiveDot(), const SizedBox(width: 6), Text(tr('live_updates'), style: const TextStyle(color: RL.text2, fontSize: 12)),
+        const LiveDot(), const SizedBox(width: 6), Text(tr('live_updates'), style: TextStyle(color: RL.text2, fontSize: 12)),
       ])),
       if (error && items == null) ErrorCard(onRetry: () { setState(() => error = false); load(); }),
       if (items == null && !error) ...[const PostSkeleton(), const PostSkeleton()],
-      if (items != null && items!.isEmpty) Padding(padding: const EdgeInsets.all(32), child: Text(tr('nothing_yet'), textAlign: TextAlign.center, style: const TextStyle(color: RL.text2))),
+      if (items != null && items!.isEmpty) Padding(padding: const EdgeInsets.all(32), child: Text(tr('nothing_yet'), textAlign: TextAlign.center, style: TextStyle(color: RL.text2))),
       for (final (n, i) in (items ?? []).indexed) Entrance(key: ValueKey(i['id']), index: n, child: PostTile(i, onUpdated: (u) => setState(() => items![items!.indexWhere((x) => x['id'] == u['id'])] = u), onRemoved: () => setState(() => items!.removeWhere((x) => x['id'] == i['id'])), onRestored: load)),
     ])),
   ]));

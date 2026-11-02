@@ -3,6 +3,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'core/api.dart';
+import 'core/format.dart';
+import 'features/profile/ui/profile_forms.dart' show TrashScreen;
+import 'features/incident/ui/incident_widgets.dart' show DetailScreen;
 import 'core/i18n.dart';
 import 'core/theme.dart';
 import 'core/widgets.dart';
@@ -27,7 +30,7 @@ class RescueLensApp extends StatelessWidget {
         title: 'RescueLens', debugShowCheckedModeBanner: false,
         theme: RL.theme(Brightness.light), darkTheme: RL.theme(Brightness.dark), themeMode: L10n.i.themeMode,
         locale: Locale(L10n.i.lang),
-        builder: (c, child) => Directionality(textDirection: L10n.i.isRtl ? TextDirection.rtl : TextDirection.ltr, child: child!),
+        builder: (c, child) { RL.isDark = Theme.of(c).brightness == Brightness.dark; return Directionality(textDirection: L10n.i.isRtl ? TextDirection.rtl : TextDirection.ltr, child: child!); },
         home: const Home(),
       ));
 }
@@ -41,6 +44,17 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   // Debug aid for automated screenshots: --dart-define=RL_START_TAB=1 opens the Map tab.
   int tab = const int.fromEnvironment('RL_START_TAB');
+  @override
+  void initState() {
+    super.initState();
+    final o = debugOpen;
+    if (o == null) return;
+    if (o == 'settings') tab = 4;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (o == 'trash') Navigator.push(context, MaterialPageRoute(builder: (_) => const TrashScreen()));
+      if (o.startsWith('incident:')) Navigator.push(context, MaterialPageRoute(builder: (_) => DetailScreen(id: o.split(':')[1])));
+    });
+  }
   void go(int i) { HapticFeedback.selectionClick(); setState(() => tab = i); }
   @override
   Widget build(BuildContext context) {

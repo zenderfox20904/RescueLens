@@ -35,7 +35,7 @@ class NetImage extends StatelessWidget {
   Widget build(BuildContext context) => CachedNetworkImage(imageUrl: url, fit: fit,
     cacheKey: url.split('?').first,
     placeholder: (_, _) => const Shim(child: Sk(h: double.infinity, r: 0)),
-    errorWidget: (_, _, _) => const ColoredBox(color: Color(0x22000000), child: Center(child: Icon(LucideIcons.imageOff, color: RL.text2))));
+    errorWidget: (_, _, _) => ColoredBox(color: Color(0x22000000), child: Center(child: Icon(LucideIcons.imageOff, color: RL.text2))));
 }
 
 void openViewer(BuildContext c, List media, int start) => Navigator.push(c, PageRouteBuilder(opaque: false, barrierColor: Colors.black,

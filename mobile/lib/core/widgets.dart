@@ -84,7 +84,7 @@ class ErrorCard extends StatelessWidget {
   const ErrorCard({super.key, required this.onRetry});
   @override
   Widget build(BuildContext context) => Card(child: Padding(padding: const EdgeInsets.all(20), child: Column(children: [
-    const Icon(LucideIcons.wifiOff, size: 36, color: RL.text2), const SizedBox(height: 8),
+    Icon(LucideIcons.wifiOff, size: 36, color: RL.text2), const SizedBox(height: 8),
     Text(tr('load_error'), textAlign: TextAlign.center), const SizedBox(height: 12),
     FilledButton.icon(onPressed: onRetry, icon: const Icon(LucideIcons.refreshCw), label: Text(tr('retry'))),
   ])));
