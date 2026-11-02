@@ -68,6 +68,7 @@ export function PostCard({ i, detail = false }: { i: Incident; detail?: boolean 
   const act = (type: 'confirm' | 'dispute') => { if (!user) return nav('/login'); react.mutate(i.my_reaction === type ? 'none' : type) }
   const cat = CATS[i.category]
   const img = i.media[0]
+  const [playing, setPlaying] = useState(false)
   const regions = i.analysis?.evidence_regions ?? []
   const s = shareLinks(i)
   return (
@@ -88,9 +89,9 @@ export function PostCard({ i, detail = false }: { i: Incident; detail?: boolean 
       {img && (
         <div className="post-media" onClick={() => setShowRegions((v) => !v)}>
           <div style={{ position: 'relative', width: 'fit-content', margin: '0 auto' }}>
-            {img.video_url ? <video src={img.video_url} poster={img.url} controls muted playsInline preload="none" width={img.width} height={img.height} style={{ height: 'auto', width: '100%' }} onClick={(e) => e.preventDefault()} aria-label={i.title} />
+            {img.video_url ? <video src={img.video_url} poster={img.url} controls muted playsInline preload="none" width={img.width} height={img.height} style={{ height: 'auto', width: '100%' }} onClick={(e) => e.stopPropagation()} onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} onEnded={() => setPlaying(false)} aria-label={i.title} />
               : <img src={img.url} alt={i.title} loading="lazy" decoding="async" width={img.width} height={img.height} style={{ height: 'auto' }} />}
-            <RegionOverlay regions={regions} show={showRegions} />
+            {!playing && <RegionOverlay regions={regions} show={showRegions} />}
           </div>
         </div>
       )}

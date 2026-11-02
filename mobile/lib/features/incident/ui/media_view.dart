@@ -5,7 +5,8 @@ import 'package:rescuelens/core/theme.dart';
 import 'package:rescuelens/core/widgets.dart';
 import 'package:video_player/video_player.dart';
 
-bool isVideo(Map m) => '${m['mime'] ?? ''}'.startsWith('video/');
+bool isVideo(Map m) => m['video_url'] != null || '${m['mime'] ?? ''}'.startsWith('video/');
+String videoSrc(Map m) => '${m['video_url'] ?? m['url']}';
 
 /// Card media: first item large, a "+N" badge for more. Tapping opens the full screen viewer.
 class MediaStrip extends StatelessWidget {
@@ -19,7 +20,7 @@ class MediaStrip extends StatelessWidget {
     return GestureDetector(
       onTap: () => openViewer(context, media, 0),
       child: ClipRRect(borderRadius: BorderRadius.circular(12), child: AspectRatio(aspectRatio: ratio, child: Stack(fit: StackFit.expand, children: [
-        Hero(tag: 'm${m['id']}', child: isVideo(m) ? const ColoredBox(color: Colors.black) : NetImage(m['url'])),
+        Hero(tag: 'm${m['id']}', child: isVideo(m) && m['video_url'] == null ? const ColoredBox(color: Colors.black) : NetImage(m['url'])),
         if (isVideo(m)) const Center(child: CircleAvatar(radius: 28, backgroundColor: Colors.black54, child: Icon(LucideIcons.play, size: 36, color: Colors.white))),
         if (media.length > 1) Positioned(right: 8, top: 8, child: Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(12)),
           child: Text('+${media.length - 1}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)))),
@@ -59,7 +60,7 @@ class _MediaViewerState extends State<MediaViewer> {
     appBar: AppBar(backgroundColor: Colors.transparent, foregroundColor: Colors.white, title: Text('${i + 1} / ${widget.media.length}')),
     body: PageView.builder(controller: pc, itemCount: widget.media.length, onPageChanged: (v) => setState(() => i = v), itemBuilder: (_, k) {
       final m = widget.media[k] as Map;
-      return isVideo(m) ? VideoBox(m['url']) : InteractiveViewer(maxScale: 5, child: Center(child: Hero(tag: 'm${m['id']}', child: NetImage(m['url'], fit: BoxFit.contain))));
+      return isVideo(m) ? VideoBox(videoSrc(m)) : InteractiveViewer(maxScale: 5, child: Center(child: Hero(tag: 'm${m['id']}', child: NetImage(m['url'], fit: BoxFit.contain))));
     }));
 }
 

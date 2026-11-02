@@ -56,6 +56,7 @@ export default function Report() {
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview) }, [preview])
 
 
+  const [playing, setPlaying] = useState(false)
   const pick = (f: File | undefined) => {
     if (!f) return
     const isVid = /^video\/(mp4|quicktime|webm|x-m4v)$/.test(f.type)
@@ -130,8 +131,8 @@ export default function Report() {
           {preview ? (
             <div style={{ position: 'relative', borderRadius: 8, overflow: 'hidden', background: '#000' }}>
               <div style={{ position: 'relative', width: 'fit-content', margin: '0 auto' }}>
-                {file?.type.startsWith('video/') ? <video src={preview} controls muted playsInline style={{ maxWidth: '100%', maxHeight: 380, display: 'block' }} /> : <img src={preview} alt="" style={{ maxWidth: '100%', maxHeight: 380, display: 'block' }} />}
-                {analysis && <RegionOverlay regions={analysis.evidence_regions} />}
+                {file?.type.startsWith('video/') ? <video src={preview} controls muted playsInline onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} onEnded={() => setPlaying(false)} style={{ maxWidth: '100%', maxHeight: 380, display: 'block' }} /> : <img src={preview} alt="" style={{ maxWidth: '100%', maxHeight: 380, display: 'block' }} />}
+                {analysis && !playing && <RegionOverlay regions={analysis.evidence_regions} />}
                 {step === 'analyzing' && <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg,transparent,rgba(24,119,242,.35),transparent)', backgroundSize: '200% 100%', animation: 'shimmer 1.2s infinite' }} />}
               </div>
               {step === 'photo' && <button className="iconbtn" style={{ position: 'absolute', top: 8, right: 8 }} onClick={() => { setFile(null); setPreview(null) }}><IX size={18} /></button>}

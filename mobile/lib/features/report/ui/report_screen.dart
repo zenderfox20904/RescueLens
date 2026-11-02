@@ -27,7 +27,7 @@ class _ReportState extends State<ReportScreen> {
     final XFile? f;
     try {
       f = video ? await ImagePicker().pickVideo(source: src, maxDuration: const Duration(seconds: 60)) : await ImagePicker().pickImage(source: src, maxWidth: 2048, imageQuality: 85);
-    } catch (_) { setState(() => err = tr('camera_unavailable')); return; }
+    } catch (_) { setState(() => err = tr(video ? 'video_pick_failed' : 'camera_unavailable')); return; }
     if (f == null) return;
     setState(() { file = f; isVideo = video; poster = null; busy = true; err = null; });
     try {
