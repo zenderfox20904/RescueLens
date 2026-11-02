@@ -11,9 +11,9 @@ class Present
 {
     public static function user(User $u): array
     {
-        return ['id' => $u->public_id, 'name' => $u->name, 'email' => $u->email, 'role' => $u->role, 'locale' => $u->locale, 'country_code' => $u->country_code ?? 'BD', 'distance_unit' => $u->distance_unit ?? 'km', 'timezone' => $u->timezone,
+        return ['id' => $u->public_id, 'name' => $u->name, 'email' => $u->email, 'role' => $u->role, 'account_type' => $u->account_type ?? 'citizen', 'organization' => ($o = \App\Models\Organization::where('user_id', $u->id)->first()) ? \App\Services\DispatchService::presentOrg($o, true) : null, 'locale' => $u->locale, 'country_code' => $u->country_code ?? 'BD', 'distance_unit' => $u->distance_unit ?? 'km', 'timezone' => $u->timezone,
             'ai_consent' => $u->ai_consent, 'auto_post_enabled' => (bool) $u->auto_post_enabled, 'alert_radius_km' => $u->alert_radius_km,
-            'alert_area_set' => $u->alert_lat !== null, 'is_demo' => $u->is_demo];
+            'alert_area_set' => $u->alert_lat !== null, 'alert_lat' => $u->alert_lat !== null ? round((float) $u->alert_lat, 4) : null, 'alert_lng' => $u->alert_lng !== null ? round((float) $u->alert_lng, 4) : null, 'is_demo' => $u->is_demo];
     }
 
     public static function analysis(AiAnalysis $a, bool $withMedia = true): array

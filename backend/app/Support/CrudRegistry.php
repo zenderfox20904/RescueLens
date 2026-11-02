@@ -7,6 +7,7 @@ use App\Models\EmergencyResource;
 use App\Models\Incident;
 use App\Models\IncidentComment;
 use App\Models\Language;
+use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Validation\Rule;
 
@@ -53,6 +54,13 @@ final class CrudRegistry
                 'update' => fn () => ['name' => 'sometimes|string|max:160', 'name_bn' => 'sometimes|nullable|string|max:160', 'phone' => ['sometimes', 'regex:/^[0-9+ ]{2,20}$/'], 'category' => 'sometimes|string|max:30', 'jurisdiction' => 'sometimes|string|max:120', 'source_name' => 'sometimes|string|max:160', 'source_url' => 'sometimes|url|starts_with:https://', 'is_active' => 'sometimes|boolean'],
                 'present' => fn (EmergencyResource $e) => ['id' => (string) $e->id, 'name' => $e->name, 'name_bn' => $e->name_bn, 'phone' => $e->phone, 'category' => $e->category, 'country_code' => $e->country_code, 'jurisdiction' => $e->jurisdiction,
                     'source_name' => $e->source_name, 'source_url' => $e->source_url, 'verified' => $e->verified_at !== null, 'is_active' => $e->is_active, 'created_at' => $e->created_at?->toIso8601String(), 'deleted_at' => $e->deleted_at?->toIso8601String()],
+            ],
+            'organizations' => [
+                'model' => Organization::class, 'key' => 'public_id', 'search' => ['name', 'phone', 'address'],
+                'filters' => ['type' => Organization::TYPES, 'country_code' => null], 'sort' => ['name', 'type', 'created_at', 'verified_at'],
+                'create' => \App\Http\Controllers\Api\OrganizationController::rules() + ['verified' => 'sometimes|boolean'],
+                'update' => fn () => \App\Http\Controllers\Api\OrganizationController::rules(true) + ['verified' => 'sometimes|boolean'],
+                'present' => fn (Organization $o) => \App\Services\DispatchService::presentOrg($o, true) + ['created_at' => $o->created_at?->toIso8601String(), 'deleted_at' => $o->deleted_at?->toIso8601String()],
             ],
             'camera-feeds' => [
                 'model' => CameraFeed::class, 'key' => 'public_id', 'search' => ['name', 'area_name'], 'filters' => ['kind' => ['snapshot_url', 'upload']], 'sort' => ['name', 'created_at', 'last_polled_at'],

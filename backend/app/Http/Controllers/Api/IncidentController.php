@@ -149,6 +149,7 @@ class IncidentController extends Controller
             $notified = 0;
         } else {
             $notified = $this->svc->notifyNearby($incident);
+            app(\App\Services\DispatchService::class)->dispatch($incident);
         }
         app(\App\Services\Integrations\WebhookDispatcher::class)->dispatch('incident.created', $incident);
         $incident->load(['user', 'media', 'analyses.regions', 'confirmations']);

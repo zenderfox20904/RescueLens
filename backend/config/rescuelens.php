@@ -30,13 +30,6 @@ return [
         'secret' => env('RL_WEBHOOK_SECRET', ''),
     ],
 
-    'facebook_page' => [
-        'enabled' => (bool) env('FB_PAGE_POSTING_ENABLED', false),
-        'page_id' => env('FB_PAGE_ID'),
-        'page_token' => env('FB_PAGE_ACCESS_TOKEN'),
-        'graph_version' => env('FB_GRAPH_VERSION', 'v24.0'),
-    ],
-
     // meta (default) | ollama (DEV ONLY, temporary, ignored when APP_ENV=production)
     'ai_provider' => env('AI_PROVIDER', 'meta'),
     'dev_ollama' => [

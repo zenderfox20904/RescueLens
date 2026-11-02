@@ -30,6 +30,8 @@ Route::prefix('v1')->middleware('throttle:api')->group(function () {
     Route::get('incidents', [IncidentController::class, 'index']);
     Route::get('incidents/map', [IncidentController::class, 'map']);
     Route::get('incidents/{incident}', [IncidentController::class, 'show']);
+    Route::get('nearby-help', [\App\Http\Controllers\Api\OrganizationController::class, 'nearby']);
+    Route::get('incidents/{incident}/dispatches', [\App\Http\Controllers\Api\OrganizationController::class, 'forIncident']);
     Route::get('incidents/{incident}/comments', [IncidentController::class, 'comments']);
 
     Route::middleware('auth:sanctum')->group(function () {
@@ -51,6 +53,9 @@ Route::prefix('v1')->middleware('throttle:api')->group(function () {
             Route::post('incidents/{incident}/comments', [IncidentController::class, 'comment']);
         });
 
+        Route::get('org/dispatches', [\App\Http\Controllers\Api\OrganizationController::class, 'mine']);
+        Route::patch('org/me', [\App\Http\Controllers\Api\OrganizationController::class, 'updateMine'])->middleware('throttle:write');
+        Route::post('org/dispatches/{dispatch}/status', [\App\Http\Controllers\Api\OrganizationController::class, 'setStatus'])->middleware('throttle:write');
         Route::get('notifications', [NotificationController::class, 'index']);
         Route::post('notifications/read-all', [NotificationController::class, 'readAll']);
 
@@ -70,7 +75,6 @@ Route::prefix('v1')->middleware('throttle:api')->group(function () {
         Route::prefix('mod')->middleware('role:moderator')->group(function () {
             Route::get('incidents', [ModerationController::class, 'queue']);
             Route::post('incidents/{incident}/status', [ModerationController::class, 'setStatus']);
-            Route::post('incidents/{incident}/facebook-page', [ModerationController::class, 'postToFacebookPage']);
             Route::post('incidents/{incident}/merge', [ModerationController::class, 'merge']);
             Route::get('users', [ModerationController::class, 'users']);
             Route::post('users/{user}/role', [ModerationController::class, 'setRole']);

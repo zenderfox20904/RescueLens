@@ -21,9 +21,18 @@ class AuthController extends Controller
             'password' => ['required', Password::min(8)->letters()->numbers()],
             'locale' => ['nullable', 'regex:/^[a-z]{2,3}$/'],
             'device_name' => 'nullable|string|max:60',
+            'account_type' => ['nullable', \Illuminate\Validation\Rule::in(array_merge(['citizen'], \App\Models\Organization::TYPES))],
         ]);
-        $u = User::create(['name' => $d['name'], 'email' => strtolower($d['email']), 'password' => $d['password'], 'locale' => $d['locale'] ?? 'en']);
-        AuditLog::record('auth.register', $u);
+        $type = $d['account_type'] ?? 'citizen';
+        $org = $type === 'citizen' ? null : $r->validate(collect(\App\Http\Controllers\Api\OrganizationController::rules())->except('type')->mapWithKeys(fn ($v, $k) => ["organization.$k" => $v])->all())['organization'];
+        $u = \Illuminate\Support\Facades\DB::transaction(function () use ($d, $type, $org) {
+            $u = User::create(['name' => $d['name'], 'email' => strtolower($d['email']), 'password' => $d['password'], 'locale' => $d['locale'] ?? 'en']);
+            $u->forceFill(['account_type' => $type])->save();
+            // Organizations start unverified; an admin verifies them before they receive dispatches or appear in Nearby help.
+            if ($org) \App\Models\Organization::create($org + ['type' => $type, 'user_id' => $u->id]);
+            return $u;
+        });
+        AuditLog::record('auth.register', $u, ['account_type' => $type]);
         return response()->json(['user' => Present::user($u), 'token' => $u->createToken($d['device_name'] ?? 'web')->plainTextToken], 201);
     }
 

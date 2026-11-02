@@ -51,7 +51,9 @@ class CrudController extends Controller
         $sort = in_array($r->input('sort'), $d['sort'], true) ? $r->input('sort') : $d['sort'][array_key_last($d['sort'])];
         $q->orderBy($sort, $r->input('dir') === 'asc' ? 'asc' : 'desc')->orderBy($d['model'] === \App\Models\Language::class ? 'code' : 'id');
         $p = $q->paginate(min(100, max(5, (int) $r->input('per_page', 20))));
-        return ['data' => collect($p->items())->map($d['present']), 'meta' => ['total' => $p->total(), 'page' => $p->currentPage(), 'last_page' => $p->lastPage(), 'per_page' => $p->perPage(),
+        $rows = collect($p->items())->map($d['present'])->all();
+        if ($entity === 'incidents') $rows = \App\Services\I18n\ContentTranslation::apply($rows, $r->input('lang'));
+        return ['data' => $rows, 'meta' => ['total' => $p->total(), 'page' => $p->currentPage(), 'last_page' => $p->lastPage(), 'per_page' => $p->perPage(),
             'trash_count' => $d['model']::onlyTrashed()->count()]];
     }
 
@@ -78,7 +80,8 @@ class CrudController extends Controller
         } elseif ($entity === 'languages') {
             $data['rtl'] ??= in_array(explode('-', $data['code'])[0], \App\Models\Language::RTL, true);
         }
-        $m = $d['model']::create($data);
+        if ($entity === 'organizations') { $v = $data['verified'] ?? false; unset($data['verified']); $data['verified_at'] = $v ? now() : null; }
+        $m = $d['model']::query()->forceCreate($data);
         if ($entity === 'comments') $m->incident?->increment('comments_count');
         AuditLog::record("crud.$entity.create", $m);
         if ($entity === 'incidents') Incident::bumpCache();
@@ -92,6 +95,7 @@ class CrudController extends Controller
         $m = $this->find($d, $id);
         $data = $r->validate(($d['update'])($m));
         if (isset($data['body'])) $data['body'] = strip_tags($data['body']);
+        if ($entity === 'organizations' && array_key_exists('verified', $data)) { $data['verified_at'] = $data['verified'] ? ($m->verified_at ?? now()) : null; unset($data['verified']); }
         if ($entity === 'incidents' && isset($data['lat'], $data['lng'])) $data += ['public_lat' => Incident::roundPublic($data['lat']), 'public_lng' => Incident::roundPublic($data['lng'])];
         $m->forceFill($data)->save(); // fields are limited by the validated allowlist; role is never accepted here
         AuditLog::record("crud.$entity.update", $m, ['fields' => array_keys($data)]);

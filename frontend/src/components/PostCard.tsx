@@ -6,7 +6,7 @@ import { useAuth } from '../lib/auth'
 import { CATS, SEVS, timeAgo, useI18n } from '../lib/i18n'
 import { type Incident, type Region, ttl } from '../lib/types'
 import { Avatar } from './Shell'
-import { IChat, IEye, IFacebook, IFlag, IShare, IWhatsApp } from './Icons'
+import { IChat, IEye, IFlag, IShare, IWhatsApp } from './Icons'
 import { ListSkeleton } from './Skeleton'
 import { useToast } from './Toast'
 
@@ -34,8 +34,6 @@ export function shareLinks(i: Incident) {
   const url = `${SHARE_BASE}/share/incidents/${i.id}`
   return {
     url,
-    // Official Facebook Share Dialog via URL (no SDK, no permissions): https://developers.facebook.com/docs/sharing/reference/share-dialog
-    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
     // WhatsApp click to chat: https://faq.whatsapp.com/5913398998672934
     whatsapp: `https://wa.me/?text=${encodeURIComponent(`⚠️ ${i.title}\n${i.location.area_name ?? ''}\n${url}`)}`,
   }
@@ -117,7 +115,7 @@ export function PostCard({ i, detail = false }: { i: Incident; detail?: boolean 
           <button className="btn" style={{ width: '100%' }} onClick={() => setShareOpen((v) => !v)}><IShare size={18} /> {t('share')}</button>
           {shareOpen && (
             <div className="card dropdown fade-in" style={{ width: 240, top: 40 }} onMouseLeave={() => setShareOpen(false)}>
-              <a className="notif" href={s.facebook} target="_blank" rel="noopener noreferrer"><IFacebook /> {t('ui.share_to_facebook')}</a>
+              {typeof navigator.share === 'function' && <button className="notif btn-ghost" style={{ border: 0, width: '100%', background: 'none' }} onClick={() => { navigator.share({ title: ttl(i), url: s.url }).catch(() => {}); setShareOpen(false) }}><IShare /> {t('share')}</button>}
               <a className="notif" href={s.whatsapp} target="_blank" rel="noopener noreferrer"><IWhatsApp /> {t('ui.send_on_whatsapp')}</a>
               <button className="notif btn-ghost" style={{ border: 0, width: '100%', background: 'none' }} onClick={() => { navigator.clipboard?.writeText(s.url); toast(t('ui.link_copied')); setShareOpen(false) }}>🔗 {t('ui.copy_link')}</button>
             </div>)}

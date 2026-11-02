@@ -87,6 +87,8 @@ export default function App() {
           <Route element={<WideLayout />}>
             <Route path="/map" element={<MapPage />} />
             <Route path="/admin" element={<RequireMod><Admin /></RequireMod>} />
+            <Route path="/admin/:section" element={<RequireMod><Admin /></RequireMod>} />
+            <Route path="/admin/:section/:id" element={<RequireMod><Admin /></RequireMod>} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

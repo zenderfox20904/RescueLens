@@ -75,17 +75,4 @@ class ModerationController extends Controller
         AuditLog::record('admin.resource_verify', $resource);
         return ['ok' => true];
     }
-
-    /** Optional Facebook Page post. Requires config flag and explicit confirm=true from a moderator. */
-    public function postToFacebookPage(Request $r, Incident $incident, \App\Services\Integrations\FacebookPagePublisher $fb)
-    {
-        $r->validate(['confirm' => 'accepted']);
-        if (! $fb->enabled()) {
-            return response()->json(['message' => 'Facebook Page posting is disabled on this server.', 'code' => 'fb_page_disabled'], 503);
-        }
-        abort_unless($incident->status === 'verified', 409, 'Only moderator verified incidents can be shared to the Page.');
-        $out = $fb->publish($incident);
-        \App\Models\AuditLog::record('incident.fb_page_post', $incident, ['post_id' => $out['post_id'] ?? null]);
-        return ['data' => $out];
-    }
 }
