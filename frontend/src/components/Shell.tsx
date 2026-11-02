@@ -17,7 +17,7 @@ export function useTheme() {
   return { theme, toggle: () => setTheme((t) => (t === 'dark' ? 'light' : 'dark')) }
 }
 
-export const initials = (n?: string | null) => (n || '?').trim().split(/\s+/).map((p) => p[0]).slice(0, 2).join('').toUpperCase()
+export const initials = (n?: string | null) => (n || '?').trim().replace(/\(.*?\)/g, "").split(/\s+/).filter(Boolean).map((p) => p[0]).slice(0, 2).join('').toUpperCase()
 export const Avatar = ({ name, size = 40 }: { name?: string | null; size?: number }) => <div className="avatar" style={{ width: size, height: size, fontSize: size * 0.4 }}>{initials(name)}</div>
 
 function Bell() {
