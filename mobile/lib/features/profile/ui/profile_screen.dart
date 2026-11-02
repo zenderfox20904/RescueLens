@@ -10,6 +10,7 @@ import 'package:rescuelens/features/feed/ui/home_header.dart';
 import 'package:rescuelens/features/incident/ui/incident_widgets.dart';
 import 'package:rescuelens/features/incident/ui/media_view.dart';
 import 'package:rescuelens/features/profile/ui/profile_forms.dart';
+import 'package:rescuelens/features/profile/ui/timeline.dart';
 
 const kDanger = Color(0xFFE41E3F);
 
@@ -102,6 +103,7 @@ class _ProfileState extends State<ProfileScreen> {
           Expanded(child: OutlinedButton.icon(onPressed: () => open(const MyReportsScreen()), icon: const Icon(Icons.article_rounded, size: 18), label: Text(tr('my_reports')))),
         ])),
       ]))),
+      if (authed && me?['id'] != null) ProfileTimeline(key: ValueKey('tl${me!['id']}'), userId: '${me!['id']}', isMe: true),
       if (!authed) Entrance(child: Card(child: Padding(padding: const EdgeInsets.all(20), child: Column(children: [
         const Icon(Icons.account_circle_rounded, size: 56, color: RL.primary), const SizedBox(height: 8),
         Text(tr('profile_signin'), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w700)),

@@ -47,3 +47,14 @@ All providers implement `App\Services\AI\VisionAnalysisProvider` and `ImageSegme
 ## Tests
 
 `backend/tests/Feature/AutoDetectionTest.php` covers consent gating, undo, allowlist, admin only access, moderation, feed thresholds, dedupe and provider selection.
+
+## Default provider: Meta Llama (open weights)
+
+RescueLens now defaults to `AI_PROVIDER=llama`, which runs Meta Llama open weights through any OpenAI compatible endpoint.
+
+* Local: Ollama at `http://localhost:11434/v1` with `LLAMA_MODEL=llama3.2-vision` (`ollama pull llama3.2-vision`, about 7.8 GB on disk, 16 GB RAM is enough).
+* Hosted later: set `LLAMA_BASE_URL`, `LLAMA_API_KEY` and `LLAMA_MODEL` for Baseten, Modal or Fireworks. Keys live only in `.env`.
+* Users see only "Meta AI" plus `LLAMA_MODEL_LABEL` (default "Llama 3.2 Vision").
+* Code: `app/Services/AI/Llama` (OpenAiCompatClient, LlamaVisionProvider, LlamaTextTranslator). Output is validated against the same schema and retried once.
+* There is no segmentation model on this path, so region masks are skipped.
+* `AI_PROVIDER=meta` still selects the Meta Model API; the legacy native Ollama provider remains DEV ONLY.

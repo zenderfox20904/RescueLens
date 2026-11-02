@@ -9,7 +9,7 @@ In `backend/.env` (never committed):
 ```
 AI_PROVIDER=ollama
 OLLAMA_URL=http://localhost:11434
-OLLAMA_MODEL=gemma4:31b-cloud
+OLLAMA_MODEL=llama3.2-vision
 ```
 
 It is ignored when `APP_ENV=production`. Health (`/api/v1/health`) reports `ai.mode = dev`, and every analysis is labeled "DEV ONLY local model (Ollama). Not Meta AI".
@@ -26,7 +26,7 @@ It is ignored when `APP_ENV=production`. Health (`/api/v1/health`) reports `ai.m
 
 ## Real run on 2 November 2026 (through the app API)
 
-Script: `docs/eval/dev_ollama_eval.py` (registers a test user, uploads, analyzes, posts). Raw output: `docs/eval/dev_ollama_results_2026_11_02.json`. Model `gemma4:31b-cloud` (vision capable per `ollama show`).
+Script: `docs/eval/dev_ollama_eval.py` (registers a test user, uploads, analyzes, posts). Raw output: `docs/eval/dev_ollama_results_2026_11_02.json`. Model `llama3.2-vision` (vision capable per `ollama show`).
 
 Images are open licensed from Wikimedia Commons and are not stored in the repo:
 
@@ -47,3 +47,14 @@ Images are open licensed from Wikimedia Commons and are not stored in the repo:
 Post generation: the accident1 English draft was posted through `POST /api/v1/incidents` with consent and returned 201, title "Overturned truck on roadway", `ai_assisted=true`.
 
 Observations: all three accidents were classified as road accidents and the control image was correctly rejected in both languages. Bangla output is natural Bengali script. The first attempt failed until fence stripping and the in prompt schema were added. Labeled DEV, not a Meta result and not a benchmark.
+
+## Default provider: Meta Llama (open weights)
+
+RescueLens now defaults to `AI_PROVIDER=llama`, which runs Meta Llama open weights through any OpenAI compatible endpoint.
+
+* Local: Ollama at `http://localhost:11434/v1` with `LLAMA_MODEL=llama3.2-vision` (`ollama pull llama3.2-vision`, about 7.8 GB on disk, 16 GB RAM is enough).
+* Hosted later: set `LLAMA_BASE_URL`, `LLAMA_API_KEY` and `LLAMA_MODEL` for Baseten, Modal or Fireworks. Keys live only in `.env`.
+* Users see only "Meta AI" plus `LLAMA_MODEL_LABEL` (default "Llama 3.2 Vision").
+* Code: `app/Services/AI/Llama` (OpenAiCompatClient, LlamaVisionProvider, LlamaTextTranslator). Output is validated against the same schema and retried once.
+* There is no segmentation model on this path, so region masks are skipped.
+* `AI_PROVIDER=meta` still selects the Meta Model API; the legacy native Ollama provider remains DEV ONLY.

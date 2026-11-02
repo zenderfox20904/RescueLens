@@ -17,12 +17,15 @@ class MetaController extends Controller
         $live = app(MetaModelClient::class)->configured();
         return response()->json([
             'status' => $db ? 'ok' : 'degraded', 'database' => $db,
-            'ai' => app(\App\Services\AI\VisionAnalysisProvider::class)->mode() === 'dev'
+            'ai' => config('rescuelens.ai_provider') === 'llama'
+                ? ['mode' => 'live', 'configured' => true, 'provider' => 'meta-llama', 'vision_model' => \App\Services\AI\Llama\OpenAiCompatClient::label(), 'segmentation_model' => null,
+                    'message' => 'Meta AI is available ('.\App\Services\AI\Llama\OpenAiCompatClient::label().', open weights).']
+                : (app(\App\Services\AI\VisionAnalysisProvider::class)->mode() === 'dev'
                 ? ['mode' => 'live', 'configured' => true, 'vision_model' => config('rescuelens.meta.vision_model'), 'segmentation_model' => config('rescuelens.meta.segmentation_model'),
                     'message' => 'Meta AI is available.']
                 : ['mode' => $live ? 'live' : 'demo', 'configured' => $live,
                 'vision_model' => config('rescuelens.meta.vision_model'), 'segmentation_model' => config('rescuelens.meta.segmentation_model'),
-                'message' => $live ? 'Meta Model API key configured.' : 'Live AI analysis is unavailable: META_MODEL_API_KEY is not set. Results are clearly labeled DEMO samples.'],
+                'message' => $live ? 'Meta Model API key configured.' : 'Live AI analysis is unavailable: META_MODEL_API_KEY is not set. Results are clearly labeled DEMO samples.']),
             'social' => ['facebook' => filled(config('services.facebook.client_id')), 'google' => filled(config('services.google.client_id'))],
             'time' => now()->toIso8601String(),
         ], $db ? 200 : 503);
