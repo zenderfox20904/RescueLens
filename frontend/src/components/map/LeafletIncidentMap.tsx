@@ -13,7 +13,7 @@ function Focus({ focus, points }: { focus: MapFocus; points: MapPoint[] }) {
   useEffect(() => { if (focus) m.setView([focus.lat, focus.lng], focus.zoom); else if (points.length) m.fitBounds(points.map((p) => [p.lat, p.lng] as [number, number]), { padding: [40, 40] }) }, [focus, points.length]) // eslint-disable-line react-hooks/exhaustive-deps
   return null
 }
-export default function LeafletIncidentMap({ points, focus = null }: { points: MapPoint[]; focus?: MapFocus }) {
+export default function LeafletIncidentMap({ points, focus = null, dark = true }: { points: MapPoint[]; focus?: MapFocus; dark?: boolean }) {
   const { t, lang } = useI18n()
   const [zoom, setZoom] = useState(12)
   const { singles, clusters } = cluster(points, zoom)
@@ -26,7 +26,9 @@ export default function LeafletIncidentMap({ points, focus = null }: { points: M
         <CircleMarker key={c.key} center={[c.lat, c.lng]} radius={14 + Math.min(16, c.n * 2)} pathOptions={{ color: '#fff', weight: 3, fillColor: SEV[c.worst], fillOpacity: 0.85 }}>
           <Tooltip permanent direction="center" className="cluster-label">{c.n}</Tooltip>
         </CircleMarker>))}
-      <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      {dark
+        ? <TileLayer key="dark" attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>' url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
+        : <TileLayer key="light" attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" />}
       {singles.map((p) => (
         <CircleMarker key={p.id} center={[p.lat, p.lng]} radius={p.severity === 'critical' ? 14 : 10} className={p.severity === 'critical' ? 'pulse' : undefined} pathOptions={{ color: '#fff', weight: 2, fillColor: SEV[p.severity], fillOpacity: p.is_stale ? 0.4 : 0.9 }}>
           <Popup><b>{ttl(p)}</b><br />{p.area_name} · {timeAgo(p.created_at, lang)}<br /><Link to={`/incidents/${p.id}`}>{t('ui.details')}</Link></Popup>

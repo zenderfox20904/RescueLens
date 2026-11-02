@@ -57,7 +57,7 @@ class _MapState extends State<MapScreen> {
   }
   double hue(String s) => {'low': BitmapDescriptor.hueGreen, 'moderate': BitmapDescriptor.hueYellow, 'high': BitmapDescriptor.hueOrange}[s] ?? BitmapDescriptor.hueRed;
   @override
-  Widget build(BuildContext context) => Column(children: [
+  Widget build(BuildContext context) => SafeArea(bottom: false, child: Column(children: [
     SizedBox(height: 44, child: ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 8), children: [
       for (final v in const [('nearby', LucideIcons.locateFixed), ('country', LucideIcons.flag), ('world', LucideIcons.globe)])
         Padding(padding: const EdgeInsets.only(right: 6), child: ChoiceChip(avatar: Icon(v.$2, size: 16), label: Text(tr('map_${v.$1}')), selected: scope == v.$1, onSelected: (_) => setScope(v.$1))),
@@ -65,6 +65,7 @@ class _MapState extends State<MapScreen> {
       for (final c in RL.categories) Padding(padding: const EdgeInsets.only(right: 6), child: FilterChip(avatar: Icon(RL.cat(c), size: 16), label: Text(tr('c_$c')), selected: cats.contains(c), onSelected: (v) => setState(() => v ? cats.add(c) : cats.remove(c)))),
     ])),
     SizedBox(height: 320, child: pts == null || maps == null ? const Shim(child: Sk(h: 320, r: 0)) : maps == false ? const MapUnavailable() : GoogleMap(
+      style: Theme.of(context).brightness == Brightness.dark ? darkMapStyle : null,
       initialCameraPosition: const CameraPosition(target: LatLng(20, 40), zoom: 1.3), onMapCreated: (c) { ctl = c; c.moveCamera(cam); },
       markers: {for (final p in shown) Marker(markerId: MarkerId(p['id']), position: LatLng((p['lat'] as num).toDouble(), (p['lng'] as num).toDouble()),
         icon: BitmapDescriptor.defaultMarkerWithHue(hue(p['severity'])), infoWindow: InfoWindow(title: title(p), snippet: p['area_name'], onTap: () => openDetail(context, p['id'])))},
@@ -73,7 +74,7 @@ class _MapState extends State<MapScreen> {
     Expanded(child: pts == null ? ListView(children: const [PostSkeleton()]) : ListView(padding: const EdgeInsets.only(bottom: 120), children: [
       for (final p in shown) ListTile(leading: Icon(RL.cat(p['category']), size: 24, color: RL.primary), title: Text(title(p)), subtitle: Text('${p['area_name'] ?? ''} · ${ago(p['created_at'])}'), onTap: () => openDetail(context, p['id'])),
     ])),
-  ]);
+  ]));
 }
 
 /// Shown when the map cannot be displayed on this build; the list below still works.
@@ -85,3 +86,5 @@ class MapUnavailable extends StatelessWidget {
     Text(tr('map_unavailable'), textAlign: TextAlign.center, style: TextStyle(color: RL.text2)),
   ]));
 }
+
+const darkMapStyle = '[{"elementType":"geometry","stylers":[{"color":"#1d2026"}]},{"elementType":"labels.text.fill","stylers":[{"color":"#9aa0a6"}]},{"elementType":"labels.text.stroke","stylers":[{"color":"#1d2026"}]},{"featureType":"road","elementType":"geometry","stylers":[{"color":"#2c313a"}]},{"featureType":"road.highway","elementType":"geometry","stylers":[{"color":"#3a404b"}]},{"featureType":"water","elementType":"geometry","stylers":[{"color":"#0e1626"}]},{"featureType":"poi","stylers":[{"visibility":"off"}]},{"featureType":"administrative","elementType":"geometry.stroke","stylers":[{"color":"#4b5563"}]}]';

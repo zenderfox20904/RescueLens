@@ -57,7 +57,7 @@ export default function MapPage() {
       <div className="card map-canvas">
         {q.isLoading ? <Sk h="100%" r={8} /> : (
           <Suspense fallback={<Sk h="100%" r={8} />}>
-            {useGoogle ? <MapErrorBoundary fallback={<LeafletIncidentMap points={points} focus={focus} />}><GoogleIncidentMap apiKey={GMAPS_KEY} points={points} dark={dark} onError={onError} focus={focus} /></MapErrorBoundary> : <LeafletIncidentMap points={points} focus={focus} />}
+            {useGoogle ? <MapErrorBoundary fallback={<LeafletIncidentMap points={points} focus={focus} dark={dark} />}><GoogleIncidentMap apiKey={GMAPS_KEY} points={points} dark={dark} onError={onError} focus={focus} /></MapErrorBoundary> : <LeafletIncidentMap points={points} focus={focus} dark={dark} />}
           </Suspense>)}
         <div className="small muted map-note"><span className="live-dot" /> {t('ui.live')} · {useGoogle ? 'Google Maps' : 'OpenStreetMap'} · {t('ui.markers_show_approximate_locations_an')}</div>
       </div>
