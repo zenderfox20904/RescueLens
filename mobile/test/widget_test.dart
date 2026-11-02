@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:rescuelens/src/theme.dart';
+import 'package:rescuelens/core/theme.dart';
 
 void main() {
   test('shared tokens match the web palette', () {

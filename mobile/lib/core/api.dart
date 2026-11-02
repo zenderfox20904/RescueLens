@@ -1,10 +1,18 @@
 import 'dart:convert';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Thin client for the RescueLens REST API. Base URL comes from --dart-define=API_URL.
 class Api {
-  static const base = String.fromEnvironment('API_URL', defaultValue: 'http://10.0.2.2:8000/api/v1');
+  static const _override = String.fromEnvironment('API_BASE_URL', defaultValue: String.fromEnvironment('API_URL'));
+  /// Override with --dart-define=API_BASE_URL. Android emulators reach the host at 10.0.2.2; iOS simulator, macOS and web use 127.0.0.1.
+  static String get base {
+    if (_override.isNotEmpty) return _override;
+    final host = (!kIsWeb && Platform.isAndroid) ? '10.0.2.2' : '127.0.0.1';
+    return 'http://$host:8000/api/v1';
+  }
   static String? token;
 
   static Future<void> load() async => token = (await SharedPreferences.getInstance()).getString('rl_token');
@@ -22,7 +30,7 @@ class Api {
     return body;
   }
 
-  static Future<dynamic> get(String path) async => _decode(await http.get(Uri.parse('$base$path'), headers: _h));
+  static Future<dynamic> get(String path) async => _decode(await http.get(Uri.parse('$base$path'), headers: _h).timeout(const Duration(seconds: 15)));
   static Future<dynamic> post(String path, Map<String, dynamic> body, {Map<String, String>? headers}) async =>
       _decode(await http.post(Uri.parse('$base$path'), headers: {..._h, ...?headers}, body: jsonEncode(body)));
 

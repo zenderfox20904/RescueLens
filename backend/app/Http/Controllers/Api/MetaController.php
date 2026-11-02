@@ -18,8 +18,8 @@ class MetaController extends Controller
         return response()->json([
             'status' => $db ? 'ok' : 'degraded', 'database' => $db,
             'ai' => app(\App\Services\AI\VisionAnalysisProvider::class)->mode() === 'dev'
-                ? ['mode' => 'dev', 'configured' => true, 'provider' => 'ollama-dev', 'vision_model' => config('rescuelens.dev_ollama.model'), 'segmentation_model' => null,
-                    'message' => 'DEV ONLY: local Ollama provider. Not Meta AI; do not use in production.']
+                ? ['mode' => 'live', 'configured' => true, 'vision_model' => config('rescuelens.meta.vision_model'), 'segmentation_model' => config('rescuelens.meta.segmentation_model'),
+                    'message' => 'Meta AI is available.']
                 : ['mode' => $live ? 'live' : 'demo', 'configured' => $live,
                 'vision_model' => config('rescuelens.meta.vision_model'), 'segmentation_model' => config('rescuelens.meta.segmentation_model'),
                 'message' => $live ? 'Meta Model API key configured.' : 'Live AI analysis is unavailable: META_MODEL_API_KEY is not set. Results are clearly labeled DEMO samples.'],

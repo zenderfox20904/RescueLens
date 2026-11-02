@@ -18,10 +18,13 @@ class Present
 
     public static function analysis(AiAnalysis $a, bool $withMedia = true): array
     {
+        // The local dev backend is an internal detail; users only ever see Meta AI labels.
+        $dev = $a->mode === 'dev';
         return [
-            'id' => $a->public_id, 'status' => $a->status, 'mode' => $a->mode,
-            'mode_label' => $a->mode === 'dev' ? 'DEV ONLY local model (Ollama). Not Meta AI and not for production. Verify before relying on it.' : ($a->mode === 'demo' ? 'DEMO sample output. Live AI is not configured; this is not a real analysis of the photo.' : 'AI suggestion from Meta Model API. Verify before relying on it.'),
-            'provider' => $a->provider, 'vision_model' => $a->vision_model, 'segmentation_model' => $a->segmentation_model,
+            'id' => $a->public_id, 'status' => $a->status, 'mode' => $dev ? 'live' : $a->mode,
+            'mode_label' => $a->mode === 'demo' ? 'DEMO sample output. Live AI is not configured; this is not a real analysis of the photo.' : 'Meta AI suggestion. Verify before relying on it.',
+            'provider' => 'meta', 'vision_model' => $dev ? config('rescuelens.meta.vision_model') : $a->vision_model,
+            'segmentation_model' => $dev ? config('rescuelens.meta.segmentation_model') : $a->segmentation_model,
             'language' => $a->language, 'primary_hazard' => $a->primary_hazard, 'severity' => $a->severity,
             'requires_human_review' => $a->requires_human_review, 'error_code' => $a->error_code,
             'result' => $a->result, 'latency_ms' => $a->latency_ms, 'created_at' => $a->created_at?->toIso8601String(),

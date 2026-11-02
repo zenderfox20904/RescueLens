@@ -25,9 +25,9 @@ class RL {
       useMaterial3: true, colorScheme: scheme, brightness: b,
       scaffoldBackgroundColor: dark ? darkBg : bg,
       dividerColor: dark ? darkHover : divider,
-      appBarTheme: AppBarTheme(backgroundColor: dark ? darkCard : card, foregroundColor: primary, elevation: 0.5,
-        titleTextStyle: const TextStyle(color: primary, fontSize: 26, fontWeight: FontWeight.w800, letterSpacing: -0.5)),
-      cardTheme: CardThemeData(color: dark ? darkCard : card, elevation: 0.5, margin: const EdgeInsets.symmetric(vertical: 6), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+      appBarTheme: AppBarTheme(backgroundColor: dark ? darkCard : card, foregroundColor: primary, elevation: 0, scrolledUnderElevation: 0.5, centerTitle: false,
+        titleTextStyle: const TextStyle(color: primary, fontSize: 22, fontWeight: FontWeight.w800, letterSpacing: -0.5)),
+      cardTheme: CardThemeData(color: dark ? darkCard : card, elevation: 0, margin: const EdgeInsets.symmetric(vertical: 6), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))),
       filledButtonTheme: FilledButtonThemeData(style: FilledButton.styleFrom(backgroundColor: primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)))),
     );
   }
