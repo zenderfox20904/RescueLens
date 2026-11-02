@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 import { APIProvider, Map, useMap } from '@vis.gl/react-google-maps'
 import { MarkerClusterer } from '@googlemaps/markerclusterer'
 import { useNavigate } from 'react-router-dom'
-import { CATS, useI18n } from '../../lib/i18n'
+import { useI18n } from '../../lib/i18n'
 import { type MapPoint, ttl } from '../../lib/types'
 
 const SEV = { low: '#31A24C', moderate: '#F7B928', high: '#F5793B', critical: '#E41E3F' }
