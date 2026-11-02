@@ -14,7 +14,7 @@ class AnalysisPipeline
 {
     public function __construct(private VisionAnalysisProvider $vision, private ImageSegmentationProvider $seg) {}
 
-    public function run(IncidentMedia $media, int $userId, string $lang, ?string $note, ?string $demoScenario): AiAnalysis
+    public function run(IncidentMedia $media, int $userId, string $lang, ?string $note, ?string $demoScenario, ?string $country = null): AiAnalysis
     {
         $a = AiAnalysis::create([
             'user_id' => $userId, 'media_id' => $media->id, 'mode' => $this->vision->mode(), 'provider' => $this->vision->name(),
@@ -23,7 +23,7 @@ class AnalysisPipeline
         $t0 = microtime(true);
         $bytes = Storage::disk($media->disk)->get($media->path);
         try {
-            $raw = $this->vision->analyze($bytes, $media->mime, $lang, $note, $demoScenario);
+            $raw = $this->vision->analyze($bytes, $media->mime, $lang, $note, $demoScenario, $country);
             $clean = AnalysisValidator::clean($raw['result']);
             $segModel = null;
             $regions = [];

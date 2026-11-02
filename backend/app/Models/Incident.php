@@ -7,7 +7,7 @@ use Illuminate\Support\Str;
 
 class Incident extends Model
 {
-    public const CATEGORIES = ['road_accident', 'flood', 'fire', 'electrical', 'building_collapse', 'injury', 'other'];
+    public const CATEGORIES = ['road_accident', 'flood', 'fire', 'electrical', 'building_collapse', 'injury', 'crowd_stampede', 'landslide', 'earthquake', 'wildfire', 'tsunami', 'cyclone_storm', 'snow_ice', 'other'];
     public const SEVERITIES = ['low', 'moderate', 'high', 'critical'];
     public const STATUSES = ['reported', 'corroborated', 'verified', 'disputed', 'resolved', 'expired', 'removed', 'withdrawn'];
     public const PUBLIC_STATUSES = ['reported', 'corroborated', 'verified', 'disputed', 'resolved', 'expired'];

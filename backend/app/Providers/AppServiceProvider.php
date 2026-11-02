@@ -26,7 +26,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $key = fn (Request $r) => $r->user()?->id ?: $r->ip();
-        RateLimiter::for('api', fn (Request $r) => Limit::perMinute(120)->by($key($r)));
+        RateLimiter::for('api', fn (Request $r) => Limit::perMinute((int) config('rescuelens.rate_limit_api', 120))->by($key($r)));
         RateLimiter::for('auth', fn (Request $r) => [Limit::perMinute(10)->by($r->ip()), Limit::perMinute(5)->by(strtolower((string) $r->input('email')).$r->ip())]);
         RateLimiter::for('uploads', fn (Request $r) => [Limit::perMinute(10)->by($key($r)), Limit::perDay(100)->by($key($r))]);
         RateLimiter::for('ai', fn (Request $r) => [Limit::perMinute(6)->by($key($r)), Limit::perDay(60)->by($key($r))]);

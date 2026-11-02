@@ -1,6 +1,8 @@
 <?php
 
 return [
+    // Requests per minute per user or IP on public read endpoints. Raise only for load testing.
+    'rate_limit_api' => (int) env('RATE_LIMIT_API_PER_MIN', 120),
     'frontend_url' => env('FRONTEND_URL', 'http://localhost:5173'),
     'meta' => [
         'api_key' => env('META_MODEL_API_KEY'),
@@ -10,6 +12,9 @@ return [
         'timeout' => (int) env('AI_REQUEST_TIMEOUT', 45),
         'max_retries' => (int) env('AI_MAX_RETRIES', 2),
         'daily_budget' => (int) env('AI_DAILY_BUDGET', 500),
+        'reasoning_effort' => env('AI_REASONING_EFFORT', 'high'),
+        // Low temperature for consistent triage. Leave empty if the model rejects the parameter.
+        'temperature' => env('AI_TEMPERATURE', '0.2'),
         'segmentation_enabled' => (bool) env('AI_ENABLE_SEGMENTATION', true),
     ],
     'public_location_decimals' => (int) env('RL_PUBLIC_LOCATION_DECIMALS', 3),

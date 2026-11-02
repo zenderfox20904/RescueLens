@@ -5,7 +5,7 @@ namespace App\Services\AI;
 interface VisionAnalysisProvider
 {
     /** @return array{result: array, model: string} raw, unvalidated structured result */
-    public function analyze(string $imageBytes, string $mime, string $language, ?string $userNote, ?string $demoScenario = null): array;
+    public function analyze(string $imageBytes, string $mime, string $language, ?string $userNote, ?string $demoScenario = null, ?string $country = null): array;
 
     public function mode(): string; // live | demo
 
