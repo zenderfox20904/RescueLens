@@ -59,9 +59,10 @@ class TranslationService
         $missing = 0;
         foreach ($flat as $k => $v) {
             $t = $have[$k] ?? null;
-            if ($t && $t->source_hash === sha1($v)) { $merged[$k] = $t->value; $provider ??= $t->provider; } else { $missing++; }
+            if ($t && $t->source_hash === sha1($v)) { $merged[$k] = $t->value; $provider ??= $t->provider; } else { $merged[$k] = $v; $missing++; }
         }
-        return ['translations' => Arr::undot($merged), 'machine' => true, 'provider' => $provider, 'missing' => $missing];
+        // Every source key is kept (English fallback), so lists such as ui.steps keep index 0 and stay JSON arrays.
+        return ['translations' => self::listify(Arr::undot($merged)), 'machine' => true, 'provider' => $provider, 'missing' => $missing];
     }
 
     public static function placeholdersMatch(string $a, string $b): bool
@@ -70,5 +71,13 @@ class TranslationService
         preg_match_all('/\{\{\s*\w+\s*\}\}/', $b, $y);
         $n = fn ($m) => collect($m[0])->map(fn ($s) => preg_replace('/\s/', '', $s))->sort()->values()->all();
         return $n($x) === $n($y);
+    }
+
+    /** Turn arrays keyed 0..n-1 back into lists, recursively. */
+    private static function listify(array $a): array
+    {
+        foreach ($a as $k => $v) if (is_array($v)) $a[$k] = self::listify($v);
+        if ($a !== [] && array_keys($a) === range(0, count($a) - 1)) return array_values($a);
+        return $a;
     }
 }

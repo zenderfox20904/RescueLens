@@ -128,7 +128,7 @@ export function RightSidebar() {
           <div key={r.id} className="small"><b>{lang === 'bn' ? r.name_bn || r.name : r.name}</b>: <a href={'tel:' + r.phone}>{r.phone}</a><div className="muted">{t('ui.source')}: <a href={r.source_url} target="_blank" rel="noreferrer">{r.source_name}</a></div></div>
         ))}
       </div>
-      <div className="section-title">AI</div>
+      <div className="section-title">Meta AI</div>
       <div className="card small" style={{ padding: 12 }}>
         {health.isLoading ? <Sk h={30} /> : health.data?.ai?.mode === 'live'
           ? <><span className="badge">Meta AI</span> {t('ui.meta_ai_live')}</>
