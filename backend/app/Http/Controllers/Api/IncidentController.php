@@ -32,7 +32,7 @@ class IncidentController extends Controller
             'category' => ['nullable', Rule::in(Incident::CATEGORIES)], 'status' => ['nullable', Rule::in(Incident::PUBLIC_STATUSES)],
             'severity' => ['nullable', Rule::in(Incident::SEVERITIES)],
             'lat' => 'nullable|numeric|between:-90,90', 'lng' => 'nullable|numeric|between:-180,180', 'radius_km' => 'nullable|numeric|between:1,100',
-            'hours' => 'nullable|integer|between:1,720', 'mine' => 'nullable|boolean', 'user' => 'nullable|string|max:40', 'per_page' => 'nullable|integer|between:1,50', 'cursor' => 'nullable|string|max:200',
+            'hours' => 'nullable|integer|between:1,720', 'mine' => 'nullable|boolean', 'user' => 'nullable|string|max:40', 'per_page' => 'nullable|integer|between:1,50', 'cursor' => 'nullable|string|max:200', 'sort' => 'nullable|in:latest,ranked',
         ]);
         $user = $r->user('sanctum');
         $q = ($d['mine'] ?? false) && $user
@@ -53,6 +53,20 @@ class IncidentController extends Controller
             $q->near($d['lat'], $d['lng'], $d['radius_km'] ?? 10);
         }
         $build = function () use ($q, $d, $user) {
+            if (($d['sort'] ?? 'latest') === 'ranked') {
+                // Ranked feed: unresolved first, then severity, then corroboration, then recency. Page cursor is "p<n>".
+                $n = (int) ltrim($d['cursor'] ?? 'p1', 'p') ?: 1; $per = $d['per_page'] ?? 20;
+                $rows = $q->withCount('confirmations')
+                    ->orderByRaw("CASE WHEN status = 'resolved' THEN 1 ELSE 0 END")
+                    ->orderByRaw("CASE severity WHEN 'critical' THEN 4 WHEN 'high' THEN 3 WHEN 'moderate' THEN 2 ELSE 1 END DESC")
+                    ->orderByDesc('confirmations_count')->orderByDesc('id')
+                    ->skip(($n - 1) * $per)->take($per + 1)->get();
+                $more = $rows->count() > $per;
+                return [
+                    'data' => $rows->take($per)->map(fn ($i) => Present::incident($i, $user))->values(),
+                    'meta' => ['next_cursor' => $more ? 'p'.($n + 1) : null, 'per_page' => $per, 'sort' => 'ranked', 'server_time' => now()->toIso8601String()],
+                ];
+            }
             // Cursor pagination: O(1) per page regardless of depth, stable under new inserts.
             $page = $q->orderByDesc('id')->cursorPaginate($d['per_page'] ?? 20);
             return [

@@ -1,4 +1,4 @@
-import { LayoutGrid } from 'lucide-react'
+import { Clock, Flame, LayoutGrid } from 'lucide-react'
 import { useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
@@ -19,7 +19,8 @@ export default function Feed() {
   const category = sp.get('category') || ''
   const mine = sp.get('mine') === '1'
   const q = (sp.get('q') || '').toLowerCase()
-  const params = new URLSearchParams({ per_page: '10', ...(category && { category }), ...(mine && { mine: '1' }) })
+  const sort = sp.get('sort') === 'latest' ? 'latest' : 'ranked'
+  const params = new URLSearchParams({ per_page: '10', sort, ...(category && { category }), ...(mine && { mine: '1' }) })
   const feed = useInfiniteQuery({
     queryKey: ['feed', params.toString()],
     queryFn: ({ pageParam }) => api<{ data: Incident[]; meta: { next_cursor: string | null } }>(`/incidents?${params}${pageParam ? '&cursor=' + pageParam : ''}`),
@@ -42,6 +43,10 @@ export default function Feed() {
         <div className="row"><Avatar name={user?.name} size={40} /><Link to={user ? '/report' : '/login'} className="pill-input muted" style={{ padding: '10px 14px' }}>{t('whatsHappening')}</Link></div>
         <div className="divider" />
         <div className="row"><Link to="/report" className="btn btn-ghost grow"><span style={{ color: '#45BD62' }}><ICamera /></span> {t('photo')}</Link><Link to="/map" className="btn btn-ghost grow"><span style={{ color: '#F5533D' }}><IPin /></span> {t('map')}</Link></div>
+      </div>
+      <div className="chips" role="tablist">
+        <button role="tab" aria-selected={sort === 'ranked'} className={'chip' + (sort === 'ranked' ? ' on' : '')} onClick={() => { const n = new URLSearchParams(sp); n.delete('sort'); setSp(n) }}><Flame size={16} aria-hidden /> {t('ui.feed_top')}</button>
+        <button role="tab" aria-selected={sort === 'latest'} className={'chip' + (sort === 'latest' ? ' on' : '')} onClick={() => { const n = new URLSearchParams(sp); n.set('sort', 'latest'); setSp(n) }}><Clock size={16} aria-hidden /> {t('ui.feed_latest')}</button>
       </div>
       <div className="chips">
         <button className={'chip' + (!category ? ' on' : '')} onClick={() => setSp({})}><LayoutGrid size={16} aria-hidden /> {t('all')}</button>

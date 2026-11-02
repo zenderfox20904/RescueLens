@@ -129,8 +129,8 @@
     "mi": "Miles",
     "settings": "Settings",
     "loading": "Loading",
-    "only_images": "JPEG, PNG or WebP only",
-    "max_size": "Max 8 MB",
+    "only_images": "Use a JPEG, PNG or WebP photo, or an MP4, MOV or WebM video.",
+    "max_size": "Photo max 8 MB, video max 50 MB and 60 seconds",
     "merged": "Merged",
     "something_wrong": "Something went wrong",
     "offline_posted": "{{count}} offline report(s) posted",
@@ -378,7 +378,9 @@
     "map_nearby": "Near me (25 km)",
     "map_world": "World, all reports",
     "map_location_off": "Location is off, so all reports are shown. Allow location to see reports near you.",
-    "map_country": "My country"
+    "map_country": "My country",
+    "feed_top": "Top",
+    "feed_latest": "Latest"
   },
   "cat": {
     "road_accident": "Road accident",

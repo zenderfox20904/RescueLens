@@ -378,7 +378,9 @@
     "map_nearby": "Near me (25 km)",
     "map_world": "World, all reports",
     "map_location_off": "Location is off, so all reports are shown. Allow location to see reports near you.",
-    "map_country": "My country"
+    "map_country": "My country",
+    "feed_top": "Top",
+    "feed_latest": "Latest"
   },
   "cat": {
     "road_accident": "Road accident",

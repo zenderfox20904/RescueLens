@@ -32,6 +32,8 @@ class L10n extends ChangeNotifier {
 
   static const _s = <String, Map<String, String>>{
     'en': {
+      'feed_top': 'Top',
+      'feed_latest': 'Latest',
       'video_pick_failed': 'Could not open that video. Pick an MP4 or MOV up to 60 seconds.',
       'video': 'Video',
       'map_country': 'My country',
@@ -246,6 +248,8 @@ class L10n extends ChangeNotifier {
       'your_reports': 'Your reports', 'reports_title': 'Reports', 'reports_count': '{n} reports', 'no_reports_profile': 'No reports yet', 'no_reports_profile_me': 'When you report an incident it appears here, where you can edit it or move it to Trash.', 'no_reports_profile_other': 'This person has not shared any public reports.',
     },
     'bn': {
+      'feed_top': 'শীর্ষ',
+      'feed_latest': 'সর্বশেষ',
       'video_pick_failed': 'ভিডিওটি খোলা যায়নি। ৬০ সেকেন্ড পর্যন্ত MP4 বা MOV বেছে নিন।',
       'video': 'ভিডিও',
       'map_country': 'আমার দেশ',
@@ -341,6 +345,8 @@ class L10n extends ChangeNotifier {
       'your_reports': 'আপনার রিপোর্ট', 'reports_title': 'রিপোর্ট', 'reports_count': '{n}টি রিপোর্ট', 'no_reports_profile': 'এখনও কোনো রিপোর্ট নেই', 'no_reports_profile_me': 'আপনি কোনো ঘটনা রিপোর্ট করলে তা এখানে দেখাবে, যেখানে সম্পাদনা বা ট্র্যাশে সরাতে পারবেন।', 'no_reports_profile_other': 'এই ব্যক্তি এখনও কোনো পাবলিক রিপোর্ট শেয়ার করেননি।',
     },
     'hi': {
+      'feed_top': 'शीर्ष',
+      'feed_latest': 'नवीनतम',
       'video_pick_failed': 'यह वीडियो नहीं खुल सका। 60 सेकंड तक का MP4 या MOV चुनें।',
       'video': 'वीडियो',
       'map_country': 'मेरा देश',
@@ -435,6 +441,8 @@ class L10n extends ChangeNotifier {
       'your_reports': 'आपकी रिपोर्ट', 'reports_title': 'रिपोर्ट', 'reports_count': '{n} रिपोर्ट', 'no_reports_profile': 'अभी कोई रिपोर्ट नहीं', 'no_reports_profile_me': 'जब आप कोई घटना रिपोर्ट करेंगे तो वह यहां दिखेगी, जहां आप उसे संपादित या ट्रैश में डाल सकते हैं।', 'no_reports_profile_other': 'इस व्यक्ति ने कोई सार्वजनिक रिपोर्ट साझा नहीं की है।',
     },
     'es': {
+      'feed_top': 'Destacados',
+      'feed_latest': 'Recientes',
       'video_pick_failed': 'No se pudo abrir el video. Elige un MP4 o MOV de hasta 60 segundos.',
       'video': 'Video',
       'map_country': 'Mi país',
@@ -529,6 +537,8 @@ class L10n extends ChangeNotifier {
       'your_reports': 'Tus reportes', 'reports_title': 'Reportes', 'reports_count': '{n} reportes', 'no_reports_profile': 'Aún no hay reportes', 'no_reports_profile_me': 'Cuando reportes un incidente aparecerá aquí, donde podrás editarlo o enviarlo a la papelera.', 'no_reports_profile_other': 'Esta persona no ha compartido reportes públicos.',
     },
     'ar': {
+      'feed_top': 'الأهم',
+      'feed_latest': 'الأحدث',
       'video_pick_failed': 'تعذر فتح الفيديو. اختر ملف MP4 أو MOV حتى 60 ثانية.',
       'video': 'فيديو',
       'map_country': 'بلدي',

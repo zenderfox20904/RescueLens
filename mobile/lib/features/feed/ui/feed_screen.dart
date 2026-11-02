@@ -18,14 +18,14 @@ class FeedScreen extends StatefulWidget {
 }
 
 class _FeedState extends State<FeedScreen> {
-  List? items; bool error = false; Timer? t;
+  List? items; bool error = false; Timer? t; String sort = 'ranked';
   @override
   void initState() { super.initState(); load(); t = Timer.periodic(const Duration(seconds: 10), (_) => load()); }
   @override
   void dispose() { t?.cancel(); super.dispose(); }
   Future<void> load() async {
     try {
-      final r = await Api.get('/incidents?per_page=20&lang=$curLang');
+      final r = await Api.get('/incidents?per_page=20&sort=$sort&lang=$curLang');
       if (mounted) setState(() { items = r['data']; error = false; });
     } catch (_) { if (mounted) setState(() => error = true); }
   }
@@ -36,6 +36,8 @@ class _FeedState extends State<FeedScreen> {
       const Entrance(child: SosBanner()),
       Padding(padding: const EdgeInsets.fromLTRB(4, 10, 4, 4), child: Row(children: [
         Expanded(child: Text(tr('latest_near_you'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800))),
+        for (final v in const [('ranked', LucideIcons.flame, 'feed_top'), ('latest', LucideIcons.clock, 'feed_latest')])
+          Padding(padding: const EdgeInsets.only(right: 6), child: ChoiceChip(avatar: Icon(v.$2, size: 16), label: Text(tr(v.$3)), selected: sort == v.$1, onSelected: (_) { setState(() { sort = v.$1; items = null; }); load(); })),
         const LiveDot(), const SizedBox(width: 6), Text(tr('live_updates'), style: TextStyle(color: RL.text2, fontSize: 12)),
       ])),
       if (error && items == null) ErrorCard(onRetry: () { setState(() => error = false); load(); }),

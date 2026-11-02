@@ -129,8 +129,8 @@
     "mi": "মাইল",
     "settings": "সেটিংস",
     "loading": "লোড হচ্ছে",
-    "only_images": "শুধু JPEG, PNG বা WebP",
-    "max_size": "সর্বোচ্চ ৮ MB",
+    "only_images": "JPEG, PNG বা WebP ছবি, অথবা MP4, MOV বা WebM ভিডিও দিন।",
+    "max_size": "ছবি সর্বোচ্চ ৮ MB, ভিডিও সর্বোচ্চ ৫০ MB ও ৬০ সেকেন্ড",
     "merged": "একত্র করা হয়েছে",
     "something_wrong": "কিছু ভুল হয়েছে",
     "offline_posted": "{{count}}টি অফলাইন রিপোর্ট পোস্ট হয়েছে",
@@ -378,7 +378,9 @@
     "map_nearby": "আমার কাছে (২৫ কিমি)",
     "map_world": "বিশ্ব, সব রিপোর্ট",
     "map_location_off": "লোকেশন বন্ধ, তাই সব রিপোর্ট দেখানো হচ্ছে। কাছের রিপোর্ট দেখতে লোকেশন চালু করুন।",
-    "map_country": "আমার দেশ"
+    "map_country": "আমার দেশ",
+    "feed_top": "শীর্ষ",
+    "feed_latest": "সর্বশেষ"
   },
   "cat": {
     "road_accident": "সড়ক দুর্ঘটনা",
