@@ -1,0 +1,60 @@
+# One command demo for judges:  docker compose up --build
+# Web: http://localhost:8080   API: http://localhost:8000/api/v1
+# Demo logins: docs/DEMO_ACCESS.md. Put META_MODEL_API_KEY in a .env file next to this file
+# (or export it) to enable live Meta AI; without it the app runs in labeled DEMO mode.
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: rescuelens
+      MYSQL_USER: rescuelens
+      MYSQL_PASSWORD: rescuelens_local_demo
+      MYSQL_ROOT_PASSWORD: rescuelens_local_root
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-urescuelens", "-prescuelens_local_demo"]
+      interval: 5s
+      retries: 30
+
+  api:
+    build: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "false"
+      APP_URL: http://localhost:${API_PORT:-8000}
+      FRONTEND_URL: http://localhost:${WEB_PORT:-8080}
+      CORS_ALLOWED_ORIGINS: http://localhost:${WEB_PORT:-8080},http://127.0.0.1:${WEB_PORT:-8080}
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_DATABASE: rescuelens
+      DB_USERNAME: rescuelens
+      DB_PASSWORD: rescuelens_local_demo
+      AI_PROVIDER: ${AI_PROVIDER:-meta}
+      META_MODEL_API_KEY: ${META_MODEL_API_KEY:-}
+      LLAMA_API_KEY: ${LLAMA_API_KEY:-}
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - api_storage:/app/storage/app
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:${API_PORT:-8000}/api/v1
+        VITE_SHARE_BASE: http://localhost:${API_PORT:-8000}
+        VITE_GOOGLE_MAPS_API_KEY: ${VITE_GOOGLE_MAPS_API_KEY:-}
+    depends_on:
+      - api
+    ports:
+      - "${WEB_PORT:-8080}:80"
+
+volumes:
+  db_data:
+  api_storage:

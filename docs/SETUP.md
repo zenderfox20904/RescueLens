@@ -1,5 +1,26 @@
 # Setup
 
+## Fastest: Docker
+
+```bash
+docker compose up --build
+```
+
+Web: http://localhost:8080, API: http://localhost:8000/api/v1. The first start migrates and seeds the demo accounts (password `RescueLensDemo2026!`). Change ports with `WEB_PORT=9090 API_PORT=9000 docker compose up --build`. For live Meta AI put `META_MODEL_API_KEY=...` in a `.env` file next to `docker-compose.yml`. Reset everything with `docker compose down -v`.
+
+## Without Docker: setup scripts
+
+```bash
+DB_PASSWORD=your_mysql_password ./scripts/setup.sh --run
+```
+```powershell
+$env:DB_PASSWORD="your_mysql_password"; .\scripts\setup.ps1 -Run
+```
+
+The script installs dependencies, creates `backend/.env`, creates the database, migrates, seeds the demo accounts and starts the API (8000) and web (5173). Optional variables: `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `API_PORT`, `WEB_PORT`, `SKIP_INSTALL=1`.
+
+The manual steps follow.
+
 ## Prerequisites
 
 * PHP 8.3 or newer with `pdo_mysql`, `gd` or `imagick`, `mbstring`, `intl`
@@ -79,6 +100,8 @@ npm run build           # production build in dist/
 
 ## App (Flutter)
 
+APK download, iOS steps and API address options: [MOBILE_APP.md](MOBILE_APP.md).
+
 ```bash
 cd mobile
 flutter pub get
@@ -104,12 +127,4 @@ Restrict each key to its platform in the Google Cloud console.
 
 ## Troubleshooting
 
-| Symptom | Fix |
-|---|---|
-| Everything is labeled DEMO | Set `META_MODEL_API_KEY` (or `AI_PROVIDER=llama` and `LLAMA_API_KEY`), then `php artisan config:clear` |
-| App cannot reach the API on Android | Use `10.0.2.2`, not `127.0.0.1` |
-| App cannot reach the API on a phone | Serve with `--host=0.0.0.0` and use the LAN IP |
-| Images do not load | Run `php artisan storage:link` |
-| Map is grey or shows a watermark | Add a valid Maps key for that platform |
-| `SQLSTATE[HY000] [1045]` | Check the `DB_*` values in `backend/.env` |
-| 419 or 401 after changing `.env` | `php artisan config:clear` and sign in again |
+See [TROUBLESHOOTING.md](TROUBLESHOOTING.md).

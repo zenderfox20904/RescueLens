@@ -13,9 +13,53 @@
 ![Tests](https://img.shields.io/badge/backend%20tests-51%20passing-2ea44f)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
-[Demo video](https://youtu.be/REPLACE_WITH_DEMO_VIDEO) · [Setup](docs/SETUP.md) · [Demo access](docs/DEMO_ACCESS.md) · [Database](docs/DATABASE.md) · [Docs](docs/README.md)
+[Demo video](https://youtu.be/REPLACE_WITH_DEMO_VIDEO) · [Judging guide](docs/JUDGING_GUIDE.md) · [Android APK](https://github.com/zenderfox20904/RescueLens/releases/latest) · [Setup](docs/SETUP.md) · [Demo access](docs/DEMO_ACCESS.md) · [Database](docs/DATABASE.md) · [Docs](docs/README.md)
 
 </div>
+
+## Quick Start for Judges (5 minutes)
+
+**Option 1, Docker (recommended).** Needs Docker Desktop only.
+
+```bash
+git clone https://github.com/zenderfox20904/RescueLens.git
+cd RescueLens
+docker compose up --build
+```
+
+Open **http://localhost:8080** and sign in as **rina@rescuelens.test** with password **RescueLensDemo2026!**
+
+To see live Meta AI analysis, create a file named `.env` next to `docker-compose.yml` containing `META_MODEL_API_KEY=your_key` before running. Without a key, AI results are clearly labeled DEMO.
+
+**Option 2, without Docker.** Needs PHP 8.3+, Composer, Node 20+, MySQL 8.
+
+```bash
+DB_PASSWORD=your_mysql_root_password ./scripts/setup.sh --run     # macOS and Linux
+```
+```powershell
+$env:DB_PASSWORD="your_mysql_root_password"; .\scripts\setup.ps1 -Run   # Windows
+```
+
+Then open **http://localhost:5173**.
+
+**Android app:** [download the APK](https://github.com/zenderfox20904/RescueLens/releases/download/v1.0.0/RescueLens-android.apk) and install it on an Android emulator while the API runs on your computer. Details in [docs/MOBILE_APP.md](docs/MOBILE_APP.md).
+
+**Full walkthrough:** [docs/JUDGING_GUIDE.md](docs/JUDGING_GUIDE.md)
+
+### Demo logins (password for all: `RescueLensDemo2026!`)
+
+| Portal | Email | What to try |
+|---|---|---|
+| Citizen | rina@rescuelens.test | Report a photo, read the Meta AI draft, confirm it, comment, translate a post |
+| Citizen | karim@rescuelens.test | Tap "I see this too" on Rina's report, get nearby alerts |
+| Moderator | moderator@rescuelens.test | Verify, dispute, merge or resolve reports in Moderation |
+| Admin | admin@rescuelens.test | Admin panel: users, organizations and verified emergency contacts |
+| Fire service | fire@rescuelens.test | Responder portal: incidents dispatched to the fire service |
+| Ambulance | ambulance@rescuelens.test | Portal with incidents dispatched to the ambulance service |
+| Hospital | hospital@rescuelens.test | Portal with incidents dispatched to the hospital |
+| NGO | ngo@rescuelens.test | Portal with nearby incidents the NGO can support |
+| Help centre | helpcenter@rescuelens.test | Portal with nearby incidents and help listings |
+| Responder | tanvir@rescuelens.test | Responder view with alerted incidents and call actions |
 
 ## The problem
 
@@ -152,27 +196,17 @@ More in [docs/screenshots](docs/screenshots).
 | AI | Meta Model API (muse-spark, SAM), Meta Llama API |
 | Tests | PHPUnit with mocked Meta providers |
 
-## Quick start
-
-```bash
-cd backend && cp .env.example .env && composer install && php artisan key:generate
-# add META_MODEL_API_KEY to .env
-php artisan migrate --seed && php artisan serve
-cd ../frontend && cp .env.example .env && npm install && npm run dev
-```
-
-Full instructions, the app, maps keys and the SQL import are in [docs/SETUP.md](docs/SETUP.md). Demo logins are in [docs/DEMO_ACCESS.md](docs/DEMO_ACCESS.md).
-
 ## Repository layout
 
-```
-backend/        Laravel API, migrations, seeders, tests, SQL files in database/
-frontend/       React + Vite web app (PWA)
-mobile/         Flutter app (iOS and Android)
-docs/           Setup, demo access, database, AI pipeline, i18n, screenshots
-scripts/        Load test helper
-.github/        Issue and pull request templates
-```
+| Folder | What is inside |
+|---|---|
+| [`backend/`](backend) | Laravel 13 API: controllers, Meta AI services (`app/Services/AI`), migrations, seeders, tests, SQL files in `database/` |
+| [`frontend/`](frontend) | React 19 + Vite web app (PWA) |
+| [`mobile/`](mobile) | Flutter app for Android and iOS |
+| [`docs/`](docs) | Judging guide, setup, demo access, database, AI pipeline, FAQ, screenshots |
+| [`scripts/`](scripts) | `setup.sh`, `setup.ps1` (run without Docker), `loadtest.sh` |
+| [`.github/`](.github) | Issue and pull request templates |
+| `docker-compose.yml` | One command stack: MySQL, API and web |
 
 ## Team
 
