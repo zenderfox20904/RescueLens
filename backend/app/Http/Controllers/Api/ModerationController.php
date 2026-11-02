@@ -21,7 +21,7 @@ class ModerationController extends Controller
         $d = $r->validate(['status' => ['nullable', Rule::in(Incident::STATUSES)]]);
         $q = Incident::with(['user', 'media', 'analyses.regions', 'confirmations'])->whereNull('merged_into_id');
         $q = isset($d['status']) ? $q->where('status', $d['status']) : $q->whereIn('status', ['reported', 'corroborated', 'disputed']);
-        return ['data' => $q->orderByRaw("FIELD(severity,'critical','high','moderate','low')")->latest()->limit(100)->get()
+        return ['data' => $q->orderByRaw("CASE severity WHEN 'critical' THEN 0 WHEN 'high' THEN 1 WHEN 'moderate' THEN 2 ELSE 3 END")->latest()->limit(100)->get()
             ->map(fn ($i) => Present::incident($i, $r->user(), true))];
     }
 

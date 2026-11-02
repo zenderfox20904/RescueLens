@@ -17,6 +17,9 @@ class User extends Authenticatable
     /** Only these fields are mass assignable. Role is never user writable. */
     protected $fillable = ['name', 'email', 'password', 'locale', 'alert_lat', 'alert_lng', 'alert_radius_km', 'ai_consent'];
 
+    /** Defaults mirror the column defaults so a freshly created model reports them. */
+    protected $attributes = ['role' => 'citizen', 'locale' => 'bn'];
+
     protected $hidden = ['password', 'remember_token', 'alert_lat', 'alert_lng'];
 
     protected function casts(): array
