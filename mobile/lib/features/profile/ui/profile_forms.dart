@@ -1,3 +1,4 @@
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:rescuelens/core/api.dart';
@@ -129,7 +130,7 @@ Future<void> showLinked(BuildContext context) async {
   try { social = (await Api.get('/health'))['social'] ?? {}; } catch (_) {}
   if (!context.mounted) return;
   showModalBottomSheet(context: context, showDragHandle: true, builder: (c) => SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
-    for (final p in ['google', 'facebook']) ListTile(leading: Icon(p == 'google' ? LucideIcons.globe : LucideIcons.userRound, size: 32),
+    for (final p in ['google', 'facebook']) ListTile(leading: SvgPicture.asset(p == 'google' ? 'assets/brand/google_g.svg' : 'assets/brand/facebook_f.svg', width: 28, height: 28),
       title: Text(p == 'google' ? 'Google' : 'Facebook'), subtitle: Text(social[p] == true ? tr('linked_available') : tr('linked_disabled'))),
     const SizedBox(height: 12),
   ])));

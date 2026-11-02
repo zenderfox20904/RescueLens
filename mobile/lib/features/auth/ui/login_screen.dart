@@ -1,3 +1,4 @@
+import '../../../core/brand_buttons.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -49,8 +50,8 @@ class _LoginState extends State<LoginScreen> {
     FilledButton(onPressed: busy ? null : submit, child: Padding(padding: const EdgeInsets.all(12), child: busy ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : Text(tr('login'), style: const TextStyle(fontSize: 17)))),
     if (social['google'] == true || social['facebook'] == true) ...[
       Padding(padding: const EdgeInsets.symmetric(vertical: 14), child: Row(children: [const Expanded(child: Divider()), Padding(padding: const EdgeInsets.symmetric(horizontal: 10), child: Text(tr('or'), style: const TextStyle(color: RL.text2))), const Expanded(child: Divider())])),
-      if (social['google'] == true) OutlinedButton.icon(onPressed: () => socialLogin('google'), icon: const Icon(LucideIcons.globe, size: 28), label: Text(tr('continue_google'))),
-      if (social['facebook'] == true) Padding(padding: const EdgeInsets.only(top: 8), child: OutlinedButton.icon(onPressed: () => socialLogin('facebook'), icon: const Icon(LucideIcons.userRound, color: Color(0xFF1877F2)), label: Text(tr('continue_facebook')))),
+      if (social['google'] == true) GoogleSignInButton(label: tr('continue_google'), onPressed: () => socialLogin('google')),
+      if (social['facebook'] == true) Padding(padding: const EdgeInsets.only(top: 8), child: FacebookSignInButton(label: tr('continue_facebook'), onPressed: () => socialLogin('facebook'))),
     ],
     const SizedBox(height: 16), const Divider(),
     const SizedBox(height: 8),

@@ -7,7 +7,8 @@ import { fmtNumber, useI18n } from '../lib/i18n'
 import { ORG_TYPES, type User } from '../lib/types'
 import { LocationPicker, type PickedLocation } from '../components/location/LocationPicker'
 import { Wordmark } from '../components/Logo'
-import { IFacebook, IGoogle } from '../components/Icons'
+import googleG from '../assets/brand/google_g.svg'
+import facebookF from '../assets/brand/facebook_f_white.svg'
 
 function SocialButtons() {
   const { t } = useI18n()
@@ -21,8 +22,9 @@ function SocialButtons() {
   }
   return (
     <div style={{ display: 'grid', gap: 8 }}>
-      <button type="button" className="btn btn-primary" style={{ padding: 12 }} onClick={() => go('facebook')}><IFacebook /> {t('ui.continue_with_facebook')}</button>
-      <button type="button" className="btn" style={{ padding: 12, background: 'var(--card)', border: '1px solid var(--divider)' }} onClick={() => go('google')}><IGoogle /> {t('ui.continue_with_google')}</button>
+      {/* Official brand marks: Google Identity sign in guidelines and Meta brand resource center. */}
+      <button type="button" className="brand-btn brand-google" onClick={() => go('google')}><img src={googleG} alt="" width={20} height={20} /><span>{t('ui.continue_with_google')}</span></button>
+      <button type="button" className="brand-btn brand-facebook" onClick={() => go('facebook')}><img src={facebookF} alt="" width={20} height={20} /><span>{t('ui.continue_with_facebook')}</span></button>
       {msg && <div className="small" role="alert" style={{ color: 'var(--danger)' }}>{msg}</div>}
     </div>
   )

@@ -347,3 +347,13 @@ input, textarea, select { font: inherit; color: var(--text); }
 .tab{background:transparent;border:0;padding:12px 14px;font-weight:600;color:var(--text-2);border-bottom:3px solid transparent;border-radius:0}
 .tab.active{color:var(--primary,#0866FF);border-bottom-color:var(--primary,#0866FF)}
 .tab:hover{background:var(--hover,rgba(127,127,127,.1))}
+
+/* Sign in buttons per Google Identity branding guidelines (light: #FFFFFF, stroke #747775, text #1F1F1F; dark: #131314, stroke #8E918F, text #E3E3E3)
+   and Meta's Facebook Login button (Facebook blue #0866FF, white text, white f mark). */
+.brand-btn{display:flex;align-items:center;justify-content:center;gap:10px;height:44px;padding:0 12px;border-radius:22px;font:500 14px/20px Roboto,system-ui,sans-serif;cursor:pointer;width:100%}
+.brand-btn img{flex:none}
+.brand-google{background:#FFFFFF;border:1px solid #747775;color:#1F1F1F}
+[data-theme="dark"] .brand-google{background:#131314;border-color:#8E918F;color:#E3E3E3}
+.brand-facebook{background:#0866FF;border:1px solid #0866FF;color:#FFFFFF}
+.brand-btn:hover{filter:brightness(.96)}
+.brand-btn:focus-visible{outline:2px solid var(--primary,#0866FF);outline-offset:2px}
